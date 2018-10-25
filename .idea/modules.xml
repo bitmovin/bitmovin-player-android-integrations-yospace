@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" filepath="$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bitmovinyospacemodule/bitmovinyospacemodule.iml" filepath="$PROJECT_DIR$/bitmovinyospacemodule/bitmovinyospacemodule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bitmovinyospacesample/bitmovinyospacesample.iml" filepath="$PROJECT_DIR$/bitmovinyospacesample/bitmovinyospacesample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" filepath="$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" filepath="$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" />
+    </modules>
+  </component>
+</project>

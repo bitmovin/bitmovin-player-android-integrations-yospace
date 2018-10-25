@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:keepScreenOn="true">
+
+    <com.bitmovin.player.BitmovinPlayerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/bitmovinPlayerView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+    </com.bitmovin.player.BitmovinPlayerView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/vod_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VOD"
+            android:enabled="false"
+            android:clickable="false"
+            />
+        <Button
+            android:id="@+id/live_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Live"
+            />
+        <Button
+            android:id="@+id/unload_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unload"
+            />
+        <Button
+            android:id="@+id/click_through"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Click"
+            android:enabled="false"
+            android:clickable="false"
+            />
+    </LinearLayout>
+
+    <WebView
+        android:layout_height="200dp"
+        android:id="@+id/webView"
+        android:layout_width="400dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+</android.support.constraint.ConstraintLayout>

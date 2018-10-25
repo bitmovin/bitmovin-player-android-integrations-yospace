@@ -1,0 +1,1 @@
+include ':bitmovinyospacesample', ':bitmovinyospacemodule', ':yoAdManagement-debug', ':yoUtil-debug'

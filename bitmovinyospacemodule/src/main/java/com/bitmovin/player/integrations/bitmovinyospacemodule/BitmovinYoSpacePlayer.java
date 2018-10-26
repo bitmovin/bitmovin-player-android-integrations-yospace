@@ -130,52 +130,18 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     }
 
     private void loadLive() {
-        sessionFactory = SessionFactory.createForLiveWithThread(new EventListener<Session>() {
-
-            public void handle(Event<Session> event) {
-
-                // Retrieve the initialised session
-                session = event.getPayload();
-                Log.d(Constants.TAG, "Session State: " + session.getState().toString() + " Result Code: " + session.getResultCode());
-                switch (session.getState()) {
-                    case INITIALISED:
-                        session.addAnalyticListener(analyticEventListener);
-                        session.setPlayerPolicy(new BitmovinPlayerPolicy());
-                        Log.i(Constants.TAG, "Session Player Url: " + session.getPlayerUrl());
-                        session.setPlayerStateSource(stateSource);
-                        session.setPlayerPolicy(bitmovinPlayerPolicy);
-
-                        if (session instanceof SessionLive){
-                            ((SessionLive) session).setTimedMetadataSource(metadataSource);
-                        }
-
-                        startPlayback(session.getPlayerUrl());
-
-                        return;
-                    case NO_ANALYTICS:
-                        Log.i(Constants.TAG,
-                                "PlayerNLSO.initYospace - Video URL does not refer to a Yospace stream, no analytics session created");
-                        handler.post(new Runnable() {
-                            public void run() {
-                                startPlayback(null);
-                            }
-                        });
-                        return;
-                    case NOT_INITIALISED:
-                        Log.e(Constants.TAG, "PlayerNLSO.initYospace - Failed to initialise analytics session");
-                        handler.post(new Runnable() {
-                            public void run() {
-                                startPlayback(null);
-                            }
-                        });
-                }
-            }
-        }, properties);
+        sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
     }
 
     private void loadVod() {
         SessionNonLinear.create(sessionEventListener, properties);
     }
+
+    private void loadStartOver() {
+
+        SessionNonLinearStartOver.create(sessionEventListener, properties);
+    }
+
 
     private EventListener<Session> sessionEventListener = new EventListener<Session>() {
 
@@ -192,52 +158,31 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
                     session.setPlayerStateSource(stateSource);
                     session.setPlayerPolicy(bitmovinPlayerPolicy);
 
+                    startPlayback(session.getPlayerUrl());
+
                     if (session instanceof SessionLive){
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
                     }
-
-                    startPlayback(session.getPlayerUrl());
-
                     return;
                 case NO_ANALYTICS:
                     Log.i(Constants.TAG,
                             "PlayerNLSO.initYospace - Video URL does not refer to a Yospace stream, no analytics session created");
-                    handler.post(new Runnable() {
-                        public void run() {
-                            startPlayback(null);
-                        }
-                    });
+                    startPlayback(originalUrl);
                     return;
                 case NOT_INITIALISED:
                     Log.e(Constants.TAG, "PlayerNLSO.initYospace - Failed to initialise analytics session");
-                    handler.post(new Runnable() {
-                        public void run() {
-                            startPlayback(null);
-                        }
-                    });
+                    startPlayback(originalUrl);
             }
         }
     };
 
-    private void loadStartOver() {
-
-        SessionNonLinearStartOver.create(sessionEventListener, properties);
-    }
-
-
-    private void startPlayback(String playbackUrl) {
-
-        if (playbackUrl == null){
-            playbackUrl = originalUrl;
-        }
-
-        final SourceConfiguration sourceConfiguration = new SourceConfiguration();
-        SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
-        sourceConfiguration.addSourceItem(sourceItem);
+    private void startPlayback(final String playbackUrl) {
 
         handler.post(new Runnable() {
-            @Override
             public void run() {
+                final SourceConfiguration sourceConfiguration = new SourceConfiguration();
+                SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
+                sourceConfiguration.addSourceItem(sourceItem);
                 load(sourceConfiguration);
             }
         });

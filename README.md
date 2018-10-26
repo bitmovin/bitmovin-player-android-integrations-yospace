@@ -26,7 +26,7 @@ dependencies {
 
 ## Examples
 
-The following example creates a `BitmovinYoSpacePlayer` object loads a `YoSpaceSourceConfiguration`
+The following example creates a `BitmovinYoSpacePlayer` object and loads a `YoSpaceSourceConfiguration`
 
 #### Basic video playback 
 ```java

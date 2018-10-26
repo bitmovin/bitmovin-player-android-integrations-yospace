@@ -131,6 +131,9 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
 
     private void loadLive() {
         sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
+        String url = sessionFactory.getPlayerUrl();
+        startPlayback(url);
+
     }
 
     private void loadVod() {
@@ -162,6 +165,8 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
 
                     if (session instanceof SessionLive){
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
+                    }else{
+                        startPlayback(session.getPlayerUrl());
                     }
                     return;
                 case NO_ANALYTICS:

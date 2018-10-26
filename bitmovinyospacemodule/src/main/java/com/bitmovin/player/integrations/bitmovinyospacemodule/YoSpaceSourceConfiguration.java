@@ -6,7 +6,7 @@ public class YoSpaceSourceConfiguration {
     private SourceConfiguration sourceConfiguration;
     private YoSpaceAssetType assetType;
 
-    public YoSpaceSourceConfiguration(SourceConfiguration sourceConfiguration, YoSpaceAssetType assetType){
+    public YoSpaceSourceConfiguration(SourceConfiguration sourceConfiguration, YoSpaceAssetType assetType) {
         this.sourceConfiguration = sourceConfiguration;
         this.assetType = assetType;
     }

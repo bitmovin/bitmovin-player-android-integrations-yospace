@@ -65,12 +65,8 @@ import java.util.List;
 
 
 public class BitmovinYoSpacePlayer extends BitmovinPlayer {
-    private static final String TAG = "BitmovinYoSpaceLive";
-
-    private String userAgent = "BitmovinPlayer";
     private Session session;
     private SessionFactory sessionFactory;
-
     private final EventSourceImpl<PlayerState> stateSource = new EventSourceImpl<>();
     private final EventSourceImpl<TimedMetadata> metadataSource = new EventSourceImpl<>();
     private final BitmovinPlayerPolicy bitmovinPlayerPolicy = new BitmovinPlayerPolicy();
@@ -79,6 +75,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     private Session.SessionProperties properties;
     private YoSpaceSourceConfiguration yoSpaceSourceConfiguration;
     private String originalUrl;
+    private BitmovinYoSpaceConfiguration yoSpaceConfiguration = new BitmovinYoSpaceConfiguration();
 
     public BitmovinYoSpacePlayer(Context context, PlayerConfiguration playerConfiguration) {
         this(context, playerConfiguration, true);
@@ -107,9 +104,9 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         Log.d(Constants.TAG, "Load YoSpace Source Configuration");
         this.yoSpaceSourceConfiguration = sourceConfiguration;
 
-        originalUrl =  yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getHlsSource().getUrl();
+        originalUrl = yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getHlsSource().getUrl();
 
-        properties = new Session.SessionProperties(originalUrl).userAgent(userAgent).readTimeout(20000).connectTimeout(20000).requestTimeout(2000);
+        properties = new Session.SessionProperties(originalUrl).userAgent(yoSpaceConfiguration.userAgent).readTimeout(yoSpaceConfiguration.readTimeout).connectTimeout(yoSpaceConfiguration.connectTimeout).requestTimeout(yoSpaceConfiguration.requestTimeout);
         properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
 
         switch (yoSpaceSourceConfiguration.getAssetType()) {
@@ -125,7 +122,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         }
     }
 
-    public void clickThroughPressed(){
+    public void clickThroughPressed() {
         session.onLinearClickThrough();
     }
 
@@ -141,7 +138,6 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     }
 
     private void loadStartOver() {
-
         SessionNonLinearStartOver.create(sessionEventListener, properties);
     }
 
@@ -163,9 +159,9 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
 
                     startPlayback(session.getPlayerUrl());
 
-                    if (session instanceof SessionLive){
+                    if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
-                    }else{
+                    } else {
                         startPlayback(session.getPlayerUrl());
                     }
                     return;
@@ -367,7 +363,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
             }
         }
     };
-    
+
     /**
      * YoSpace Listeners
      */
@@ -416,7 +412,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
 
             String clickThroughUrl = "";
 
-            if(advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
+            if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                 clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
             }
 
@@ -442,6 +438,10 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         @Override
         public void onVastReceived(VastPayload vastPayload) {
             Log.d(Constants.TAG, "OnVastReceived: " + vastPayload.getRaw());
+        }
+
+        public BitmovinYoSpaceConfiguration getYoSpaceConfiguration() {
+            return yoSpaceConfiguration;
         }
     };
 

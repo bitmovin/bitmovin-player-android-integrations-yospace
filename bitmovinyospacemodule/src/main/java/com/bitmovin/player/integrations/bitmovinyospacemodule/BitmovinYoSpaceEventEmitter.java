@@ -24,23 +24,23 @@ public class BitmovinYoSpaceEventEmitter {
 
         Class javaClass = null;
 
-        if (listener instanceof OnAdBreakStartedListener){
+        if (listener instanceof OnAdBreakStartedListener) {
             javaClass = OnAdBreakStartedListener.class;
-        }else if (listener instanceof OnAdBreakFinishedListener){
+        } else if (listener instanceof OnAdBreakFinishedListener) {
             javaClass = OnAdBreakFinishedListener.class;
-        }else if (listener instanceof OnAdClickedListener){
+        } else if (listener instanceof OnAdClickedListener) {
             javaClass = OnAdClickedListener.class;
-        }else if (listener instanceof OnAdErrorListener){
+        } else if (listener instanceof OnAdErrorListener) {
             javaClass = OnAdErrorListener.class;
-        }else if (listener instanceof OnAdFinishedListener){
+        } else if (listener instanceof OnAdFinishedListener) {
             javaClass = OnAdFinishedListener.class;
-        }else if (listener instanceof OnAdStartedListener){
+        } else if (listener instanceof OnAdStartedListener) {
             javaClass = OnAdStartedListener.class;
-        }else if (listener instanceof OnAdSkippedListener){
+        } else if (listener instanceof OnAdSkippedListener) {
             javaClass = OnAdSkippedListener.class;
         }
 
-        if(javaClass != null) {
+        if (javaClass != null) {
             List listeners = eventListeners.get(javaClass);
             if (listeners == null) {
                 eventListeners.put(javaClass, new ArrayList<EventListener>());

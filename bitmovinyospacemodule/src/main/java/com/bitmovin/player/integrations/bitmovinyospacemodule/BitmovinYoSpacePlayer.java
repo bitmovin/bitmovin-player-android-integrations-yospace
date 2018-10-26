@@ -100,16 +100,15 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         this.addEventListener(onFullscreenExitListener);
     }
 
-    public void load(YoSpaceSourceConfiguration sourceConfiguration) {
+    public void load(YoSpaceSourceConfiguration yoSpaceSourceConfiguration) {
         Log.d(Constants.TAG, "Load YoSpace Source Configuration");
-        SourceConfiguration config = sourceConfiguration;
-        SourceItem sourceItem = sourceConfiguration.getFirstSourceItem();
+        SourceConfiguration config = yoSpaceSourceConfiguration.getSourceConfiguration();
+        SourceItem sourceItem = config.getFirstSourceItem();
 
         HLSSource hlsSource = sourceItem.getHlsSource();
         String url = hlsSource.getUrl();
 
-
-        switch (sourceConfiguration.getYoSpaceAssetType()) {
+        switch (yoSpaceSourceConfiguration.getAssetType()) {
             case LINEAR:
                 loadLive(url);
                 break;

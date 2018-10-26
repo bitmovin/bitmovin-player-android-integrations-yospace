@@ -1,14 +1,10 @@
 package com.bitmovin.player.integrations.bitmovinyospace;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -29,15 +25,15 @@ import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.config.media.HLSSource;
+import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.BitmovinYoSpacePlayer;
-import com.bitmovin.player.integrations.bitmovinyospacemodule.Constants;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YoSpaceAssetType;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YoSpaceSourceConfiguration;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private BitmovinPlayerView bitmovinPlayerView;
-    private BitmovinYoSpacePlayer yoSpaceLivePlayer;
+    private BitmovinYoSpacePlayer bitmovinYoSpacePlayer;
     private Button liveButton;
     private Button vodButton;
     private Button unloadButton;
@@ -59,50 +55,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         clickThrough.setOnClickListener(this);
 
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
-        yoSpaceLivePlayer = new BitmovinYoSpacePlayer(getApplicationContext());
-        this.bitmovinPlayerView.setPlayer(yoSpaceLivePlayer);
-        yoSpaceLivePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
+        bitmovinYoSpacePlayer = new BitmovinYoSpacePlayer(getApplicationContext());
+        this.bitmovinPlayerView.setPlayer(bitmovinYoSpacePlayer);
+        bitmovinYoSpacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
-        yoSpaceLivePlayer.addEventListener(onAdBreakStartedListener);
-        yoSpaceLivePlayer.addEventListener(onAdBreakFinishedListener);
-        yoSpaceLivePlayer.addEventListener(onAdStartedListener);
-        yoSpaceLivePlayer.addEventListener(onAdFinishedListener);
-        yoSpaceLivePlayer.addEventListener(onAdClickedListener);
-        yoSpaceLivePlayer.addEventListener(onAdErrorListener);
-        yoSpaceLivePlayer.addEventListener(onAdSkippedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdBreakStartedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdBreakFinishedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdStartedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdFinishedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdClickedListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdErrorListener);
+        bitmovinYoSpacePlayer.addEventListener(onAdSkippedListener);
 
         this.loadLive();
 
     }
 
     private void unload(){
-        yoSpaceLivePlayer.unload();
+        bitmovinYoSpacePlayer.unload();
     }
 
     private void loadLive() {
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration();
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=true&yo.ac=true"));
-        yoSpaceSourceConfiguration.addSourceItem(sourceItem);
-        yoSpaceSourceConfiguration.setYoSpaceAssetType(YoSpaceAssetType.LINEAR);
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.LINEAR);
 
-        yoSpaceLivePlayer.load(yoSpaceSourceConfiguration);
+        bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
 
     private void loadVod() {
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration();
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
-        yoSpaceSourceConfiguration.addSourceItem(sourceItem);
-        yoSpaceSourceConfiguration.setYoSpaceAssetType(YoSpaceAssetType.VOD);
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.VOD);
 
-        yoSpaceLivePlayer.load(yoSpaceSourceConfiguration);
+        bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
 
     private void loadLinearStartOver() {
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration();
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
-        yoSpaceSourceConfiguration.addSourceItem(sourceItem);
-        yoSpaceSourceConfiguration.setYoSpaceAssetType(YoSpaceAssetType.LINEAR_START_OVER);
-        yoSpaceLivePlayer.load(yoSpaceSourceConfiguration);
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.LINEAR_START_OVER);
+        bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
 
 
@@ -110,12 +106,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         bitmovinPlayerView.onResume();
-        yoSpaceLivePlayer.play();
+        bitmovinYoSpacePlayer.play();
     }
 
     @Override
     protected void onPause() {
-        yoSpaceLivePlayer.pause();
+        bitmovinYoSpacePlayer.pause();
         bitmovinPlayerView.onPause();
         super.onPause();
     }
@@ -190,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     private void clickThroughPressed(){
-        yoSpaceLivePlayer.clickThroughPressed();
+        bitmovinYoSpacePlayer.clickThroughPressed();
 
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(currentClickThroughUrl));
         startActivity(browserIntent);

@@ -74,6 +74,11 @@ private OnAdStartedListener onAdStartedListener = new OnAdStartedListener() {
 }
 ```
 
+In order to properly track ads, you must call `clickThroughPressed()` whenever the user clicks on an ad
+```java
+bitmovinYoSpacePlayer.clickThroughPressed();
+```
+
 #### Configuration
 You can configure the yospace ad management sdk through the BitmovinYoSpacePlayer. These properties can be set between each call to `load`
 
@@ -83,11 +88,6 @@ bitmovinYoSpacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
 bitmovinYoSpacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
 bitmovinYoSpacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
 bitmovinYoSpacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
-```
-
-In order to properly track ads, you must call `clickThroughPressed()` whenever the user clicks on an ad
-```java
-bitmovinYoSpacePlayer.clickThroughPressed();
 ```
 
 

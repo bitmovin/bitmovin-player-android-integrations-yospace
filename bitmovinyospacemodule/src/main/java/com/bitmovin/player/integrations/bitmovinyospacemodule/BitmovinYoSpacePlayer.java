@@ -323,6 +323,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     private OnMetadataListener onMetadataListener = new OnMetadataListener() {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
+
             if (metadataEvent.getType() == "ID3") {
                 com.bitmovin.player.model.Metadata metadata = metadataEvent.getMetadata();
                 String ymid = null;
@@ -358,6 +359,8 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
                 }
 
                 if (timedMetadata != null) {
+                    Log.d(Constants.TAG,"On Metadata Listener: " + timedMetadata.toString());
+
                     metadataSource.notify(timedMetadata);
                 }
             }

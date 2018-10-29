@@ -2,13 +2,14 @@ package com.bitmovin.player.integrations.bitmovinyospace;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.BitmovinPlayerView;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button unloadButton;
     private Button clickThrough;
     private String currentClickThroughUrl;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void unload(){
+    private void unload() {
         bitmovinYoSpacePlayer.unload();
     }
 
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=true&yo.ac=true"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.LINEAR);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig, YoSpaceAssetType.LINEAR);
 
         bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.VOD);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig, YoSpaceAssetType.VOD);
 
         bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.LINEAR_START_OVER);
+        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig, YoSpaceAssetType.LINEAR_START_OVER);
         bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
 
@@ -125,14 +127,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnAdBreakStartedListener onAdBreakStartedListener = new OnAdBreakStartedListener() {
         @Override
         public void onAdBreakStarted(AdBreakStartedEvent adBreakStartedEvent) {
-            Toast.makeText(getApplicationContext(),"Ad Break Started",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Ad Break Started", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         }
     };
 
     private OnAdBreakFinishedListener onAdBreakFinishedListener = new OnAdBreakFinishedListener() {
         @Override
         public void onAdBreakFinished(AdBreakFinishedEvent adBreakFinishedEvent) {
-            Toast.makeText(getApplicationContext(),"Ad Break Finished",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Ad Break Finished", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
@@ -140,17 +151,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onAdStarted(AdStartedEvent adStartedEvent) {
             String clickThroughUrl = null;
-            if(adStartedEvent != null){
+            if (adStartedEvent != null) {
                 clickThroughUrl = adStartedEvent.getClickThroughUrl();
             }
+            currentClickThroughUrl = clickThroughUrl;
 
-            if(clickThroughUrl != null && clickThroughUrl != ""){
-                clickThrough.setEnabled(true);
-                clickThrough.setClickable(true);
-                currentClickThroughUrl = clickThroughUrl;
-            }
+            final String url = currentClickThroughUrl;
 
-            Toast.makeText(getApplicationContext(),"Ad Started",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    if (url != null && url != "") {
+                        clickThrough.setEnabled(true);
+                        clickThrough.setClickable(true);
+
+                    }
+                    Toast.makeText(getApplicationContext(), "Ad Started", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         }
     };
 
@@ -160,32 +178,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             clickThrough.setEnabled(false);
             clickThrough.setClickable(false);
             currentClickThroughUrl = null;
-            Toast.makeText(getApplicationContext(),"Ad Finished",Toast.LENGTH_SHORT).show();
+
+            handler.post(new Runnable() {
+                public void run() {
+                    clickThrough.setEnabled(false);
+                    clickThrough.setClickable(false);
+                    Toast.makeText(getApplicationContext(), "Ad Finished", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
     private OnAdSkippedListener onAdSkippedListener = new OnAdSkippedListener() {
         @Override
         public void onAdSkipped(AdSkippedEvent adSkippedEvent) {
-            Toast.makeText(getApplicationContext(),"Ad Skipped",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Ad Skipped", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
     private OnAdErrorListener onAdErrorListener = new OnAdErrorListener() {
         @Override
         public void onAdError(AdErrorEvent adErrorEvent) {
-            Toast.makeText(getApplicationContext(),"Ad Error",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Ad Error", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
     private OnAdClickedListener onAdClickedListener = new OnAdClickedListener() {
         @Override
         public void onAdClicked(AdClickedEvent adClickedEvent) {
-            Toast.makeText(getApplicationContext(),"Ad Clicked",Toast.LENGTH_SHORT).show();
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Ad Clicked", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
-    private void clickThroughPressed(){
+    private void clickThroughPressed() {
         bitmovinYoSpacePlayer.clickThroughPressed();
 
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(currentClickThroughUrl));

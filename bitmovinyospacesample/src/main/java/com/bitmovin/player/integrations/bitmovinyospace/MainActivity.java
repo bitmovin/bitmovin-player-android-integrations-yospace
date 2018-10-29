@@ -61,6 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.bitmovinPlayerView.setPlayer(bitmovinYoSpacePlayer);
         bitmovinYoSpacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
+        bitmovinYoSpacePlayer.getYoSpaceConfiguration().debug = true;
+        bitmovinYoSpacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
+        bitmovinYoSpacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
+        bitmovinYoSpacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
+        bitmovinYoSpacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
+
+
         bitmovinYoSpacePlayer.addEventListener(onAdBreakStartedListener);
         bitmovinYoSpacePlayer.addEventListener(onAdBreakFinishedListener);
         bitmovinYoSpacePlayer.addEventListener(onAdStartedListener);

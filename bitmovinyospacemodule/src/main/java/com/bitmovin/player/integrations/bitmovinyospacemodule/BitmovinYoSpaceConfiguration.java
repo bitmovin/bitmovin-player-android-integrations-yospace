@@ -5,4 +5,5 @@ public class BitmovinYoSpaceConfiguration {
     public int readTimeout = 5000;
     public int connectTimeout = 5000;
     public int requestTimeout = 5000;
+    public boolean debug = false;
 }

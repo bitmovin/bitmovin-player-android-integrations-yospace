@@ -107,7 +107,10 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         originalUrl = yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getHlsSource().getUrl();
 
         properties = new Session.SessionProperties(originalUrl).userAgent(yoSpaceConfiguration.userAgent).readTimeout(yoSpaceConfiguration.readTimeout).connectTimeout(yoSpaceConfiguration.connectTimeout).requestTimeout(yoSpaceConfiguration.requestTimeout);
-        properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
+
+        if(yoSpaceConfiguration.debug){
+            properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
+        }
 
         switch (yoSpaceSourceConfiguration.getAssetType()) {
             case LINEAR:
@@ -449,4 +452,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     };
 
 
+    public BitmovinYoSpaceConfiguration getYoSpaceConfiguration() {
+        return yoSpaceConfiguration;
+    }
 }

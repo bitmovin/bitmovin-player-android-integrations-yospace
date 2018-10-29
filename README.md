@@ -74,7 +74,7 @@ private OnAdStartedListener onAdStartedListener = new OnAdStartedListener() {
 }
 ```
 
-In order to properly track ads you must call `clickThroughPressed()`
+In order to properly track ads, you must call `clickThroughPressed()` whenever the user clicks on an ad
 ```java
 bitmovinYoSpacePlayer.clickThroughPressed();
 ```

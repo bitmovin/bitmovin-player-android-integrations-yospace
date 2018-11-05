@@ -384,23 +384,14 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertBreakEnd(AdBreak adBreak) {
             Log.d(Constants.TAG, "OnAdvertBreakEnd: " + adBreak.toString());
-
-            List<com.bitmovin.player.api.event.listener.EventListener> eventListeners = bitmovinYoSpaceEventEmitter.getEventListeners().get(OnAdBreakFinishedListener.class);
-
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners) {
-                ((OnAdBreakFinishedListener) listener).onAdBreakFinished(new AdBreakFinishedEvent());
-            }
+            bitmovinYoSpaceEventEmitter.emit(new AdBreakFinishedEvent());
         }
 
         @Override
         public void onAdvertBreakStart(AdBreak adBreak) {
 
             Log.d(Constants.TAG, "OnAdvertBreakStart: " + adBreak.toString());
-            List<com.bitmovin.player.api.event.listener.EventListener> eventListeners = bitmovinYoSpaceEventEmitter.getEventListeners().get(OnAdBreakStartedListener.class);
-
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners) {
-                ((OnAdBreakStartedListener) listener).onAdBreakStarted(new AdBreakStartedEvent());
-            }
+            bitmovinYoSpaceEventEmitter.emit(new AdBreakStartedEvent());
 
         }
 
@@ -408,32 +399,19 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         public void onAdvertEnd(Advert advert) {
             Log.d(Constants.TAG, "OnAdvertEnd: " + advert.getId() + " duration - " + advert.getDuration());
 
-            List<com.bitmovin.player.api.event.listener.EventListener> eventListeners = bitmovinYoSpaceEventEmitter.getEventListeners().get(OnAdFinishedListener.class);
-
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners) {
-                ((OnAdFinishedListener) listener).onAdFinished(new AdFinishedEvent());
-            }
-
+            bitmovinYoSpaceEventEmitter.emit(new AdFinishedEvent());
         }
 
         @Override
         public void onAdvertStart(Advert advert) {
-
             Log.d(Constants.TAG, "OnAdvertStart: " + advert.getId() + " duration - " + advert.getDuration());
-
-            List<com.bitmovin.player.api.event.listener.EventListener> eventListeners = bitmovinYoSpaceEventEmitter.getEventListeners().get(OnAdStartedListener.class);
-
             String clickThroughUrl = "";
-
             if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                 clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
             }
 
             AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
-
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners) {
-                ((OnAdStartedListener) listener).onAdStarted(adStartedEvent);
-            }
+            bitmovinYoSpaceEventEmitter.emit(adStartedEvent);
         }
 
         @Override

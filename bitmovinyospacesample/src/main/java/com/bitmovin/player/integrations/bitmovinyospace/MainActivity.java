@@ -25,12 +25,18 @@ import com.bitmovin.player.api.event.listener.OnAdErrorListener;
 import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
+import com.bitmovin.player.config.drm.DRMSystems;
+import com.bitmovin.player.config.media.DASHSource;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.BitmovinYoSpacePlayer;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YoSpaceAssetType;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YoSpaceSourceConfiguration;
+
+import java.util.UUID;
+
+import javax.xml.transform.Source;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private BitmovinPlayerView bitmovinPlayerView;
@@ -94,9 +100,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadVod() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-ces1eurxaws102j8-56ib7gouor1.tls1.yospace.com/csm/access/152064303/REFTSF9ITFNfRk1QNF9DQkNTX0NFTkNfZnJvbV9pbnRlcl9tYWluX2JvbmVzX1JBRFMxMDA4MDcxODAwMDI1OTQ0X3YxX3YxLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjMDAwMDAyNDIvbWFzdGVyX3d2Lm0zdTgK?yo.ad=true"));
+
+        // setup DRM handling
+        String drmLicenseUrl = "https://widevine.license.istreamplanet.com/widevine/api/license/a229afbf-e1d3-499e-8127-c33cd7231e58";
+        UUID drmSchemeUuid = DRMSystems.WIDEVINE_UUID;
+        sourceItem.addDRMConfiguration(drmSchemeUuid, drmLicenseUrl);
+
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
+
         YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig, YoSpaceAssetType.VOD);
 
         bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
@@ -109,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig, YoSpaceAssetType.LINEAR_START_OVER);
         bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
     }
-
 
     @Override
     protected void onResume() {

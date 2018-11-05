@@ -10,7 +10,11 @@ import java.util.List;
 
 public class BitmovinPlayerPolicy implements PolicyHandler {
 
+    //TODO fix this class with proper values once we have a VOD test stream
+
     private Session.PlaybackMode mPlaybackMode;
+
+
 
     @Override
     public boolean canStart(long l, List<AdBreak> list) {

@@ -25,8 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="VOD"
-            android:enabled="false"
-            android:clickable="false"
+            android:enabled="true"
+            android:clickable="true"
             />
         <Button
             android:id="@+id/live_button"

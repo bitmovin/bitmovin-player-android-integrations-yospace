@@ -39,6 +39,8 @@ import com.bitmovin.player.api.event.listener.OnStallStartedListener;
 import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.advertising.AdSourceType;
+import com.bitmovin.player.config.drm.DRMConfiguration;
+import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
@@ -87,17 +89,17 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
 
     protected BitmovinYoSpacePlayer(Context context, PlayerConfiguration playerConfiguration, boolean useCast) {
         super(context, playerConfiguration, useCast);
-        this.addEventListener(onPausedListener);
-        this.addEventListener(onPlayingListener);
-        this.addEventListener(onPlaybackFinishedListener);
-        this.addEventListener(onSourceLoadedListener);
-        this.addEventListener(onSourceUnloadedListener);
-        this.addEventListener(onStallEndedListener);
-        this.addEventListener(onStallStartedListener);
-        this.addEventListener(onMetadataListener);
-        this.addEventListener(onTimeChangedListener);
-        this.addEventListener(onFullscreenEnterListener);
-        this.addEventListener(onFullscreenExitListener);
+        super.addEventListener(onPausedListener);
+        super.addEventListener(onPlayingListener);
+        super.addEventListener(onPlaybackFinishedListener);
+        super.addEventListener(onSourceLoadedListener);
+        super.addEventListener(onSourceUnloadedListener);
+        super.addEventListener(onStallEndedListener);
+        super.addEventListener(onStallStartedListener);
+        super.addEventListener(onMetadataListener);
+        super.addEventListener(onTimeChangedListener);
+        super.addEventListener(onFullscreenEnterListener);
+        super.addEventListener(onFullscreenExitListener);
     }
 
     public void load(YoSpaceSourceConfiguration sourceConfiguration) {
@@ -186,6 +188,11 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
             public void run() {
                 final SourceConfiguration sourceConfiguration = new SourceConfiguration();
                 SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
+                DRMConfiguration drmConfiguration = yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getDrmConfiguration(DRMSystems.WIDEVINE_UUID);
+                if(drmConfiguration != null){
+                    sourceItem.addDRMConfiguration(drmConfiguration);
+                }
+
                 sourceConfiguration.addSourceItem(sourceItem);
                 load(sourceConfiguration);
             }

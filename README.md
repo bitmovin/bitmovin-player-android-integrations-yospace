@@ -31,10 +31,10 @@ The following example creates a `BitmovinYoSpacePlayer` object and loads a `YoSp
 #### Basic video playback 
 ```java
 //Create a BitmovinYoSpacePlayer
-BitmovinYoSpacePlayer bitmovinYoSpacePlayer = new BitmovinYoSpacePlayer(getApplicationContext());
+BitmovinYospacePlayer bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext());
     
 //Set it to your BitmovinPlayerView
-bitmovinPlayerView.setPlayer(bitmovinYoSpacePlayer);
+bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
     
 //Create a SourceConfiguration 
 SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=true&yo.ac=true"));
@@ -42,24 +42,23 @@ SourceConfiguration sourceConfig = new SourceConfiguration();
 sourceConfig.addSourceItem(sourceItem);
     
 //Create a YoSpaceSourceConfiguration with your SourceConfiguration and a YoSpaceAssetType
-YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(sourceConfig,YoSpaceAssetType.LINEAR);
+YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
     
 //Load your YoSpaceSourceConfiguration
-bitmovinYoSpacePlayer.load(yoSpaceSourceConfiguration);
-        
+bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
 ```
 
 #### Ad Tracking Events
-The BitmovinYoSpacePlayer will fire events thought the normal Bitmovin event listeners. These are the ad related event listeners you should create 
+The BitmovinYospacePlayer will fire events thought the normal Bitmovin event listeners. These are the ad related event listeners you should create 
 
 ```java
-bitmovinYoSpacePlayer.addEventListener(onAdBreakStartedListener);
-bitmovinYoSpacePlayer.addEventListener(onAdBreakFinishedListener);
-bitmovinYoSpacePlayer.addEventListener(onAdStartedListener);
-bitmovinYoSpacePlayer.addEventListener(onAdFinishedListener);
-bitmovinYoSpacePlayer.addEventListener(onAdClickedListener);
-bitmovinYoSpacePlayer.addEventListener(onAdErrorListener);
-bitmovinYoSpacePlayer.addEventListener(onAdSkippedListener);
+bitmovinYospacePlayer.addEventListener(onAdBreakStartedListener);
+bitmovinYospacePlayer.addEventListener(onAdBreakFinishedListener);
+bitmovinYospacePlayer.addEventListener(onAdStartedListener);
+bitmovinYospacePlayer.addEventListener(onAdFinishedListener);
+bitmovinYospacePlayer.addEventListener(onAdClickedListener);
+bitmovinYospacePlayer.addEventListener(onAdErrorListener);
+bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
 ``` 
 
 
@@ -76,18 +75,18 @@ private OnAdStartedListener onAdStartedListener = new OnAdStartedListener() {
 
 In order to properly track ads, you must call `clickThroughPressed()` whenever the user clicks on an ad
 ```java
-bitmovinYoSpacePlayer.clickThroughPressed();
+bitmovinYospacePlayer.clickThroughPressed();
 ```
 
 #### Configuration
 You can configure the yospace ad management sdk through the BitmovinYoSpacePlayer. These properties can be set between each call to `load`
 
 ```java
-bitmovinYoSpacePlayer.getYoSpaceConfiguration().debug = true;
-bitmovinYoSpacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
-bitmovinYoSpacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
-bitmovinYoSpacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
-bitmovinYoSpacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
+bitmovinYospacePlayer.getYoSpaceConfiguration().debug = true;
+bitmovinYospacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
+bitmovinYospacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
+bitmovinYospacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
+bitmovinYospacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
 ```
 
 

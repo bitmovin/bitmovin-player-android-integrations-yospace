@@ -31,7 +31,7 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.BitmovinYospacePlayer;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YospaceAssetType;
-import com.bitmovin.player.integrations.bitmovinyospacemodule.YoSpaceSourceConfiguration;
+import com.bitmovin.player.integrations.bitmovinyospacemodule.YospaceSourceConfiguration;
 
 import java.util.UUID;
 
@@ -90,9 +90,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=true&yo.ac=true"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(YospaceAssetType.LINEAR);
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
 
-        bitmovinYospacePlayer.load(sourceConfig,yoSpaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
     private void loadVod() {
@@ -105,17 +105,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(YospaceAssetType.VOD);
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
 
-        bitmovinYospacePlayer.load(sourceConfig,yoSpaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
     private void loadLinearStartOver() {
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YoSpaceSourceConfiguration yoSpaceSourceConfiguration = new YoSpaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
-        bitmovinYospacePlayer.load(sourceConfig,yoSpaceSourceConfiguration);
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
     @Override

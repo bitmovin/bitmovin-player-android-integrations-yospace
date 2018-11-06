@@ -15,7 +15,6 @@ public class BitmovinPlayerPolicy implements PolicyHandler {
     private Session.PlaybackMode mPlaybackMode;
 
 
-
     @Override
     public boolean canStart(long l, List<AdBreak> list) {
         Log.d(Constants.TAG, "Player Policy::canStart");

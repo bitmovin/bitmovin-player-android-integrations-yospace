@@ -5,12 +5,14 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.ViewGroup;
 
 import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
+import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.FullscreenEnterEvent;
 import com.bitmovin.player.api.event.data.FullscreenExitEvent;
 import com.bitmovin.player.api.event.data.MetadataEvent;
@@ -22,10 +24,7 @@ import com.bitmovin.player.api.event.data.SourceUnloadedEvent;
 import com.bitmovin.player.api.event.data.StallEndedEvent;
 import com.bitmovin.player.api.event.data.StallStartedEvent;
 import com.bitmovin.player.api.event.data.TimeChangedEvent;
-import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
-import com.bitmovin.player.api.event.listener.OnAdBreakStartedListener;
-import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
-import com.bitmovin.player.api.event.listener.OnAdStartedListener;
+import com.bitmovin.player.api.event.data.WarningEvent;
 import com.bitmovin.player.api.event.listener.OnFullscreenEnterListener;
 import com.bitmovin.player.api.event.listener.OnFullscreenExitListener;
 import com.bitmovin.player.api.event.listener.OnMetadataListener;
@@ -38,13 +37,13 @@ import com.bitmovin.player.api.event.listener.OnStallEndedListener;
 import com.bitmovin.player.api.event.listener.OnStallStartedListener;
 import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
 import com.bitmovin.player.config.PlayerConfiguration;
+import com.bitmovin.player.config.advertising.AdItem;
 import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.config.drm.DRMConfiguration;
 import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
-import com.bitmovin.player.model.id3.BinaryFrame;
 import com.yospace.android.hls.analytic.AnalyticEventListener;
 import com.yospace.android.hls.analytic.Session;
 import com.yospace.android.hls.analytic.SessionFactory;
@@ -63,31 +62,31 @@ import com.yospace.util.event.Event;
 import com.yospace.util.event.EventListener;
 import com.yospace.util.event.EventSourceImpl;
 
-import java.util.List;
 
-
-public class BitmovinYoSpacePlayer extends BitmovinPlayer {
+public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;
     private SessionFactory sessionFactory;
     private final EventSourceImpl<PlayerState> stateSource = new EventSourceImpl<>();
     private final EventSourceImpl<TimedMetadata> metadataSource = new EventSourceImpl<>();
     private final BitmovinPlayerPolicy bitmovinPlayerPolicy = new BitmovinPlayerPolicy();
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final BitmovinYoSpaceEventEmitter bitmovinYoSpaceEventEmitter = new BitmovinYoSpaceEventEmitter();
+    private final BitmovinYospaceEventEmitter bitmovinYospaceEventEmitter = new BitmovinYospaceEventEmitter();
     private Session.SessionProperties properties;
     private YoSpaceSourceConfiguration yoSpaceSourceConfiguration;
+    private SourceConfiguration sourceConfiguration;
     private String originalUrl;
-    private BitmovinYoSpaceConfiguration yoSpaceConfiguration = new BitmovinYoSpaceConfiguration();
+    private BitmovinYospaceConfiguration yoSpaceConfiguration = new BitmovinYospaceConfiguration();
+    private boolean isYospaceAd = false;
 
-    public BitmovinYoSpacePlayer(Context context, PlayerConfiguration playerConfiguration) {
+    public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration) {
         this(context, playerConfiguration, true);
     }
 
-    public BitmovinYoSpacePlayer(Context context) {
+    public BitmovinYospacePlayer(Context context) {
         this(context, new PlayerConfiguration());
     }
 
-    protected BitmovinYoSpacePlayer(Context context, PlayerConfiguration playerConfiguration, boolean useCast) {
+    protected BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, boolean useCast) {
         super(context, playerConfiguration, useCast);
         super.addEventListener(onPausedListener);
         super.addEventListener(onPlayingListener);
@@ -102,14 +101,21 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         super.addEventListener(onFullscreenExitListener);
     }
 
-    public void load(YoSpaceSourceConfiguration sourceConfiguration) {
+    public void load(SourceConfiguration sourceConfiguration, YoSpaceSourceConfiguration yoSpaceSourceConfiguration) {
         Log.d(Constants.TAG, "Load YoSpace Source Configuration");
-        this.yoSpaceSourceConfiguration = sourceConfiguration;
+        this.yoSpaceSourceConfiguration = yoSpaceSourceConfiguration;
+        this.sourceConfiguration = sourceConfiguration;
 
-        originalUrl = yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getHlsSource().getUrl();
+        HLSSource hlsSource = sourceConfiguration.getFirstSourceItem().getHlsSource();
 
+        if (hlsSource == null || hlsSource.getUrl() == null) {
+            bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
+            unload();
+            return;
+        }
+
+        originalUrl = hlsSource.getUrl();
         properties = new Session.SessionProperties(originalUrl).userAgent(yoSpaceConfiguration.userAgent).readTimeout(yoSpaceConfiguration.readTimeout).connectTimeout(yoSpaceConfiguration.connectTimeout).requestTimeout(yoSpaceConfiguration.requestTimeout);
-
         if (yoSpaceConfiguration.debug) {
             properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
         }
@@ -127,10 +133,6 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         }
     }
 
-    public void clickThroughPressed() {
-        session.onLinearClickThrough();
-    }
-
     private void loadLive() {
         sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
         String url = sessionFactory.getPlayerUrl();
@@ -145,7 +147,6 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     private void loadStartOver() {
         SessionNonLinearStartOver.create(sessionEventListener, properties);
     }
-
 
     private EventListener<Session> sessionEventListener = new EventListener<Session>() {
 
@@ -173,11 +174,13 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
                 case NO_ANALYTICS:
                     Log.i(Constants.TAG,
                             "PlayerNLSO.initYospace - Video URL does not refer to a Yospace stream, no analytics session created");
-                    startPlayback(originalUrl);
+                    bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
+                    unload();
                     return;
                 case NOT_INITIALISED:
-                    Log.e(Constants.TAG, "PlayerNLSO.initYospace - Failed to initialise analytics session");
-                    startPlayback(originalUrl);
+                    bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NOT_INITIALISED, "Failed to initialise Yospace stream."));
+                    unload();
+                    return;
             }
         }
     };
@@ -188,8 +191,8 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
             public void run() {
                 final SourceConfiguration sourceConfiguration = new SourceConfiguration();
                 SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
-                DRMConfiguration drmConfiguration = yoSpaceSourceConfiguration.getSourceConfiguration().getFirstSourceItem().getDrmConfiguration(DRMSystems.WIDEVINE_UUID);
-                if(drmConfiguration != null){
+                DRMConfiguration drmConfiguration = sourceConfiguration.getFirstSourceItem().getDrmConfiguration(DRMSystems.WIDEVINE_UUID);
+                if (drmConfiguration != null) {
                     sourceItem.addDRMConfiguration(drmConfiguration);
                 }
 
@@ -199,13 +202,24 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         });
     }
 
+
+    public void clickThroughPressed() {
+        session.onLinearClickThrough();
+    }
+
     /**
      * EventListener
      */
     @Override
     public void addEventListener(com.bitmovin.player.api.event.listener.EventListener listener) {
-        bitmovinYoSpaceEventEmitter.addEventListener(listener);
+        bitmovinYospaceEventEmitter.addEventListener(listener);
         super.addEventListener(listener);
+    }
+
+    @Override
+    public void removeEventListener(com.bitmovin.player.api.event.listener.EventListener listener) {
+        bitmovinYospaceEventEmitter.removeEventListener(listener);
+        super.removeEventListener(listener);
     }
 
     /**
@@ -254,6 +268,42 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         super.timeShift(offset);
     }
 
+    @Override
+    public boolean isAd() {
+        if (yoSpaceSourceConfiguration != null) {
+            return isYospaceAd;
+        } else {
+            return super.isAd();
+        }
+    }
+
+    @Override
+    public void skipAd() {
+        if (yoSpaceSourceConfiguration != null) {
+            //TODO skip ad via yospace
+        } else {
+            super.skipAd();
+        }
+    }
+
+    @Override
+    public void scheduleAd(AdItem adItem) {
+        if (yoSpaceSourceConfiguration != null) {
+            bitmovinYospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "scheduleAd API is not available when playing back a Yospace asset"));
+        } else {
+            super.scheduleAd(adItem);
+        }
+    }
+
+    @Override
+    public void setAdViewGroup(ViewGroup adViewGroup) {
+        if (yoSpaceSourceConfiguration != null) {
+            bitmovinYospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "setAdViewGroup API is not available when playing back a Yospace asset"));
+        } else {
+            super.setAdViewGroup(adViewGroup);
+        }
+    }
+
     /**
      * Player Listeners
      */
@@ -268,6 +318,8 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             stateSource.notify(new PlayerState(PlaybackState.STOPPED, (int) Math.round(getCurrentTime()), false));
+            yoSpaceSourceConfiguration = null;
+            sourceConfiguration = null;
         }
     };
 
@@ -333,46 +385,10 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     private OnMetadataListener onMetadataListener = new OnMetadataListener() {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
-
-            if (metadataEvent.getType() == "ID3") {
-                com.bitmovin.player.model.Metadata metadata = metadataEvent.getMetadata();
-                String ymid = null;
-                String yseq = null;
-                String ytyp = null;
-                String ydur = null;
-                String yprg = null;
-
-                for (int i = 0; i < metadata.length(); i++) {
-                    com.bitmovin.player.model.Metadata.Entry entry = metadata.get(i);
-                    if (entry instanceof BinaryFrame) {
-                        BinaryFrame binFrame = (BinaryFrame) entry;
-
-                        if ("YMID".equals(binFrame.id)) {
-                            ymid = new String(binFrame.data);
-                        } else if ("YSEQ".equals(binFrame.id)) {
-                            yseq = new String(binFrame.data);
-                        } else if ("YTYP".equals(binFrame.id)) {
-                            ytyp = new String(binFrame.data);
-                        } else if ("YDUR".equals(binFrame.id)) {
-                            ydur = new String(binFrame.data);
-                        } else if ("YPRG".equals(binFrame.id)) {
-                            yprg = new String(binFrame.data);
-                        }
-                    }
-                }
-
-                TimedMetadata timedMetadata = null;
-                if (ymid != null && yseq != null && ytyp != null && ydur != null) {
-                    timedMetadata = TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur);
-                } else if (yprg != null) {
-                    timedMetadata = TimedMetadata.createFromId3Tags(yprg, 0.0f);
-                }
-
-                if (timedMetadata != null) {
-                    Log.d(Constants.TAG, "On Metadata Listener: " + timedMetadata.toString());
-
-                    metadataSource.notify(timedMetadata);
-                }
+            TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
+            if (timedMetadata != null) {
+                Log.d(Constants.TAG, "On Metadata Listener: " + timedMetadata.toString());
+                metadataSource.notify(timedMetadata);
             }
         }
     };
@@ -384,46 +400,43 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertBreakEnd(AdBreak adBreak) {
             Log.d(Constants.TAG, "OnAdvertBreakEnd: " + adBreak.toString());
-            bitmovinYoSpaceEventEmitter.emit(new AdBreakFinishedEvent());
+            bitmovinYospaceEventEmitter.emit(new AdBreakFinishedEvent());
         }
 
         @Override
         public void onAdvertBreakStart(AdBreak adBreak) {
-
             Log.d(Constants.TAG, "OnAdvertBreakStart: " + adBreak.toString());
-            bitmovinYoSpaceEventEmitter.emit(new AdBreakStartedEvent());
-
+            bitmovinYospaceEventEmitter.emit(new AdBreakStartedEvent());
         }
 
         @Override
         public void onAdvertEnd(Advert advert) {
             Log.d(Constants.TAG, "OnAdvertEnd: " + advert.getId() + " duration - " + advert.getDuration());
-
-            bitmovinYoSpaceEventEmitter.emit(new AdFinishedEvent());
+            isYospaceAd = false;
+            bitmovinYospaceEventEmitter.emit(new AdFinishedEvent());
         }
 
         @Override
         public void onAdvertStart(Advert advert) {
             Log.d(Constants.TAG, "OnAdvertStart: " + advert.getId() + " duration - " + advert.getDuration());
+            isYospaceAd = true;
             String clickThroughUrl = "";
             if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                 clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
             }
 
             AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
-            bitmovinYoSpaceEventEmitter.emit(adStartedEvent);
+            bitmovinYospaceEventEmitter.emit(adStartedEvent);
         }
 
         @Override
         public void onTimelineUpdateReceived(VmapPayload vmapPayload) {
             Log.d(Constants.TAG, "OnTimelineUpdateReceived: " + vmapPayload.toString());
-
         }
 
         @Override
         public void onTrackingUrlCalled(Advert advert, String s, String s1) {
             Log.d(Constants.TAG, "OnTrackingUrlCalled: " + s);
-
         }
 
         @Override
@@ -433,7 +446,7 @@ public class BitmovinYoSpacePlayer extends BitmovinPlayer {
     };
 
 
-    public BitmovinYoSpaceConfiguration getYoSpaceConfiguration() {
+    public BitmovinYospaceConfiguration getYoSpaceConfiguration() {
         return yoSpaceConfiguration;
     }
 }

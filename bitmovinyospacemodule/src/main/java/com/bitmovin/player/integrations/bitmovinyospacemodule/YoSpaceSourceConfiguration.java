@@ -1,21 +1,13 @@
 package com.bitmovin.player.integrations.bitmovinyospacemodule;
 
-import com.bitmovin.player.config.media.SourceConfiguration;
-
 public class YoSpaceSourceConfiguration {
-    private SourceConfiguration sourceConfiguration;
-    private YoSpaceAssetType assetType;
+    private YospaceAssetType assetType;
 
-    public YoSpaceSourceConfiguration(SourceConfiguration sourceConfiguration, YoSpaceAssetType assetType) {
-        this.sourceConfiguration = sourceConfiguration;
+    public YoSpaceSourceConfiguration(YospaceAssetType assetType) {
         this.assetType = assetType;
     }
 
-    public YoSpaceAssetType getAssetType() {
+    public YospaceAssetType getAssetType() {
         return assetType;
-    }
-
-    public SourceConfiguration getSourceConfiguration() {
-        return sourceConfiguration;
     }
 }

@@ -72,7 +72,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final BitmovinYospaceEventEmitter bitmovinYospaceEventEmitter = new BitmovinYospaceEventEmitter();
     private Session.SessionProperties properties;
-    private YoSpaceSourceConfiguration yoSpaceSourceConfiguration;
+    private YospaceSourceConfiguration yospaceSourceConfiguration;
     private SourceConfiguration sourceConfiguration;
     private String originalUrl;
     private BitmovinYospaceConfiguration yoSpaceConfiguration = new BitmovinYospaceConfiguration();
@@ -101,9 +101,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         super.addEventListener(onFullscreenExitListener);
     }
 
-    public void load(SourceConfiguration sourceConfiguration, YoSpaceSourceConfiguration yoSpaceSourceConfiguration) {
+    public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration) {
         Log.d(Constants.TAG, "Load YoSpace Source Configuration");
-        this.yoSpaceSourceConfiguration = yoSpaceSourceConfiguration;
+        this.yospaceSourceConfiguration = yospaceSourceConfiguration;
         this.sourceConfiguration = sourceConfiguration;
 
         HLSSource hlsSource = sourceConfiguration.getFirstSourceItem().getHlsSource();
@@ -120,7 +120,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
         }
 
-        switch (yoSpaceSourceConfiguration.getAssetType()) {
+        switch (yospaceSourceConfiguration.getAssetType()) {
             case LINEAR:
                 loadLive();
                 break;
@@ -270,7 +270,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     @Override
     public boolean isAd() {
-        if (yoSpaceSourceConfiguration != null) {
+        if (yospaceSourceConfiguration != null) {
             return isYospaceAd;
         } else {
             return super.isAd();
@@ -279,7 +279,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     @Override
     public void skipAd() {
-        if (yoSpaceSourceConfiguration != null) {
+        if (yospaceSourceConfiguration != null) {
             //TODO skip ad via yospace
         } else {
             super.skipAd();
@@ -288,7 +288,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     @Override
     public void scheduleAd(AdItem adItem) {
-        if (yoSpaceSourceConfiguration != null) {
+        if (yospaceSourceConfiguration != null) {
             bitmovinYospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "scheduleAd API is not available when playing back a Yospace asset"));
         } else {
             super.scheduleAd(adItem);
@@ -297,7 +297,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     @Override
     public void setAdViewGroup(ViewGroup adViewGroup) {
-        if (yoSpaceSourceConfiguration != null) {
+        if (yospaceSourceConfiguration != null) {
             bitmovinYospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "setAdViewGroup API is not available when playing back a Yospace asset"));
         } else {
             super.setAdViewGroup(adViewGroup);
@@ -318,7 +318,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             stateSource.notify(new PlayerState(PlaybackState.STOPPED, (int) Math.round(getCurrentTime()), false));
-            yoSpaceSourceConfiguration = null;
+            yospaceSourceConfiguration = null;
             sourceConfiguration = null;
         }
     };

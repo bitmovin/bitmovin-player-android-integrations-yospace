@@ -1,9 +1,9 @@
 package com.bitmovin.player.integrations.bitmovinyospacemodule;
 
-public class YoSpaceSourceConfiguration {
+public class YospaceSourceConfiguration {
     private YospaceAssetType assetType;
 
-    public YoSpaceSourceConfiguration(YospaceAssetType assetType) {
+    public YospaceSourceConfiguration(YospaceAssetType assetType) {
         this.assetType = assetType;
     }
 

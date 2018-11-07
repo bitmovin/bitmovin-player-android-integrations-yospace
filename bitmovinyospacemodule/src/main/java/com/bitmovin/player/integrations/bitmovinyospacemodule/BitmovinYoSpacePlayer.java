@@ -189,15 +189,15 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         handler.post(new Runnable() {
             public void run() {
-                final SourceConfiguration sourceConfiguration = new SourceConfiguration();
+                final SourceConfiguration newSourceConfiguration = new SourceConfiguration();
                 SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
                 DRMConfiguration drmConfiguration = sourceConfiguration.getFirstSourceItem().getDrmConfiguration(DRMSystems.WIDEVINE_UUID);
                 if (drmConfiguration != null) {
                     sourceItem.addDRMConfiguration(drmConfiguration);
                 }
 
-                sourceConfiguration.addSourceItem(sourceItem);
-                load(sourceConfiguration);
+                newSourceConfiguration.addSourceItem(sourceItem);
+                load(newSourceConfiguration);
             }
         });
     }
@@ -304,20 +304,26 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
+    private int getYospaceTime(){
+        return (int) Math.round(getCurrentTime()*1000);
+    }
+
     /**
      * Player Listeners
      */
     private OnSourceLoadedListener onSourceLoadedListener = new OnSourceLoadedListener() {
         @Override
         public void onSourceLoaded(SourceLoadedEvent sourceLoadedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.INITIALISING, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Initialising Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.INITIALISING, getYospaceTime(), false));
         }
     };
 
     private OnSourceUnloadedListener onSourceUnloadedListener = new OnSourceUnloadedListener() {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.STOPPED, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Stopped Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
             yospaceSourceConfiguration = null;
             sourceConfiguration = null;
         }
@@ -326,35 +332,40 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnPlaybackFinishedListener onPlaybackFinishedListener = new OnPlaybackFinishedListener() {
         @Override
         public void onPlaybackFinished(PlaybackFinishedEvent playbackFinishedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.STOPPED, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Finished Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
         }
     };
 
     private OnPausedListener onPausedListener = new OnPausedListener() {
         @Override
         public void onPaused(PausedEvent pausedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.PAUSED, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Paused Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
         }
     };
 
     private OnPlayingListener onPlayingListener = new OnPlayingListener() {
         @Override
         public void onPlaying(PlayingEvent playingEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.PLAYING, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"SendingPlaying Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
         }
     };
 
     private OnStallEndedListener onStallEndedListener = new OnStallEndedListener() {
         @Override
         public void onStallEnded(StallEndedEvent stallEndedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.BUFFERING_END, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Stall Ended Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.BUFFERING_END, getYospaceTime(), false));
         }
     };
 
     private OnStallStartedListener onStallStartedListener = new OnStallStartedListener() {
         @Override
         public void onStallStarted(StallStartedEvent stallStartedEvent) {
-            stateSource.notify(new PlayerState(PlaybackState.BUFFERING_START, (int) Math.round(getCurrentTime()), false));
+            Log.d(Constants.TAG,"Sending Stall Started Event" + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.BUFFERING_START, getYospaceTime(), false));
         }
     };
 
@@ -362,8 +373,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onTimeChanged(TimeChangedEvent timeChangedEvent) {
             if (!(session instanceof SessionLive)) {
-                int timeUpdate = (int) Math.round(getCurrentTime() * 1000);
-                stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, timeUpdate, false));
+                Log.d(Constants.TAG,"Sending Playhead Update: " + getYospaceTime());
+                stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
             }
         }
     };

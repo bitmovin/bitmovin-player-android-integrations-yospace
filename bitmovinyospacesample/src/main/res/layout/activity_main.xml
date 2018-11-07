@@ -35,6 +35,12 @@
             android:text="Live"
             />
         <Button
+            android:id="@+id/nlso_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NLSO"
+            />
+        <Button
             android:id="@+id/unload_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button vodButton;
     private Button unloadButton;
     private Button clickThrough;
+    private Button nlsoButton;
     private String currentClickThroughUrl;
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unloadButton.setOnClickListener(this);
         clickThrough = findViewById(R.id.click_through);
         clickThrough.setOnClickListener(this);
+        nlsoButton = findViewById(R.id.nlso_button);
+        nlsoButton.setOnClickListener(this);
 
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext());
@@ -77,9 +80,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdClickedListener);
         bitmovinYospacePlayer.addEventListener(onAdErrorListener);
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
-
-        this.loadLive();
-
     }
 
     private void unload() {
@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadVod() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://vodp-e-turner-eb.tls1.yospace.com/csm/access/152064303/Q01BRl9GTVA0X0RBU0hfQ0VOQ19ITFNfQ0JDU19DRU5DX2Zyb21faW50ZXJfbWFpbl9NYXJyaWVkd2l0aENoaWxkcmVuX0NBUkUxMDA5MjYxNzAwMDE4ODUyX3dpdGhfYnJlYWtzLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjMDAwMDAyNjIvbWFzdGVyX3d2Lm0zdTg=?yo.ad=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://vodp-e-turner-eb.tls1.yospace.com/csm/access/152902489/ZmY5ZDkzOWY1ZWE0NTFmY2IzYmZkZTcxYjdjNzM0ZmQvbWFzdGVyX3VucHZfdHYubTN1OA=="));
         // setup DRM handling
-        String drmLicenseUrl = "https://widevine.license.istreamplanet.com/widevine/api/license/a229afbf-e1d3-499e-8127-c33cd7231e58";
-        UUID drmSchemeUuid = DRMSystems.WIDEVINE_UUID;
-        sourceItem.addDRMConfiguration(drmSchemeUuid, drmLicenseUrl);
+//        String drmLicenseUrl = "https://widevine.license.istreamplanet.com/widevine/api/license/a229afbf-e1d3-499e-8127-c33cd7231e58";
+//        UUID drmSchemeUuid = DRMSystems.WIDEVINE_UUID;
+//        sourceItem.addDRMConfiguration(drmSchemeUuid, drmLicenseUrl);
 
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadLinearStartOver() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://vodp-e-turner-eb.tls1.yospace.com/access/event/latest/110611066?promo=130805986"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
@@ -249,6 +249,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             loadLive();
         } else if (v == vodButton) {
             loadVod();
+        } else if (v == nlsoButton) {
+            loadLinearStartOver();
         } else if (v == unloadButton) {
             unload();
         } else if (v == clickThrough) {

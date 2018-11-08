@@ -25,6 +25,8 @@ import com.bitmovin.player.api.event.listener.OnAdErrorListener;
 import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
+import com.bitmovin.player.config.PlayerConfiguration;
+import com.bitmovin.player.config.StyleConfiguration;
 import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
@@ -61,9 +63,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         clickThrough.setOnClickListener(this);
         nlsoButton = findViewById(R.id.nlso_button);
         nlsoButton.setOnClickListener(this);
+        // Create new StyleConfiguration
+        StyleConfiguration styleConfiguration = new StyleConfiguration();
+        // Disable UI
+        styleConfiguration.setUiEnabled(false);
+        // Creating a new PlayerConfiguration
+        PlayerConfiguration playerConfiguration = new PlayerConfiguration();
+        // Assign created StyleConfiguration to the PlayerConfiguration
+        playerConfiguration.setStyleConfiguration(styleConfiguration);
 
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
-        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext());
+        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(),playerConfiguration);
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
@@ -177,7 +187,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (url != null && url != "") {
                         clickThrough.setEnabled(true);
                         clickThrough.setClickable(true);
-
                     }
                     Toast.makeText(getApplicationContext(), "Ad Started: " + bitmovinYospacePlayer.isAd(), Toast.LENGTH_SHORT).show();
                 }
@@ -189,10 +198,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnAdFinishedListener onAdFinishedListener = new OnAdFinishedListener() {
         @Override
         public void onAdFinished(AdFinishedEvent adFinishedEvent) {
-            clickThrough.setEnabled(false);
-            clickThrough.setClickable(false);
-            currentClickThroughUrl = null;
-
             handler.post(new Runnable() {
                 public void run() {
                     clickThrough.setEnabled(false);

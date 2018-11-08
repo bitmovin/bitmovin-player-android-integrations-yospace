@@ -133,6 +133,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
+
+
     private void loadLive() {
         sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
         String url = sessionFactory.getPlayerUrl();
@@ -324,8 +326,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             Log.d(Constants.TAG,"Sending Stopped Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
-            yospaceSourceConfiguration = null;
-            sourceConfiguration = null;
         }
     };
 
@@ -373,7 +373,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onTimeChanged(TimeChangedEvent timeChangedEvent) {
             if (!(session instanceof SessionLive)) {
-                Log.d(Constants.TAG,"Sending Playhead Update: " + getYospaceTime());
                 stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
             }
         }

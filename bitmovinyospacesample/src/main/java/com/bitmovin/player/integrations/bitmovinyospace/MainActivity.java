@@ -77,12 +77,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
-        bitmovinYospacePlayer.getYoSpaceConfiguration().debug = true;
-        bitmovinYospacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
-        bitmovinYospacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
-        bitmovinYospacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
-        bitmovinYospacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
-
         bitmovinYospacePlayer.addEventListener(onAdBreakStartedListener);
         bitmovinYospacePlayer.addEventListener(onAdBreakFinishedListener);
         bitmovinYospacePlayer.addEventListener(onAdStartedListener);
@@ -101,7 +95,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
-
+        yospaceSourceConfiguration.debug = true;
+        yospaceSourceConfiguration.connectTimeout = 5000;
+        yospaceSourceConfiguration.requestTimeout = 5000;
+        yospaceSourceConfiguration.readTimeout = 5000;
+        yospaceSourceConfiguration.userAgent = "BitmovinPlayerUserAgent";
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 

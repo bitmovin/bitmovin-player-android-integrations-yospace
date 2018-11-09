@@ -75,7 +75,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private YospaceSourceConfiguration yospaceSourceConfiguration;
     private SourceConfiguration sourceConfiguration;
     private String originalUrl;
-    private BitmovinYospaceConfiguration yoSpaceConfiguration = new BitmovinYospaceConfiguration();
     private boolean isYospaceAd = false;
 
     public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration) {
@@ -115,8 +114,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
 
         originalUrl = hlsSource.getUrl();
-        properties = new Session.SessionProperties(originalUrl).userAgent(yoSpaceConfiguration.userAgent).readTimeout(yoSpaceConfiguration.readTimeout).connectTimeout(yoSpaceConfiguration.connectTimeout).requestTimeout(yoSpaceConfiguration.requestTimeout);
-        if (yoSpaceConfiguration.debug) {
+        properties = new Session.SessionProperties(originalUrl).userAgent(yospaceSourceConfiguration.userAgent).readTimeout(yospaceSourceConfiguration.readTimeout).connectTimeout(yospaceSourceConfiguration.connectTimeout).requestTimeout(yospaceSourceConfiguration.requestTimeout);
+        if (yospaceSourceConfiguration.debug) {
             properties.addDebugFlags(YoLog.DEBUG_POLLING | YoLog.DEBUG_ID3TAG | YoLog.DEBUG_PARSING | YoLog.DEBUG_REPORTS | YoLog.DEBUG_HTTP | YoLog.DEBUG_RAW_XML);
         }
 
@@ -453,9 +452,4 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             Log.d(Constants.TAG, "OnVastReceived: " + vastPayload.getRaw());
         }
     };
-
-
-    public BitmovinYospaceConfiguration getYoSpaceConfiguration() {
-        return yoSpaceConfiguration;
-    }
 }

@@ -79,14 +79,14 @@ bitmovinYospacePlayer.clickThroughPressed();
 ```
 
 #### Configuration
-You can configure the yospace ad management sdk through the BitmovinYoSpacePlayer. These properties can be set between each call to `load`
+You can configure the yospace ad management sdk through the YospaceSourceConfiguration. These properties can be set between each call to `load`
 
 ```java
-bitmovinYospacePlayer.getYoSpaceConfiguration().debug = true;
-bitmovinYospacePlayer.getYoSpaceConfiguration().connectTimeout = 5000;
-bitmovinYospacePlayer.getYoSpaceConfiguration().requestTimeout = 5000;
-bitmovinYospacePlayer.getYoSpaceConfiguration().readTimeout = 5000;
-bitmovinYospacePlayer.getYoSpaceConfiguration().userAgent = "BitmovinPlayerUserAgent";
+yospaceSourceConfiguration.debug = true;
+yospaceSourceConfiguration.connectTimeout = 5000;
+yospaceSourceConfiguration.requestTimeout = 5000;
+yospaceSourceConfiguration.readTimeout = 5000;
+yospaceSourceConfiguration.userAgent = "BitmovinPlayerUserAgent";
 ```
 
 

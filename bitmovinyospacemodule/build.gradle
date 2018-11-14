@@ -3,17 +3,16 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integrations'
-def libraryVersion = '0.1.4'
+def libraryVersion = '0.1.5'
 
 android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 27
-        versionCode 4
-        versionName "0.1.4"
-
+        versionCode 5
+        versionName "0.1.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -30,6 +29,8 @@ android {
 dependencies {
     implementation files('libs/yoAdManagement-debug.aar')
     implementation files('libs/yoUtil-debug.aar')
+    implementation files('libs/yoMoatAdapter-debug.aar')
+    implementation files('libs/YOS-moat-mobile-app-kit-2.3.3.aar')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.0'

@@ -1,12 +1,12 @@
-package com.bitmovin.player.integrations.bitmovinyospacemodule;
+package com.bitmovin.player.integrations.bitmovinyospacemodule.config;
+
+import android.app.Application;
+import android.view.View;
+
+import com.bitmovin.player.integrations.bitmovinyospacemodule.YospaceAssetType;
 
 public class YospaceSourceConfiguration {
     private YospaceAssetType assetType;
-    public String userAgent = "BitmovinPlayer";
-    public int readTimeout = 5000;
-    public int connectTimeout = 5000;
-    public int requestTimeout = 5000;
-    public boolean debug = true;
 
     public YospaceSourceConfiguration(YospaceAssetType assetType) {
         this.assetType = assetType;

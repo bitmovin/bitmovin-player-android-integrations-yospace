@@ -25,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="VOD"
+            android:background="@drawable/button_background"
             android:enabled="true"
             android:clickable="true"
             />
@@ -32,24 +33,28 @@
             android:id="@+id/live_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
             android:text="Live"
             />
         <Button
             android:id="@+id/nlso_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
             android:text="NLSO"
             />
         <Button
             android:id="@+id/unload_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
             android:text="Unload"
             />
         <Button
             android:id="@+id/click_through"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
             android:text="Click"
             android:enabled="false"
             android:clickable="false"

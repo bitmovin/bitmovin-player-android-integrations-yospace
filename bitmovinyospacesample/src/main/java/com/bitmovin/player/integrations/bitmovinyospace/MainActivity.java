@@ -39,7 +39,7 @@ import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceConf
 import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceConfigurationBuilder;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceSourceConfiguration;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener,KeyEvent.Callback  {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, KeyEvent.Callback {
     private BitmovinPlayerView bitmovinPlayerView;
     private BitmovinYospacePlayer bitmovinYospacePlayer;
     private Button liveButton;
@@ -67,25 +67,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nlsoButton.setOnClickListener(this);
         // Create new StyleConfiguration
         StyleConfiguration styleConfiguration = new StyleConfiguration();
-        // Disable UI
         styleConfiguration.setUiEnabled(false);
+
         // Creating a new PlayerConfiguration
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
-        // Assign created StyleConfiguration to the PlayerConfiguration
         playerConfiguration.setStyleConfiguration(styleConfiguration);
 
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
-        YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).build();
+        YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
 
-//        yospaceSourceConfiguration.debug = false;
-//        yospaceSourceConfiguration.connectTimeout = 25000;
-//        yospaceSourceConfiguration.requestTimeout = 25000;
-//        yospaceSourceConfiguration.readTimeout = 25000;
-//        yospaceSourceConfiguration.application = this.getApplication();
-//        yospaceSourceConfiguration.playerView = bitmovinPlayerView;
-
-        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(),playerConfiguration,yospaceConfiguration);
+        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
@@ -98,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
 
-        loadLive();
+        loadVod();
     }
 
     private void unload() {
@@ -120,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sourceConfig.addSourceItem(sourceItem);
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
-
 
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
@@ -172,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onError(final ErrorEvent errorEvent) {
             handler.post(new Runnable() {
                 public void run() {
-                    Toast.makeText(getApplicationContext(), "Error: " + errorEvent.getCode() + " - " + errorEvent.getMessage() , Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Error: " + errorEvent.getCode() + " - " + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -286,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
 
-        switch (keyCode){
+        switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_BUTTON_A:
                 // ... handle selections

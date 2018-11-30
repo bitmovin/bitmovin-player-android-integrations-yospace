@@ -1,5 +1,5 @@
 # [![bitmovin](http://bitmovin-a.akamaihd.net/webpages/bitmovin-logo-github.png)](http://www.bitmovin.com)
-Android module that integrates the Bitmovin Android SDK with the YoSpace Ad Management SDK
+Android module that integrates the Bitmovin Android SDK with the Yospace Ad Management SDK
 
 # Getting started
 ## Gradle
@@ -26,11 +26,11 @@ dependencies {
 
 ## Examples
 
-The following example creates a `BitmovinYoSpacePlayer` object and loads a `YoSpaceSourceConfiguration`
+The following example creates a `BitmovinYospacePlayer` object and loads a `YospaceSourceConfiguration`
 
 #### Basic video playback 
 ```java
-//Create a BitmovinYoSpacePlayer
+//Create a BitmovinYospacePlayer
 BitmovinYospacePlayer bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext());
     
 //Set it to your BitmovinPlayerView
@@ -41,10 +41,10 @@ SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws10
 SourceConfiguration sourceConfig = new SourceConfiguration();
 sourceConfig.addSourceItem(sourceItem);
     
-//Create a YoSpaceSourceConfiguration with your SourceConfiguration and a YoSpaceAssetType
+//Create a YospaceSourceConfiguration with your SourceConfiguration and a YospaceAssetType
 YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
     
-//Load your YoSpaceSourceConfiguration
+//Load your YospaceSourceConfiguration
 bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
 ```
 

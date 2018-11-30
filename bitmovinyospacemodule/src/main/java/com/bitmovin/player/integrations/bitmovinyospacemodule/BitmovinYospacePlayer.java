@@ -3,6 +3,7 @@ package com.bitmovin.player.integrations.bitmovinyospacemodule;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
+import com.bitmovin.player.api.event.data.AdScheduledEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.FullscreenEnterEvent;
@@ -26,6 +28,7 @@ import com.bitmovin.player.api.event.data.StallEndedEvent;
 import com.bitmovin.player.api.event.data.StallStartedEvent;
 import com.bitmovin.player.api.event.data.TimeChangedEvent;
 import com.bitmovin.player.api.event.data.WarningEvent;
+import com.bitmovin.player.api.event.listener.OnAdScheduledListener;
 import com.bitmovin.player.api.event.listener.OnFullscreenEnterListener;
 import com.bitmovin.player.api.event.listener.OnFullscreenExitListener;
 import com.bitmovin.player.api.event.listener.OnMetadataListener;
@@ -70,6 +73,8 @@ import com.yospace.util.event.Event;
 import com.yospace.util.event.EventListener;
 import com.yospace.util.event.EventSourceImpl;
 
+import org.apache.commons.lang3.Validate;
+
 import java.util.HashMap;
 
 
@@ -80,6 +85,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private final EventSourceImpl<TimedMetadata> metadataSource = new EventSourceImpl<>();
     private final BitmovinPlayerPolicy bitmovinPlayerPolicy = new BitmovinPlayerPolicy();
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler sessionHandler;
     private final BitmovinYospaceEventEmitter bitmovinYospaceEventEmitter = new BitmovinYospaceEventEmitter();
     private Session.SessionProperties properties;
     private YospaceSourceConfiguration yospaceSourceConfiguration;
@@ -91,12 +97,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private MoatAdapter moatAdapter;
 
     public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
-        this(context, playerConfiguration, yospaceConfiguration,true);
-    }
-
-    protected BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration, boolean useCast) {
-        super(context, playerConfiguration, useCast);
+        super(context, playerConfiguration);
         this.yospaceConfiguration = yospaceConfiguration;
+
+        HandlerThread handlerThread = new HandlerThread("BitmovinYospaceHandlerThread");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+        sessionHandler = new Handler(looper);
+
         super.addEventListener(onPausedListener);
         super.addEventListener(onPlayingListener);
         super.addEventListener(onPlaybackFinishedListener);
@@ -112,14 +120,21 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration) {
+        Validate.notNull(sourceConfiguration,"SourceConfiguration must not be null");
+        Validate.notNull(yospaceSourceConfiguration,"YospaceSourceConfiguration must not be null");
 
         resetYospaceSession();
 
-        Log.d(Constants.TAG, "Load YoSpace Source Configuration");
+        Log.d(Constants.TAG, "Load Yospace Source Configuration");
         this.yospaceSourceConfiguration = yospaceSourceConfiguration;
         this.sourceConfiguration = sourceConfiguration;
 
-        HLSSource hlsSource = sourceConfiguration.getFirstSourceItem().getHlsSource();
+        SourceItem sourceItem = sourceConfiguration.getFirstSourceItem();
+        if (sourceItem == null){
+            bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
+            unload();
+            return;
+        }
 
         if(yospaceConfiguration.getMoatConfiguration() != null && moatAdapter == null){
             MoatConfiguration moatConfiguration = yospaceConfiguration.getMoatConfiguration();
@@ -130,6 +145,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             options.loggingEnabled = moatConfiguration.isLoggingEnabled();
             moatAdapter = MoatAdapter.create(moatConfiguration.getPartnerCode(),moatConfiguration.getApplication(),moatHandler,options);
         }
+
+        HLSSource hlsSource = sourceItem.getHlsSource();
 
         if (hlsSource == null || hlsSource.getUrl() == null) {
             bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
@@ -176,7 +193,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     private void loadVod() {
-        SessionNonLinear.create(sessionEventListener, properties);
+//        sessionHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+                SessionNonLinear.create(sessionEventListener, properties);
+//            }
+//        });
     }
 
     private void loadStartOver() {
@@ -481,7 +503,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     };
 
     /**
-     * YoSpace Listeners
+     * Yospace Listeners
      */
     private AnalyticEventListener analyticEventListener = new AnalyticEventListener() {
         @Override

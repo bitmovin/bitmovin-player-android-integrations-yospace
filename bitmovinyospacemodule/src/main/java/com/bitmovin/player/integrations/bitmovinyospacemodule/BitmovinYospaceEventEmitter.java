@@ -99,40 +99,40 @@ public class BitmovinYospaceEventEmitter {
 
     public void emit(BitmovinPlayerEvent event) {
         if (event instanceof AdBreakStartedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
                 ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
             }
         } else if (event instanceof AdBreakFinishedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
                 ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
             }
 
         } else if (event instanceof AdStartedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
                 ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
             }
         } else if (event instanceof AdFinishedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
                 ((OnAdFinishedListener) listener).onAdFinished((AdFinishedEvent) event);
             }
         } else if (event instanceof AdClickedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
                 ((OnAdClickedListener) listener).onAdClicked((AdClickedEvent) event);
             }
         } else if (event instanceof AdErrorEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
                 ((OnAdErrorListener) listener).onAdError((AdErrorEvent) event);
             }
         } else if (event instanceof AdSkippedEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
+            for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
                 ((OnAdSkippedListener) listener).onAdSkipped((AdSkippedEvent) event);
             }
         } else if (event instanceof ErrorEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnErrorListener.class)) {
+            for (EventListener listener : eventListeners.get(OnErrorListener.class)) {
                 ((OnErrorListener) listener).onError((ErrorEvent) event);
             }
         } else if (event instanceof WarningEvent) {
-            for (com.bitmovin.player.api.event.listener.EventListener listener : eventListeners.get(OnWarningListener.class)) {
+            for (EventListener listener : eventListeners.get(OnWarningListener.class)) {
                 ((OnWarningListener) listener).onWarning((WarningEvent) event);
             }
         }

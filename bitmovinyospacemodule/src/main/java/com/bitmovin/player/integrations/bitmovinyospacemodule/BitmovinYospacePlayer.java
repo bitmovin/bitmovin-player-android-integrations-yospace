@@ -12,7 +12,6 @@ import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
-import com.bitmovin.player.api.event.data.AdScheduledEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.FullscreenEnterEvent;
@@ -28,7 +27,6 @@ import com.bitmovin.player.api.event.data.StallEndedEvent;
 import com.bitmovin.player.api.event.data.StallStartedEvent;
 import com.bitmovin.player.api.event.data.TimeChangedEvent;
 import com.bitmovin.player.api.event.data.WarningEvent;
-import com.bitmovin.player.api.event.listener.OnAdScheduledListener;
 import com.bitmovin.player.api.event.listener.OnFullscreenEnterListener;
 import com.bitmovin.player.api.event.listener.OnFullscreenExitListener;
 import com.bitmovin.player.api.event.listener.OnMetadataListener;
@@ -120,8 +118,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration) {
-        Validate.notNull(sourceConfiguration,"SourceConfiguration must not be null");
-        Validate.notNull(yospaceSourceConfiguration,"YospaceSourceConfiguration must not be null");
+        Validate.notNull(sourceConfiguration, "SourceConfiguration must not be null");
+        Validate.notNull(yospaceSourceConfiguration, "YospaceSourceConfiguration must not be null");
 
         resetYospaceSession();
 
@@ -130,20 +128,20 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         this.sourceConfiguration = sourceConfiguration;
 
         SourceItem sourceItem = sourceConfiguration.getFirstSourceItem();
-        if (sourceItem == null){
+        if (sourceItem == null) {
             bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
             unload();
             return;
         }
 
-        if(yospaceConfiguration.getMoatConfiguration() != null && moatAdapter == null){
+        if (yospaceConfiguration.getMoatConfiguration() != null && moatAdapter == null) {
             MoatConfiguration moatConfiguration = yospaceConfiguration.getMoatConfiguration();
             MoatOptions options = new MoatOptions();
             options.autoTrackGMAInterstitials = moatConfiguration.isAutoTrackGMAInterstitials();
             options.disableAdIdCollection = moatConfiguration.isDisableAdIdCollection();
             options.disableLocationServices = moatConfiguration.isDisableLocationServices();
             options.loggingEnabled = moatConfiguration.isLoggingEnabled();
-            moatAdapter = MoatAdapter.create(moatConfiguration.getPartnerCode(),moatConfiguration.getApplication(),moatHandler,options);
+            moatAdapter = MoatAdapter.create(moatConfiguration.getPartnerCode(), moatConfiguration.getApplication(), moatHandler, options);
         }
 
         HLSSource hlsSource = sourceItem.getHlsSource();
@@ -157,7 +155,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         originalUrl = hlsSource.getUrl();
         properties = new Session.SessionProperties(originalUrl).readTimeout(yospaceConfiguration.getReadTimeout()).connectTimeout(yospaceConfiguration.getConnectTimeout()).requestTimeout(yospaceConfiguration.getRequestTimeout());
 
-        if(yospaceConfiguration.getUserAgent() != null){
+        if (yospaceConfiguration.getUserAgent() != null) {
             properties.userAgent(yospaceConfiguration.getUserAgent());
         }
 
@@ -178,8 +176,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
-    private void resetYospaceSession(){
-        if(session != null){
+    private void resetYospaceSession() {
+        if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
             session.shutdown();
 
@@ -196,7 +194,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 //        sessionHandler.post(new Runnable() {
 //            @Override
 //            public void run() {
-                SessionNonLinear.create(sessionEventListener, properties);
+        SessionNonLinear.create(sessionEventListener, properties);
 //            }
 //        });
     }
@@ -230,8 +228,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
                     return;
                 case NO_ANALYTICS:
-                    Log.i(Constants.TAG,
-                            "PlayerNLSO.initYospace - Video URL does not refer to a Yospace stream, no analytics session created");
                     bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
                     unload();
                     return;
@@ -244,7 +240,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     };
 
     private void startPlayback(final String playbackUrl) {
-
         handler.post(new Runnable() {
             public void run() {
                 final SourceConfiguration newSourceConfiguration = new SourceConfiguration();
@@ -364,8 +359,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     private int getYospaceTime() {
         int i = (int) Math.round(getCurrentTime() * 1000);
-        if (i < 0){
-            i=0;
+        if (i < 0) {
+            i = 0;
         }
         return i;
     }
@@ -377,8 +372,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceLoaded(SourceLoadedEvent sourceLoadedEvent) {
 
-            if(moatAdapter != null && yospaceConfiguration.getMoatConfiguration() != null){
-                moatAdapter.startAnalyticSession(session,yospaceConfiguration.getMoatConfiguration().getPlayerView());
+            if (moatAdapter != null && yospaceConfiguration.getMoatConfiguration() != null) {
+                moatAdapter.startAnalyticSession(session, yospaceConfiguration.getMoatConfiguration().getPlayerView());
             }
 
             Log.d(Constants.TAG, "Sending Initialising Event" + getYospaceTime());
@@ -390,11 +385,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
 
-            if(moatAdapter != null){
+            if (moatAdapter != null) {
                 moatAdapter.stopAnalyticSession();
             }
 
-            if(sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED){
+            if (sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED) {
                 resetYospaceSession();
             }
 
@@ -425,11 +420,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             Log.d(Constants.TAG, "SendingPlaying Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
 
-            if (session instanceof SessionNonLinear){
-                Log.d(Constants.TAG,"Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
+            if (session instanceof SessionNonLinear) {
+                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
             }
 
-            Log.d(Constants.TAG,"Duration: " + getDuration()*1000 + " - " + getCurrentTime()*1000);
+            Log.d(Constants.TAG, "Duration: " + getDuration() * 1000 + " - " + getCurrentTime() * 1000);
 
 
         }
@@ -535,7 +530,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
             }
 
-            Log.d(Constants.TAG,"Extensions Block: " + advert.getExtensionBlock());
+            Log.d(Constants.TAG, "Extensions Block: " + advert.getExtensionBlock());
 
             AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
             bitmovinYospaceEventEmitter.emit(adStartedEvent);

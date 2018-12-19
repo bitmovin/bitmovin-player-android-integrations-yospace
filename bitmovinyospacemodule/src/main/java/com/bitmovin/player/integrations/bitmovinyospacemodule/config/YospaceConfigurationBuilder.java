@@ -12,37 +12,37 @@ public class YospaceConfigurationBuilder {
     public YospaceConfigurationBuilder() {
     }
 
-    public YospaceConfigurationBuilder setMoatConfiguration(MoatConfiguration moatConfiguration){
+    public YospaceConfigurationBuilder setMoatConfiguration(MoatConfiguration moatConfiguration) {
         this.moatConfiguration = moatConfiguration;
         return this;
     }
 
-    public YospaceConfigurationBuilder setUserAgent(String userAgent){
+    public YospaceConfigurationBuilder setUserAgent(String userAgent) {
         this.userAgent = userAgent;
         return this;
     }
 
-    public YospaceConfigurationBuilder setReadTimeout(int readTimeout){
+    public YospaceConfigurationBuilder setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
         return this;
     }
 
-    public YospaceConfigurationBuilder setConnectTimeout(int connectTimeout){
+    public YospaceConfigurationBuilder setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
         return this;
     }
 
-    public YospaceConfigurationBuilder setRequestTimeout(int requestTimeout){
+    public YospaceConfigurationBuilder setRequestTimeout(int requestTimeout) {
         this.requestTimeout = requestTimeout;
         return this;
     }
 
-    public YospaceConfigurationBuilder setDebug(boolean debug){
+    public YospaceConfigurationBuilder setDebug(boolean debug) {
         this.debug = debug;
         return this;
     }
 
-    public YospaceConfiguration build(){
-        return new YospaceConfiguration(userAgent,moatConfiguration,readTimeout,connectTimeout,requestTimeout,debug);
+    public YospaceConfiguration build() {
+        return new YospaceConfiguration(userAgent, moatConfiguration, readTimeout, connectTimeout, requestTimeout, debug);
     }
 }

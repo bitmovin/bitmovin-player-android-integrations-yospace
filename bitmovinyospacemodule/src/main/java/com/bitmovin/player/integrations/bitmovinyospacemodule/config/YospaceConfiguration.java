@@ -8,7 +8,7 @@ public class YospaceConfiguration {
     private int requestTimeout;
     private boolean debug;
 
-    public YospaceConfiguration(){
+    public YospaceConfiguration() {
     }
 
     public YospaceConfiguration(String userAgent, MoatConfiguration moatConfiguration, int readTimeout, int connectTimeout, int requestTimeout, boolean debug) {

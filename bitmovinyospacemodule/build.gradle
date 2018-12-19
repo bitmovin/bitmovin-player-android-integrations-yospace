@@ -30,7 +30,6 @@ dependencies {
     implementation files('libs/yoAdManagement-debug.aar')
     implementation files('libs/yoUtil-debug.aar')
     implementation files('libs/yoMoatAdapter-debug.aar')
-    implementation files('libs/YOS-moat-mobile-app-kit-2.3.3.aar')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.0'

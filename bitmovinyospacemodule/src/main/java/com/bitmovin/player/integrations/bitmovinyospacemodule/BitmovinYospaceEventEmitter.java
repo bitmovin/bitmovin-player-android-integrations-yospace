@@ -28,76 +28,31 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BitmovinYospaceEventEmitter {
     private ConcurrentHashMap<Class, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
 
-    public ConcurrentHashMap<Class, List<EventListener>> getEventListeners() {
-        return eventListeners;
-    }
+    public synchronized void addEventListener(EventListener listener) {
+        Class listenerClass = listenerClass(listener);
 
-    public void addEventListener(EventListener listener) {
-
-        Class javaClass = null;
-
-        if (listener instanceof OnAdBreakStartedListener) {
-            javaClass = OnAdBreakStartedListener.class;
-        } else if (listener instanceof OnAdBreakFinishedListener) {
-            javaClass = OnAdBreakFinishedListener.class;
-        } else if (listener instanceof OnAdClickedListener) {
-            javaClass = OnAdClickedListener.class;
-        } else if (listener instanceof OnAdErrorListener) {
-            javaClass = OnAdErrorListener.class;
-        } else if (listener instanceof OnAdFinishedListener) {
-            javaClass = OnAdFinishedListener.class;
-        } else if (listener instanceof OnAdStartedListener) {
-            javaClass = OnAdStartedListener.class;
-        } else if (listener instanceof OnAdSkippedListener) {
-            javaClass = OnAdSkippedListener.class;
-        } else if (listener instanceof OnErrorListener) {
-            javaClass = OnErrorListener.class;
-        } else if (listener instanceof OnWarningListener) {
-            javaClass = OnWarningListener.class;
-        }
-
-        if (javaClass != null) {
-            List listeners = eventListeners.get(javaClass);
+        if (listenerClass != null) {
+            List listeners = eventListeners.get(listenerClass);
             if (listeners == null) {
-                eventListeners.put(javaClass, new ArrayList<EventListener>());
+                eventListeners.put(listenerClass, new ArrayList<EventListener>());
             }
-            eventListeners.get(javaClass).add(listener);
+            eventListeners.get(listenerClass).add(listener);
         }
     }
 
-    public void removeEventListener(EventListener listener) {
+    public synchronized void removeEventListener(EventListener listener) {
 
-        Class javaClass = null;
+        Class listenerClass = listenerClass(listener);
 
-        if (listener instanceof OnAdBreakStartedListener) {
-            javaClass = OnAdBreakStartedListener.class;
-        } else if (listener instanceof OnAdBreakFinishedListener) {
-            javaClass = OnAdBreakFinishedListener.class;
-        } else if (listener instanceof OnAdClickedListener) {
-            javaClass = OnAdClickedListener.class;
-        } else if (listener instanceof OnAdErrorListener) {
-            javaClass = OnAdErrorListener.class;
-        } else if (listener instanceof OnAdFinishedListener) {
-            javaClass = OnAdFinishedListener.class;
-        } else if (listener instanceof OnAdStartedListener) {
-            javaClass = OnAdStartedListener.class;
-        } else if (listener instanceof OnAdSkippedListener) {
-            javaClass = OnAdSkippedListener.class;
-        } else if (listener instanceof OnErrorListener) {
-            javaClass = OnErrorListener.class;
-        } else if (listener instanceof OnWarningListener) {
-            javaClass = OnWarningListener.class;
-        }
-
-        if (javaClass != null) {
-            List listeners = eventListeners.get(javaClass);
+        if (listenerClass != null) {
+            List listeners = eventListeners.get(listenerClass);
             if (listeners != null) {
                 listeners.remove(listener);
             }
         }
     }
 
-    public void emit(BitmovinPlayerEvent event) {
+    public synchronized void emit(BitmovinPlayerEvent event) {
         if (event instanceof AdBreakStartedEvent) {
             for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
                 ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
@@ -106,7 +61,6 @@ public class BitmovinYospaceEventEmitter {
             for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
                 ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
             }
-
         } else if (event instanceof AdStartedEvent) {
             for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
                 ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
@@ -136,6 +90,31 @@ public class BitmovinYospaceEventEmitter {
                 ((OnWarningListener) listener).onWarning((WarningEvent) event);
             }
         }
+    }
 
+    private Class listenerClass(EventListener listener) {
+        Class javaClass = null;
+
+        if (listener instanceof OnAdBreakStartedListener) {
+            javaClass = OnAdBreakStartedListener.class;
+        } else if (listener instanceof OnAdBreakFinishedListener) {
+            javaClass = OnAdBreakFinishedListener.class;
+        } else if (listener instanceof OnAdClickedListener) {
+            javaClass = OnAdClickedListener.class;
+        } else if (listener instanceof OnAdErrorListener) {
+            javaClass = OnAdErrorListener.class;
+        } else if (listener instanceof OnAdFinishedListener) {
+            javaClass = OnAdFinishedListener.class;
+        } else if (listener instanceof OnAdStartedListener) {
+            javaClass = OnAdStartedListener.class;
+        } else if (listener instanceof OnAdSkippedListener) {
+            javaClass = OnAdSkippedListener.class;
+        } else if (listener instanceof OnErrorListener) {
+            javaClass = OnErrorListener.class;
+        } else if (listener instanceof OnWarningListener) {
+            javaClass = OnWarningListener.class;
+        }
+
+        return javaClass;
     }
 }

@@ -1,7 +1,6 @@
 package com.bitmovin.player.integrations.bitmovinyospacemodule.config;
 
 public class YospaceConfiguration {
-    private MoatConfiguration moatConfiguration;
     private String userAgent;
     private int readTimeout;
     private int connectTimeout;
@@ -11,8 +10,7 @@ public class YospaceConfiguration {
     public YospaceConfiguration() {
     }
 
-    public YospaceConfiguration(String userAgent, MoatConfiguration moatConfiguration, int readTimeout, int connectTimeout, int requestTimeout, boolean debug) {
-        this.moatConfiguration = moatConfiguration;
+    public YospaceConfiguration(String userAgent, int readTimeout, int connectTimeout, int requestTimeout, boolean debug) {
         this.userAgent = userAgent;
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
@@ -20,9 +18,6 @@ public class YospaceConfiguration {
         this.debug = debug;
     }
 
-    public MoatConfiguration getMoatConfiguration() {
-        return moatConfiguration;
-    }
 
     public String getUserAgent() {
         return userAgent;

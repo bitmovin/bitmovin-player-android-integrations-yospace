@@ -37,13 +37,6 @@
             android:text="Live"
             />
         <Button
-            android:id="@+id/nlso_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="NLSO"
-            />
-        <Button
             android:id="@+id/unload_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,6 +51,15 @@
             android:text="Click"
             android:enabled="false"
             android:clickable="false"
+            />
+        <Button
+            android:id="@+id/custom_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
+            android:text="Custom"
+            android:enabled="true"
+            android:clickable="true"
             />
     </LinearLayout>
 

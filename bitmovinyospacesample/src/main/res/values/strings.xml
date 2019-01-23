@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">BitmovinYospace</string>
+    <string name="asset_prompt">Asset Type</string>
+
+    <string-array name="asset_types">
+        <item>Live</item>
+        <item>Vod</item>
+    </string-array>
 </resources>

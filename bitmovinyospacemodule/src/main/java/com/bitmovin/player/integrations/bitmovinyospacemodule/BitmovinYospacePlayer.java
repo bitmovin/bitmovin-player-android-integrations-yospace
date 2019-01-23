@@ -457,7 +457,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onMetadata(MetadataEvent metadataEvent) {
             TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
             if (timedMetadata != null) {
-                Log.d(Constants.TAG, "On Metadata Listener: " + timedMetadata.toString());
+                Log.d(Constants.TAG, "Metadata - " + timedMetadata.toString());
                 metadataSource.notify(timedMetadata);
             }
         }

@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bitmovin.player.BitmovinPlayerView;
@@ -46,7 +48,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button vodButton;
     private Button unloadButton;
     private Button clickThrough;
-    private Button nlsoButton;
+    private Button customButton;
+    private Spinner customSpinner;
+    private EditText urlInput;
+
     private String currentClickThroughUrl;
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -63,8 +68,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unloadButton.setOnClickListener(this);
         clickThrough = findViewById(R.id.click_through);
         clickThrough.setOnClickListener(this);
-        nlsoButton = findViewById(R.id.nlso_button);
-        nlsoButton.setOnClickListener(this);
+        customButton = findViewById(R.id.custom_button);
+        customButton.setOnClickListener(this);
+        customSpinner = findViewById(R.id.spinner1);
+        urlInput = findViewById(R.id.url_input);
+
         // Create new StyleConfiguration
         StyleConfiguration styleConfiguration = new StyleConfiguration();
         styleConfiguration.setUiEnabled(true);
@@ -96,8 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadLive() {
-//        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=true&yo.ac=true"));
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/extlive/turnerdev01,tbse-clear.m3u8?yo.ac=true&yo.ch=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/extlive/turnerdev01,tbse-clear.m3u8?yo.ac=true&yo.ch=true&yo.av=2"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
@@ -106,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadVod() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525969367/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 
@@ -121,6 +128,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sourceConfig.addSourceItem(sourceItem);
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+    }
+
+    private void loadCustomUrl(){
+        String url = urlInput.getText().toString();
+        SourceItem sourceItem = new SourceItem(new HLSSource(url));
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+
+        YospaceSourceConfiguration yospaceSourceConfiguration;
+
+        if(customSpinner.getSelectedItemPosition() == 0) {
+            yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
+        }else {
+            yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
+        }
 
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
@@ -165,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(getApplicationContext(), "Error: " + errorEvent.getCode() + " - " + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
-
         }
     };
 
@@ -263,12 +286,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             loadLive();
         } else if (v == vodButton) {
             loadVod();
-        } else if (v == nlsoButton) {
-            loadLinearStartOver();
         } else if (v == unloadButton) {
             unload();
         } else if (v == clickThrough) {
             clickThroughPressed();
+        }else if (v == customButton) {
+            loadCustomUrl();
         }
     }
 

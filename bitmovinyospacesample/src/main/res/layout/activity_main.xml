@@ -7,19 +7,31 @@
     tools:context=".MainActivity"
     android:keepScreenOn="true">
 
-    <com.bitmovin.player.BitmovinPlayerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/bitmovinPlayerView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-    </com.bitmovin.player.BitmovinPlayerView>
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp">
+            <EditText
+                android:id="@+id/url_input"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:text="https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/extlive/turnerdev01,tbse-clear.m3u8?yo.ac=true&amp;yo.ch=true&amp;yo.av=2"
+                android:autofillHints="" />
+
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/asset_types"
+                android:prompt="@string/asset_prompt" />
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <Button
             android:id="@+id/vod_button"
             android:layout_width="wrap_content"
@@ -37,6 +49,13 @@
             android:text="Live"
             />
         <Button
+            android:id="@+id/custom_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_background"
+            android:text="Custom"
+            />
+        <Button
             android:id="@+id/unload_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,15 +71,15 @@
             android:enabled="false"
             android:clickable="false"
             />
-        <Button
-            android:id="@+id/custom_button"
-            android:layout_width="wrap_content"
+    </LinearLayout>
+        <com.bitmovin.player.BitmovinPlayerView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Custom"
-            android:enabled="true"
-            android:clickable="true"
-            />
+            android:id="@+id/bitmovinPlayerView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+        </com.bitmovin.player.BitmovinPlayerView>
     </LinearLayout>
 
     <WebView

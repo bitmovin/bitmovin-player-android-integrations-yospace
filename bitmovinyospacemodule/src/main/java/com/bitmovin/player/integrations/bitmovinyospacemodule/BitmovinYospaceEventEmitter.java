@@ -1,5 +1,8 @@
 package com.bitmovin.player.integrations.bitmovinyospacemodule;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdClickedEvent;
@@ -53,43 +56,52 @@ public class BitmovinYospaceEventEmitter {
     }
 
     public synchronized void emit(BitmovinPlayerEvent event) {
-        if (event instanceof AdBreakStartedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
-                ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (event instanceof AdBreakStartedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
+                        ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
+                    }
+                } else if (event instanceof AdBreakFinishedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
+                        ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
+                    }
+                } else if (event instanceof AdStartedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
+                        ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
+                    }
+                } else if (event instanceof AdFinishedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
+                        ((OnAdFinishedListener) listener).onAdFinished((AdFinishedEvent) event);
+                    }
+                } else if (event instanceof AdClickedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
+                        ((OnAdClickedListener) listener).onAdClicked((AdClickedEvent) event);
+                    }
+                } else if (event instanceof AdErrorEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
+                        ((OnAdErrorListener) listener).onAdError((AdErrorEvent) event);
+                    }
+                } else if (event instanceof AdSkippedEvent) {
+                    for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
+                        ((OnAdSkippedListener) listener).onAdSkipped((AdSkippedEvent) event);
+                    }
+                } else if (event instanceof ErrorEvent) {
+                    for (EventListener listener : eventListeners.get(OnErrorListener.class)) {
+                        ((OnErrorListener) listener).onError((ErrorEvent) event);
+                    }
+                } else if (event instanceof WarningEvent) {
+                    for (EventListener listener : eventListeners.get(OnWarningListener.class)) {
+                        ((OnWarningListener) listener).onWarning((WarningEvent) event);
+                    }
+                }
             }
-        } else if (event instanceof AdBreakFinishedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
-                ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
-            }
-        } else if (event instanceof AdStartedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
-                ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
-            }
-        } else if (event instanceof AdFinishedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
-                ((OnAdFinishedListener) listener).onAdFinished((AdFinishedEvent) event);
-            }
-        } else if (event instanceof AdClickedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
-                ((OnAdClickedListener) listener).onAdClicked((AdClickedEvent) event);
-            }
-        } else if (event instanceof AdErrorEvent) {
-            for (EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
-                ((OnAdErrorListener) listener).onAdError((AdErrorEvent) event);
-            }
-        } else if (event instanceof AdSkippedEvent) {
-            for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
-                ((OnAdSkippedListener) listener).onAdSkipped((AdSkippedEvent) event);
-            }
-        } else if (event instanceof ErrorEvent) {
-            for (EventListener listener : eventListeners.get(OnErrorListener.class)) {
-                ((OnErrorListener) listener).onError((ErrorEvent) event);
-            }
-        } else if (event instanceof WarningEvent) {
-            for (EventListener listener : eventListeners.get(OnWarningListener.class)) {
-                ((OnWarningListener) listener).onWarning((WarningEvent) event);
-            }
-        }
+        };
+        mainHandler.post(myRunnable);
     }
 
     private Class listenerClass(EventListener listener) {

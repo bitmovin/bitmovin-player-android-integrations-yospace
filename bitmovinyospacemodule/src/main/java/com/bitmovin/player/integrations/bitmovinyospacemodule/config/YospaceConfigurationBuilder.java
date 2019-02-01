@@ -1,11 +1,14 @@
 package com.bitmovin.player.integrations.bitmovinyospacemodule.config;
 
+import android.view.ViewGroup;
+
 public class YospaceConfigurationBuilder {
     private String userAgent;
     private int readTimeout;
     private int connectTimeout;
     private int requestTimeout;
     private boolean debug = false;
+    private ViewGroup trueXViewGroup;
 
 
     public YospaceConfigurationBuilder() {

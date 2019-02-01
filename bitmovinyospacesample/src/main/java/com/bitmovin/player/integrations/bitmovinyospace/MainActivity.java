@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -37,6 +38,7 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.BitmovinYospacePlayer;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.YospaceAssetType;
+import com.bitmovin.player.integrations.bitmovinyospacemodule.config.TrueXConfiguration;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceConfiguration;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceConfigurationBuilder;
 import com.bitmovin.player.integrations.bitmovinyospacemodule.config.YospaceSourceConfiguration;
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button unloadButton;
     private Button clickThrough;
     private Button customButton;
+    private Button trueXButton;
+    private Button defaultButton;
     private Spinner customSpinner;
     private EditText urlInput;
 
@@ -72,20 +76,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         customButton.setOnClickListener(this);
         customSpinner = findViewById(R.id.spinner1);
         urlInput = findViewById(R.id.url_input);
-
-        // Create new StyleConfiguration
-        StyleConfiguration styleConfiguration = new StyleConfiguration();
-        styleConfiguration.setUiEnabled(true);
+        trueXButton = findViewById(R.id.truex_button);
+        trueXButton.setOnClickListener(this);
+        defaultButton = findViewById(R.id.default_button);
+        defaultButton.setOnClickListener(this);
 
         // Creating a new PlayerConfiguration
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
-        playerConfiguration.setStyleConfiguration(styleConfiguration);
 
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
 
-        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
+        TrueXConfiguration trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+
+        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration, trueXConfiguration);
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
@@ -114,6 +119,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadVod() {
         SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525969367/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2"));
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+    }
+
+    private void loadDefault() {
+        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=true"));
+        SourceConfiguration sourceConfig = new SourceConfiguration();
+        sourceConfig.addSourceItem(sourceItem);
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+    }
+
+    private void loadTrueX() {
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-stg.tls1.yospace.com/csm/access/525943851/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 
@@ -292,6 +315,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             clickThroughPressed();
         }else if (v == customButton) {
             loadCustomUrl();
+        }else if (v == trueXButton) {
+            loadTrueX();
+        }else if (v == defaultButton) {
+            loadDefault();
         }
     }
 

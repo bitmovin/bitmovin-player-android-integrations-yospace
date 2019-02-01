@@ -23,6 +23,9 @@ allprojects {
         maven {
             url 'http://bitmovin.bintray.com/maven'
         }
+        maven {
+            url "https://raw.github.com/socialvibe/truex-mobile-integrations/android"
+        }
     }
 }
 

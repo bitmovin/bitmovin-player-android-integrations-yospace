@@ -231,7 +231,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     } else {
                         startPlayback(session.getPlayerUrl());
                     }
-
                     return;
                 case NO_ANALYTICS:
                     bitmovinYospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
@@ -254,7 +253,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (drmConfiguration != null) {
                     sourceItem.addDRMConfiguration(drmConfiguration);
                 }
-
                 newSourceConfiguration.addSourceItem(sourceItem);
                 load(newSourceConfiguration);
             }
@@ -272,9 +270,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private void showTrueXAd(String creativeURL, String adParameters) {
         if (trueXConfiguration != null) {
             try {
-
-                // NOTE: This creativeURL, adParameters and slotType should come from Uplynk.
-                // This is hard coded as an example only.
                 JSONObject adParams = new JSONObject(adParameters);
                 truexAdRenderer = new TruexAdRenderer(context);
                 truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
@@ -332,11 +327,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public double getDuration() {
         double adBreakDurations = 0;
-
         if(timeline != null){
             adBreakDurations = timeline.totalAdBreakDurations();
         }
-
         return super.getDuration() - adBreakDurations;
     }
 
@@ -418,7 +411,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     private int getYospaceTime() {
-
         int i = (int) Math.round(currentTimeWithAds() * 1000);
         if (i < 0) {
             i = 0;
@@ -443,7 +435,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED) {
                 resetYospaceSession();
             }
-
             Log.d(Constants.TAG, "Sending Stopped Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
         }
@@ -586,9 +577,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler popupListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-//            String url = data.get("url");
             Log.d(Constants.TAG, "popup");
-//            Log.d(Constants.TAG, "url: " + url);
         }
     };
 
@@ -612,7 +601,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertBreakStart(AdBreak adBreak) {
-
             if (adFree) {
                 Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime()+1);

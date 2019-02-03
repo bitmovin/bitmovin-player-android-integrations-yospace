@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-
         TrueXConfiguration trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration, trueXConfiguration);
@@ -128,10 +127,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadDefault() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
-        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
+        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 

@@ -67,6 +67,7 @@ import com.yospace.android.xml.VmapPayload;
 import com.yospace.hls.TimedMetadata;
 import com.yospace.hls.player.PlaybackState;
 import com.yospace.hls.player.PlayerState;
+import com.yospace.util.Constant;
 import com.yospace.util.YoLog;
 import com.yospace.util.event.Event;
 import com.yospace.util.event.EventListener;
@@ -100,6 +101,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private TruexAdRenderer truexAdRenderer;
     private Context context;
     private boolean adFree = false;
+    private Timeline timeline;
 
     public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
         this(context, playerConfiguration, yospaceConfiguration, null);
@@ -180,6 +182,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
+    public double currentTimeWithAds() {
+        return super.getCurrentTime();
+    }
+
     private void resetYospaceSession() {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
@@ -255,6 +261,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         });
     }
 
+    public Timeline getTimeline() {
+        return timeline;
+    }
+
     /**
      * TrueXRendering
      */
@@ -320,10 +330,35 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     @Override
+    public double getDuration() {
+        double adBreakDurations = 0;
+
+        if(timeline != null){
+            adBreakDurations = timeline.totalAdBreakDurations();
+        }
+
+        return super.getDuration() - adBreakDurations;
+    }
+
+    @Override
+    public double getCurrentTime() {
+        if(timeline != null){
+            return timeline.absoluteToRelative(super.getCurrentTime());
+        }else {
+            return super.getCurrentTime();
+        }
+
+    }
+
+    @Override
     public void seek(double time) {
         if (session != null) {
             if (session.canSeek()) {
-                super.seek(time);
+                if (timeline != null){
+                    super.seek(timeline.relativeToAbsolute(time));
+                }else {
+                    super.seek(time);
+                }
             }
         } else {
             super.seek(time);
@@ -383,7 +418,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     private int getYospaceTime() {
-        int i = (int) Math.round(getCurrentTime() * 1000);
+
+        int i = (int) Math.round(currentTimeWithAds() * 1000);
         if (i < 0) {
             i = 0;
         }
@@ -437,6 +473,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
             if (session instanceof SessionNonLinear) {
                 Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
+                timeline = new Timeline(((SessionNonLinear) session).getAdBreaks());
+                Log.d(Constants.TAG,timeline.toString());
             }
 
             Log.d(Constants.TAG, "Duration: " + getDuration() * 1000 + " - " + getCurrentTime() * 1000);
@@ -575,7 +613,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertBreakStart(AdBreak adBreak) {
 
-            if (!adFree) {
+            if (adFree) {
+                Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
+                seek(getCurrentTime()+1);
+            }else{
                 Log.d(Constants.TAG, "OnAdvertBreakStart: " + adBreak.toString());
                 bitmovinYospaceEventEmitter.emit(new AdBreakStartedEvent());
                 List<Advert> adverts = adBreak.getAdverts();
@@ -589,8 +630,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     }
 
                 }
-            } else {
-                Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
             }
         }
 
@@ -618,8 +657,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onTimelineUpdateReceived(VmapPayload vmapPayload) {
-            Log.d(Constants.TAG, "OnTimelineUpdateReceived: " + vmapPayload.toString());
-            Log.d(Constants.TAG, vmapPayload.getAdBreaks().toString());
+            Log.d(Constants.TAG, "onTimelineUpdateReceived: ");
         }
 
         @Override

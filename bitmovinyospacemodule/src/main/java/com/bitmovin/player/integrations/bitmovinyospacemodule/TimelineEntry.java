@@ -5,6 +5,7 @@ public class TimelineEntry {
     private double duration = 0;
     private double absoluteStart = 0;
     private double absoluteEnd = 0;
+
     public double getRelativeStart() {
         return relativeStart;
     }

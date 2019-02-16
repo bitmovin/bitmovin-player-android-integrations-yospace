@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadVod() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525969367/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvYm9uZXNfUkFEUzEwMDgwNzE4MDAwMjU5NDRfdjEyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9pZnAubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 

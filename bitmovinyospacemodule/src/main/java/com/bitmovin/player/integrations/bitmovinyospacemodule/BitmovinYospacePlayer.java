@@ -62,7 +62,6 @@ import com.yospace.android.xml.VmapPayload;
 import com.yospace.hls.TimedMetadata;
 import com.yospace.hls.player.PlaybackState;
 import com.yospace.hls.player.PlayerState;
-import com.yospace.moat.MoatHandler;
 import com.yospace.util.YoLog;
 import com.yospace.util.event.Event;
 import com.yospace.util.event.EventListener;
@@ -460,16 +459,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 Log.d(Constants.TAG, "Metadata - " + timedMetadata.toString());
                 metadataSource.notify(timedMetadata);
             }
-        }
-    };
-
-    /**
-     * Moat Handler
-     */
-    private MoatHandler moatHandler = new MoatHandler() {
-        @Override
-        public HashMap<String, String> adIdentifiersForBlob(String s) {
-            return null;
         }
     };
 

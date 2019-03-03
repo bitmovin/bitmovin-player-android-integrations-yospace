@@ -483,7 +483,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             Log.d(Constants.TAG, "OnAdvertEnd: " + advert.getId() + " duration - " + advert.getDuration());
             isYospaceAd = false;
             bitmovinYospaceEventEmitter.emit(new AdFinishedEvent());
-
         }
 
         @Override

@@ -70,7 +70,7 @@ import com.yospace.util.event.EventSourceImpl;
 import org.apache.commons.lang3.Validate;
 
 
-public class BitmovinYospacePlayer extends BitmovinPlayer {
+public class YospacePlayer extends BitmovinPlayer {
     private Session session;
     private SessionFactory sessionFactory;
     private final EventSourceImpl<PlayerState> stateSource = new EventSourceImpl<>();
@@ -87,7 +87,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private String originalUrl;
     private boolean isYospaceAd = false;
 
-    public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
+    public YospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
         super(context, playerConfiguration);
         this.yospaceConfiguration = yospaceConfiguration;
 

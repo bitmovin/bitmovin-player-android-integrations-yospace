@@ -1,1 +1,1 @@
-include ':bitmovinyospacesample', ':bitmovinyospacemodule', ':yoAdManagement-debug', ':yoUtil-debug'
+include ':yospacesample', ':yospace', ':yoAdManagement-debug', ':yoUtil-debug'

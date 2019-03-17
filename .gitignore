@@ -30,7 +30,7 @@ proguard/
 .navigation/
 
 # Libs
-yospace/libs
+yospace/libs/
 
 # Android Studio captures folder
 captures/

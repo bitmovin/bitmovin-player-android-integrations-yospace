@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadLive() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/extlive/turnerdev01,tbse-clear.m3u8?yo.ac=true&yo.ch=true&yo.av=2"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://ssai.cdn.turner.com/csmp/cmaf/live/2000073/tbse-clear/master.m3u8?yo.aas=true&yo.ac=true"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadVod() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvYm9uZXNfUkFEUzEwMDgwNzE4MDAwMjU5NDRfdjEyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9pZnAubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://turnercmaf.cdn.turner.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525947592"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadTrueX() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://csm-e-stg.tls1.yospace.com/csm/access/525943851/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://turnercmaf.cdn.turner.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525955018"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 

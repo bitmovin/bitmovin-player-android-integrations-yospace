@@ -260,6 +260,7 @@ public class YospacePlayer extends BitmovinPlayer {
     private void showTrueXAd(String creativeURL, String adParameters) {
         if (trueXConfiguration != null) {
             try {
+                pause();
                 JSONObject adParams = new JSONObject(adParameters);
                 truexAdRenderer = new TruexAdRenderer(context);
                 truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);

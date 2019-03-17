@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BitmovinYospaceEventEmitter {
+public class YospaceEventEmitter {
     private ConcurrentHashMap<Class, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
 
     public synchronized void addEventListener(EventListener listener) {

@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity
-            android:name="com.bitmovin.player.integrations.yospacesample.MainActivity"
+            android:name="com.bitmovin.player.integration.yospacesample.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
 
         <meta-data
             android:name="BITMOVIN_PLAYER_LICENSE_KEY"
-            android:value="18ca6ad5-9768-4129-bdf6-17685e0d14d2" />
+            android:value="" />
     </application>
 
 </manifest>

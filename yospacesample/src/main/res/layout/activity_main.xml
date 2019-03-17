@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,15 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp">
+
             <EditText
                 android:id="@+id/url_input"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:text="https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/extlive/turnerdev01,tbse-clear.m3u8?yo.ac=true&amp;yo.ch=true&amp;yo.av=2"
+                android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
                 android:autofillHints="" />
 
             <Spinner
@@ -29,39 +30,70 @@
                 android:entries="@array/asset_types"
                 android:prompt="@string/asset_prompt" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/vod_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="T VOD"
+                android:background="@drawable/button_background"
+                android:enabled="true"
+                android:clickable="true" />
+
+            <Button
+                android:id="@+id/live_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:text="T Live" />
+            <Button
+                android:id="@+id/truex_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TrueX"
+                android:background="@drawable/button_background"
+                android:enabled="true"
+                android:clickable="true" />
+            <Button
+                android:id="@+id/custom_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:text="Custom" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/default_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yo VOD"
+                android:background="@drawable/button_background"
+                android:enabled="true"
+                android:clickable="true" />
+
+            <Button
+                android:id="@+id/yospace_nlso_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yo NLSO"
+                android:background="@drawable/button_background"
+                android:enabled="true"
+                android:clickable="true" />
+
+        </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/vod_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="VOD"
-            android:background="@drawable/button_background"
-            android:enabled="true"
-            android:clickable="true"
-            />
-        <Button
-            android:id="@+id/live_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Live"
-            />
-        <Button
-            android:id="@+id/custom_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Custom"
-            />
-        <Button
-            android:id="@+id/unload_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Unload"
-            />
         <Button
             android:id="@+id/click_through"
             android:layout_width="wrap_content"
@@ -69,24 +101,30 @@
             android:background="@drawable/button_background"
             android:text="Click"
             android:enabled="false"
-            android:clickable="false"
-            />
-    </LinearLayout>
-        <com.bitmovin.player.BitmovinPlayerView
-            android:layout_width="match_parent"
+            android:clickable="false" />
+        <Button
+            android:id="@+id/unload_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/bitmovinPlayerView"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
-        </com.bitmovin.player.BitmovinPlayerView>
+            android:background="@drawable/button_background"
+            android:text="Unload" />
     </LinearLayout>
 
-    <WebView
-        android:layout_height="200dp"
-        android:id="@+id/webView"
-        android:layout_width="400dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible" />
+    <com.bitmovin.player.BitmovinPlayerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/bitmovinPlayerView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+    </com.bitmovin.player.BitmovinPlayerView>
+
+    <!--<WebView-->
+    <!--android:layout_height="200dp"-->
+    <!--android:id="@+id/webView"-->
+    <!--android:layout_width="400dp"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:visibility="invisible" />-->
+</LinearLayout>
 </android.support.constraint.ConstraintLayout>

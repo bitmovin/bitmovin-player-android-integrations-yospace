@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String currentClickThroughUrl;
     private Handler handler = new Handler(Looper.getMainLooper());
+    private TrueXConfiguration trueXConfiguration;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,9 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-        TrueXConfiguration trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
 
-        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration,trueXConfiguration);
+        bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
 
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadLive() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://ssai.cdn.turner.com/csmp/cmaf/live/2000073/tbse-clear/master.m3u8?yo.aas=true&yo.ac=true"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=false"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
@@ -140,17 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
-    }
-
-    private void loadLinearStartOver() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("https://vodp-e-turner-eb.tls1.yospace.com/access/event/latest/110611066?promo=130805986"));
-        SourceConfiguration sourceConfig = new SourceConfiguration();
-        sourceConfig.addSourceItem(sourceItem);
-
-        YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
-
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration,trueXConfiguration);
     }
 
     private void loadCustomUrl(){

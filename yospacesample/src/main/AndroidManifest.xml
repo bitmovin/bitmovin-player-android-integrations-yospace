@@ -16,14 +16,13 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <meta-data
             android:name="BITMOVIN_PLAYER_LICENSE_KEY"
-            android:value="" />
+            android:value="18ca6ad5-9768-4129-bdf6-17685e0d14d2" />
     </application>
 
 </manifest>

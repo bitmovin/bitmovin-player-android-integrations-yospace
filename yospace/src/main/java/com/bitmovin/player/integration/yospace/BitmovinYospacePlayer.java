@@ -99,11 +99,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private boolean adFree = false;
     private Timeline timeline;
 
-    public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration, TrueXConfiguration trueXConfiguration) {
+    public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
         super(context, playerConfiguration);
         this.context = context;
         this.yospaceConfiguration = yospaceConfiguration;
-        this.trueXConfiguration = trueXConfiguration;
 
         HandlerThread handlerThread = new HandlerThread("BitmovinYospaceHandlerThread");
         handlerThread.start();
@@ -123,8 +122,17 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration) {
+        load(sourceConfiguration, yospaceSourceConfiguration, null);
+    }
+
+    public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration, TrueXConfiguration trueXConfiguration) {
         Validate.notNull(sourceConfiguration, "SourceConfiguration must not be null");
         Validate.notNull(yospaceSourceConfiguration, "YospaceSourceConfiguration must not be null");
+
+        this.trueXConfiguration = trueXConfiguration;
+        if (trueXConfiguration == null) {
+            truexAdRenderer = null;
+        }
 
         resetYospaceSession();
 
@@ -225,11 +233,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     return;
                 case NO_ANALYTICS:
                     yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
-                    unload();
                     return;
                 case NOT_INITIALISED:
                     yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NOT_INITIALISED, "Failed to initialise Yospace stream."));
-                    unload();
                     return;
             }
         }
@@ -621,17 +627,22 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertStart(Advert advert) {
-            Log.d(Constants.TAG, "OnAdvertStart: " + advert.getId() + " duration - " + advert.getDuration());
-            isYospaceAd = true;
-            String clickThroughUrl = "";
-            if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
-                clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
+            if (adFree) {
+                Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
+                seek(getCurrentTime() + 1);
+            }else {
+                Log.d(Constants.TAG, "OnAdvertStart: " + advert.getId() + " duration - " + advert.getDuration());
+                isYospaceAd = true;
+                String clickThroughUrl = "";
+                if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
+                    clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
+                }
+
+                Log.d(Constants.TAG, "Extensions Block: " + advert.getExtensionBlock());
+
+                AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
+                yospaceEventEmitter.emit(adStartedEvent);
             }
-
-            Log.d(Constants.TAG, "Extensions Block: " + advert.getExtensionBlock());
-
-            AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
-            yospaceEventEmitter.emit(adStartedEvent);
         }
 
         @Override

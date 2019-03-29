@@ -209,11 +209,11 @@ public class YospacePlayer extends BitmovinPlayer {
                     return;
                 case NO_ANALYTICS:
                     yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
-                    unload();
+                    startPlayback(sourceConfiguration.getFirstSourceItem().getHlsSource().getUrl());
                     return;
                 case NOT_INITIALISED:
                     yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NOT_INITIALISED, "Failed to initialise Yospace stream."));
-                    unload();
+                    startPlayback(sourceConfiguration.getFirstSourceItem().getHlsSource().getUrl());
                     return;
             }
         }

@@ -58,7 +58,6 @@ import com.yospace.android.hls.analytic.SessionFactory;
 import com.yospace.android.hls.analytic.SessionLive;
 import com.yospace.android.hls.analytic.SessionNonLinear;
 import com.yospace.android.hls.analytic.SessionNonLinearStartOver;
-import com.yospace.android.hls.analytic.advert.AdBreak;
 import com.yospace.android.hls.analytic.advert.Advert;
 import com.yospace.android.hls.analytic.advert.LinearCreative;
 import com.yospace.android.xml.VastPayload;
@@ -97,7 +96,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private TruexAdRenderer truexAdRenderer;
     private Context context;
     private boolean adFree = false;
-    private Timeline timeline;
+    private AdTimeline adTimeline;
 
     public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
         super(context, playerConfiguration);
@@ -183,6 +182,22 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         return super.getCurrentTime();
     }
 
+    public Ad getActiveAd() {
+        if (adTimeline == null) {
+            return null;
+        } else {
+            return adTimeline.currentAd(this.currentTimeWithAds());
+        }
+    }
+
+    public AdBreak getActiveAdBreak() {
+        if (adTimeline == null) {
+            return null;
+        } else {
+            return adTimeline.currentAdBreak(this.currentTimeWithAds());
+        }
+    }
+
     private void resetYospaceSession() {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
@@ -256,8 +271,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         });
     }
 
-    public Timeline getTimeline() {
-        return timeline;
+    public AdTimeline getAdTimeline() {
+        return adTimeline;
     }
 
     /**
@@ -324,16 +339,16 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public double getDuration() {
         double adBreakDurations = 0;
-        if (timeline != null) {
-            adBreakDurations = timeline.totalAdBreakDurations();
+        if (adTimeline != null) {
+            adBreakDurations = adTimeline.totalAdBreakDurations();
         }
         return super.getDuration() - adBreakDurations;
     }
 
     @Override
     public double getCurrentTime() {
-        if (timeline != null) {
-            return timeline.absoluteToRelative(super.getCurrentTime());
+        if (adTimeline != null) {
+            return adTimeline.absoluteToRelative(super.getCurrentTime());
         } else {
             return super.getCurrentTime();
         }
@@ -344,8 +359,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     public void seek(double time) {
         if (session != null) {
             if (session.canSeek()) {
-                if (timeline != null) {
-                    super.seek(timeline.relativeToAbsolute(time));
+                if (adTimeline != null) {
+                    super.seek(adTimeline.relativeToAbsolute(time));
                 } else {
                     super.seek(time);
                 }
@@ -458,16 +473,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onPlaying(PlayingEvent playingEvent) {
             Log.d(Constants.TAG, "SendingPlaying Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
-
-            if (session instanceof SessionNonLinear) {
-                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
-                timeline = new Timeline(((SessionNonLinear) session).getAdBreaks());
-                Log.d(Constants.TAG, timeline.toString());
-            }
-
-            Log.d(Constants.TAG, "Duration: " + getDuration() * 1000 + " - " + getCurrentTime() * 1000);
-
-
         }
     };
 
@@ -475,6 +480,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onReady(ReadyEvent readyEvent) {
             sessionStatus = YospaceSesssionStatus.INITIALIZED;
+            if (session instanceof SessionNonLinear) {
+                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
+                adTimeline = new AdTimeline(((SessionNonLinear) session).getAdBreaks());
+                Log.d(Constants.TAG, adTimeline.toString());
+            }
         }
     };
 
@@ -537,7 +547,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             Log.d(Constants.TAG, "TrueX - adStarted");
-            AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, "", 0, 0, 0, "0", 0);
+            AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
@@ -591,13 +601,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
      */
     private AnalyticEventListener analyticEventListener = new AnalyticEventListener() {
         @Override
-        public void onAdvertBreakEnd(AdBreak adBreak) {
+        public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             Log.d(Constants.TAG, "OnAdvertBreakEnd: " + adBreak.toString());
             yospaceEventEmitter.emit(new AdBreakFinishedEvent());
         }
 
         @Override
-        public void onAdvertBreakStart(AdBreak adBreak) {
+        public void onAdvertBreakStart(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             if (adFree) {
                 Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
@@ -630,17 +640,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (adFree) {
                 Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
-            }else {
+            } else {
                 Log.d(Constants.TAG, "OnAdvertStart: " + advert.getId() + " duration - " + advert.getDuration());
                 isYospaceAd = true;
                 String clickThroughUrl = "";
                 if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                     clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
                 }
-
-                Log.d(Constants.TAG, "Extensions Block: " + advert.getExtensionBlock());
-
-                AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.IMA, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
+                AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
                 yospaceEventEmitter.emit(adStartedEvent);
             }
         }

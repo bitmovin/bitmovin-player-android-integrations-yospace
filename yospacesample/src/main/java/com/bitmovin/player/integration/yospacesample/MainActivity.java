@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +23,7 @@ import com.bitmovin.player.api.event.data.AdFinishedEvent;
 import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
+import com.bitmovin.player.api.event.data.PlayingEvent;
 import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdBreakStartedListener;
 import com.bitmovin.player.api.event.listener.OnAdClickedListener;
@@ -30,6 +32,7 @@ import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
+import com.bitmovin.player.api.event.listener.OnPlayingListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
@@ -101,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdErrorListener);
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
-
+        bitmovinYospacePlayer.addEventListener(onPlayingListener);
     }
 
     private void unload() {
@@ -187,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onAdBreakStarted(AdBreakStartedEvent adBreakStartedEvent) {
             handler.post(new Runnable() {
                 public void run() {
-                    Toast.makeText(getApplicationContext(), "Ad Break Started", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getApplicationContext(), "Ad Break Started", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -233,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         clickThrough.setEnabled(true);
                         clickThrough.setClickable(true);
                     }
-                    Toast.makeText(getApplicationContext(), "Ad Started: " + bitmovinYospacePlayer.isAd(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Ad Started: " + bitmovinYospacePlayer.getActiveAd().getIdentifier(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -261,6 +264,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(getApplicationContext(), "Ad Skipped", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+    };
+
+    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
+        @Override
+        public void onPlaying(PlayingEvent playingEvent) {
+            Log.d("BitmovinYospaceSample", "ad breaks - " + bitmovinYospacePlayer.getAdTimeline().toString());
         }
     };
 

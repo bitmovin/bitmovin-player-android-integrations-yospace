@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
         bitmovinYospacePlayer.addEventListener(onPlayingListener);
+
+        bitmovinYospacePlayer.setPlayerPolicy(new BitmovinYospacePolicy(bitmovinYospacePlayer));
     }
 
     private void unload() {

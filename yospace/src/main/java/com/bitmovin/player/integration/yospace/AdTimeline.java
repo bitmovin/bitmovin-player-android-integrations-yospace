@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdTimeline {
-    private List<AdBreak> entries = new ArrayList<AdBreak>();
+    private List<AdBreak> adBreaks = new ArrayList<AdBreak>();
 
     public AdTimeline(List<com.yospace.android.hls.analytic.advert.AdBreak> adBreaks) {
         double count = 0;
@@ -19,14 +19,14 @@ public class AdTimeline {
                 Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart(), advert.getDuration(), advert.getStartMillis(), advert.getStartMillis() + advert.getDuration(), advert.hasLinearInteractiveUnit());
                 entry.appendAd(ad);
             }
-            entries.add(entry);
+            this.adBreaks.add(entry);
         }
     }
 
     @Override
     public String toString() {
-        String str = entries.size() + " ad breaks ";
-        for (AdBreak entry : entries) {
+        String str = adBreaks.size() + " ad breaks ";
+        for (AdBreak entry : adBreaks) {
             str += " [" + entry.getRelativeStart() + " - " + entry.getDuration() + "] ";
         }
         return str;
@@ -36,7 +36,7 @@ public class AdTimeline {
         time = time * 1000;
         AdBreak currentAdBreak = null;
 
-        for (AdBreak adBreak : entries) {
+        for (AdBreak adBreak : adBreaks) {
             if (adBreak.getAbsoluteStart() < time && (adBreak.getAbsoluteStart() + adBreak.getDuration()) > time) {
                 currentAdBreak = adBreak;
                 break;
@@ -51,7 +51,7 @@ public class AdTimeline {
         AdBreak currentAdBreak = null;
         Ad currentAd = null;
 
-        for (AdBreak adBreak : entries) {
+        for (AdBreak adBreak : adBreaks) {
             if (adBreak.getAbsoluteStart() < time && (adBreak.getAbsoluteStart() + adBreak.getDuration()) > time) {
                 currentAdBreak = adBreak;
                 break;
@@ -79,7 +79,7 @@ public class AdTimeline {
         double passedAdBreakDurations = 0;
         AdBreak currentAdBreak = currentAdBreak(time);
 
-        for (AdBreak entry : entries) {
+        for (AdBreak entry : adBreaks) {
             if (entry.getAbsoluteEnd() < time) {
                 passedAdBreakDurations += entry.getDuration();
             }
@@ -96,7 +96,7 @@ public class AdTimeline {
         time = time * 1000;
         double passedAdBreakDurations = 0;
 
-        for (AdBreak entry : entries) {
+        for (AdBreak entry : adBreaks) {
             if (entry.getRelativeStart() < time) {
                 passedAdBreakDurations += entry.getDuration();
             }
@@ -108,10 +108,14 @@ public class AdTimeline {
     public double totalAdBreakDurations() {
         double breakDurations = 0;
 
-        for (AdBreak entry : entries) {
+        for (AdBreak entry : adBreaks) {
             breakDurations += entry.getDuration();
         }
 
         return breakDurations / 1000;
+    }
+
+    public List<AdBreak> getAdBreaks() {
+        return adBreaks;
     }
 }

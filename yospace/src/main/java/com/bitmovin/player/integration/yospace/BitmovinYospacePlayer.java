@@ -82,7 +82,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private SessionFactory sessionFactory;
     private final EventSourceImpl<PlayerState> stateSource = new EventSourceImpl<>();
     private final EventSourceImpl<TimedMetadata> metadataSource = new EventSourceImpl<>();
-    private final BitmovinPlayerPolicy bitmovinPlayerPolicy = new BitmovinPlayerPolicy();
+    private final YospacePlayerPolicy yospacePlayerPolicy;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final YospaceEventEmitter yospaceEventEmitter = new YospaceEventEmitter();
     private Session.SessionProperties properties;
@@ -102,6 +102,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         super(context, playerConfiguration);
         this.context = context;
         this.yospaceConfiguration = yospaceConfiguration;
+        this.yospacePlayerPolicy = new YospacePlayerPolicy(new DefaultBitmovinYospacePlayerPolicy(this));
 
         HandlerThread handlerThread = new HandlerThread("BitmovinYospaceHandlerThread");
         handlerThread.start();
@@ -198,6 +199,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
+    public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy){
+        this.yospacePlayerPolicy.setPlayerPolicy(bitmovinYospacePlayerPolicy);
+    }
+
     private void resetYospaceSession() {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
@@ -233,10 +238,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             switch (session.getState()) {
                 case INITIALISED:
                     session.addAnalyticListener(analyticEventListener);
-                    session.setPlayerPolicy(new BitmovinPlayerPolicy());
                     Log.i(Constants.TAG, "Session Player Url: " + session.getPlayerUrl());
                     session.setPlayerStateSource(stateSource);
-                    session.setPlayerPolicy(bitmovinPlayerPolicy);
+                    session.setPlayerPolicy(yospacePlayerPolicy);
 
                     startPlayback(session.getPlayerUrl());
 

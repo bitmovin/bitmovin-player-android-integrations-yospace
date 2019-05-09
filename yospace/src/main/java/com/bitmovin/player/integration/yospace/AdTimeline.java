@@ -33,7 +33,6 @@ public class AdTimeline {
     }
 
     public AdBreak currentAdBreak(double time) {
-        time = time * 1000;
         AdBreak currentAdBreak = null;
 
         for (AdBreak adBreak : adBreaks) {
@@ -46,8 +45,6 @@ public class AdTimeline {
     }
 
     public Ad currentAd(double time) {
-        time = time * 1000;
-
         AdBreak currentAdBreak = null;
         Ad currentAd = null;
 
@@ -75,7 +72,6 @@ public class AdTimeline {
     }
 
     public double absoluteToRelative(double time) {
-        time = time * 1000;
         double passedAdBreakDurations = 0;
         AdBreak currentAdBreak = currentAdBreak(time);
 
@@ -89,11 +85,10 @@ public class AdTimeline {
             return (currentAdBreak.getAbsoluteStart() - passedAdBreakDurations) / 1000;
         }
 
-        return (time - passedAdBreakDurations) / 1000;
+        return (time - passedAdBreakDurations);
     }
 
     public double relativeToAbsolute(double time) {
-        time = time * 1000;
         double passedAdBreakDurations = 0;
 
         for (AdBreak entry : adBreaks) {
@@ -102,7 +97,7 @@ public class AdTimeline {
             }
         }
 
-        return (time + passedAdBreakDurations) / 1000;
+        return (time + passedAdBreakDurations);
     }
 
     public double totalAdBreakDurations() {
@@ -112,7 +107,7 @@ public class AdTimeline {
             breakDurations += entry.getDuration();
         }
 
-        return breakDurations / 1000;
+        return breakDurations;
     }
 
     public List<AdBreak> getAdBreaks() {

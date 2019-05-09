@@ -12,10 +12,10 @@ public class AdBreak {
     private List<Ad> ads = new ArrayList<>();
 
     public AdBreak(String identifier, double relativeStart, double duration, double absoluteStart, double absoluteEnd) {
-        this.relativeStart = relativeStart;
-        this.duration = duration;
-        this.absoluteStart = absoluteStart;
-        this.absoluteEnd = absoluteEnd;
+        this.relativeStart = relativeStart/1000;
+        this.duration = duration/1000;
+        this.absoluteStart = absoluteStart/1000;
+        this.absoluteEnd = absoluteEnd/1000;
         this.identifier = identifier;
     }
 

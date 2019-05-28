@@ -251,14 +251,29 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     }
                     return;
                 case NO_ANALYTICS:
-                    yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream"));
+                    handleYospaceSessionFailure(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream");
                     return;
                 case NOT_INITIALISED:
-                    yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_NOT_INITIALISED, "Failed to initialise Yospace stream."));
+                    handleYospaceSessionFailure(YospaceErrorCodes.YOSPACE_NOT_INITIALISED, "Failed to initialise Yospace stream.");
                     return;
             }
         }
     };
+
+    private void handleYospaceSessionFailure(int yospaceErrorCode, String message) {
+        if (yospaceSourceConfiguration.isRetryExcludingYospace()) {
+            Log.i(Constants.TAG, "Yospace Session failed, retrying playback without using the Yospace SDK");
+            yospaceEventEmitter.emit(new WarningEvent(yospaceErrorCode, message));
+            handler.post(new Runnable() {
+                public void run() {
+                    load(sourceConfiguration);
+                }
+            });
+        } else {
+            Log.i(Constants.TAG, "Yospace Session failed, shutting down playback");
+            yospaceEventEmitter.emit(new ErrorEvent(yospaceErrorCode, message));
+        }
+    }
 
     private void startPlayback(final String playbackUrl) {
         handler.post(new Runnable() {

@@ -3,7 +3,7 @@ package com.bitmovin.player.integration.yospace;
 public class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayerPolicy {
     private BitmovinYospacePlayer bitmovinYospacePlayer;
 
-    public DefaultBitmovinYospacePlayerPolicy(BitmovinYospacePlayer player){
+    public DefaultBitmovinYospacePlayerPolicy(BitmovinYospacePlayer player) {
         this.bitmovinYospacePlayer = player;
     }
 

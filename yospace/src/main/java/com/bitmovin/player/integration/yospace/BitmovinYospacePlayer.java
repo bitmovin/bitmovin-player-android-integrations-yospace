@@ -199,7 +199,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
-    public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy){
+    public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy) {
         this.yospacePlayerPolicy.setPlayerPolicy(bitmovinYospacePlayerPolicy);
     }
 
@@ -364,7 +364,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         if (session != null) {
             if (session.canSeek()) {
                 if (adTimeline != null) {
-                    super.seek(adTimeline.relativeToAbsolute(time));
+                    long seekTime = session.willSeekTo((long) time);
+                    double absoluteSeekTime = adTimeline.relativeToAbsolute(seekTime);
+                    super.seek(absoluteSeekTime);
                 } else {
                     super.seek(time);
                 }

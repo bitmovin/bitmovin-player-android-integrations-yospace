@@ -199,7 +199,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
-    public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy){
+    public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy) {
         this.yospacePlayerPolicy.setPlayerPolicy(bitmovinYospacePlayerPolicy);
     }
 

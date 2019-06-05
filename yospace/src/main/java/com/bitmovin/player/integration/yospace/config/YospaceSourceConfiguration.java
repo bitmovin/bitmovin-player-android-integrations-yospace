@@ -20,7 +20,7 @@ public class YospaceSourceConfiguration {
         return assetType;
     }
 
-    public boolean isRetryExcludingYospace() {
+    public boolean shouldRetryExcludingYospace() {
         return retryExcludingYospace;
     }
 }

@@ -24,6 +24,7 @@ import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.PlayingEvent;
+import com.bitmovin.player.api.event.data.WarningEvent;
 import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdBreakStartedListener;
 import com.bitmovin.player.api.event.listener.OnAdClickedListener;
@@ -33,6 +34,7 @@ import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
 import com.bitmovin.player.api.event.listener.OnPlayingListener;
+import com.bitmovin.player.api.event.listener.OnWarningListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
@@ -105,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
         bitmovinYospacePlayer.addEventListener(onPlayingListener);
+        bitmovinYospacePlayer.addEventListener(onWarningListener);
 
         bitmovinYospacePlayer.setPlayerPolicy(new BitmovinYospacePolicy(bitmovinYospacePlayer));
     }
@@ -293,6 +296,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             handler.post(new Runnable() {
                 public void run() {
                     Toast.makeText(getApplicationContext(), "Ad Clicked", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    };
+
+    private OnWarningListener onWarningListener = new OnWarningListener() {
+        @Override
+        public void onWarning(WarningEvent warningEvent) {
+            handler.post(new Runnable() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "On Warning", Toast.LENGTH_SHORT).show();
                 }
             });
         }

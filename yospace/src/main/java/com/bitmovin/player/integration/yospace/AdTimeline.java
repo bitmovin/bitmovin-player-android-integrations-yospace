@@ -82,7 +82,7 @@ public class AdTimeline {
         }
 
         if (currentAdBreak != null) {
-            return (time - currentAdBreak.getAbsoluteStart());
+            return (currentAdBreak.getAbsoluteStart() - passedAdBreakDurations);
         }
 
         return (time - passedAdBreakDurations);

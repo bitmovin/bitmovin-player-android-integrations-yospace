@@ -326,7 +326,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public void addEventListener(com.bitmovin.player.api.event.listener.EventListener listener) {
         yospaceEventEmitter.addEventListener(listener);
-        super.addEventListener(listener);
+
+        if (!(listener instanceof OnTimeChangedListener)) {
+            super.addEventListener(listener);
+        }
     }
 
     @Override
@@ -370,7 +373,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         } else {
             return super.getCurrentTime();
         }
-
     }
 
     @Override
@@ -530,6 +532,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (!(session instanceof SessionLive)) {
                 stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
             }
+            double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
+            yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
         }
     };
 

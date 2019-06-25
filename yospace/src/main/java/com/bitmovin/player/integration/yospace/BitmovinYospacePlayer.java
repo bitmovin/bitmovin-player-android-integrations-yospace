@@ -261,7 +261,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     };
 
     private void handleYospaceSessionFailure(int yospaceErrorCode, String message) {
-        if (yospaceSourceConfiguration.isRetryExcludingYospace()) {
+        if (yospaceSourceConfiguration.shouldRetryExcludingYospace()) {
             Log.i(Constants.TAG, "Yospace Session failed, retrying playback without using the Yospace SDK");
             yospaceEventEmitter.emit(new WarningEvent(yospaceErrorCode, message));
             handler.post(new Runnable() {
@@ -568,7 +568,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             Log.d(Constants.TAG, "TrueX - adStarted");
-            AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
+            AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
@@ -668,7 +668,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                     clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
                 }
-                AdStartedEvent adStartedEvent = new AdStartedEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
+                AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0);
                 yospaceEventEmitter.emit(adStartedEvent);
             }
         }

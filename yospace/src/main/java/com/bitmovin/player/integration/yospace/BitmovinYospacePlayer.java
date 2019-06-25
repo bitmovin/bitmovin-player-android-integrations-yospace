@@ -11,6 +11,7 @@ import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
+import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.FullscreenEnterEvent;
 import com.bitmovin.player.api.event.data.FullscreenExitEvent;
@@ -567,7 +568,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             Log.d(Constants.TAG, "TrueX - adStarted");
-            YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
+            AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
@@ -667,7 +668,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                     clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
                 }
-                YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis() / 1000, "position", 0);
+                AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0);
                 yospaceEventEmitter.emit(adStartedEvent);
             }
         }

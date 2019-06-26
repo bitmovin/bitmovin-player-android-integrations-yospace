@@ -12,6 +12,7 @@ import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.BitmovinPlayerEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
+import com.bitmovin.player.api.event.data.TimeChangedEvent;
 import com.bitmovin.player.api.event.data.WarningEvent;
 import com.bitmovin.player.api.event.listener.EventListener;
 import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
@@ -22,6 +23,7 @@ import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
+import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
 import com.bitmovin.player.api.event.listener.OnWarningListener;
 
 import java.util.ArrayList;
@@ -63,40 +65,75 @@ public class YospaceEventEmitter {
             @Override
             public void run() {
                 if (event instanceof AdBreakStartedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
-                        ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdBreakStartedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
+                            ((OnAdBreakStartedListener) listener).onAdBreakStarted((AdBreakStartedEvent) event);
+                        }
                     }
                 } else if (event instanceof AdBreakFinishedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
-                        ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdBreakFinishedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
+                            ((OnAdBreakFinishedListener) listener).onAdBreakFinished((AdBreakFinishedEvent) event);
+                        }
                     }
                 } else if (event instanceof AdStartedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
-                        ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdStartedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
+                            ((OnAdStartedListener) listener).onAdStarted((AdStartedEvent) event);
+                        }
                     }
                 } else if (event instanceof AdFinishedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
-                        ((OnAdFinishedListener) listener).onAdFinished((AdFinishedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdFinishedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
+                            ((OnAdFinishedListener) listener).onAdFinished((AdFinishedEvent) event);
+                        }
                     }
                 } else if (event instanceof AdClickedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
-                        ((OnAdClickedListener) listener).onAdClicked((AdClickedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdClickedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdClickedListener.class)) {
+                            ((OnAdClickedListener) listener).onAdClicked((AdClickedEvent) event);
+                        }
                     }
                 } else if (event instanceof AdErrorEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
-                        ((OnAdErrorListener) listener).onAdError((AdErrorEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdErrorListener.class);
+                    if (listeners != null) {
+
+                        for (EventListener listener : eventListeners.get(OnAdErrorListener.class)) {
+                            ((OnAdErrorListener) listener).onAdError((AdErrorEvent) event);
+                        }
                     }
                 } else if (event instanceof AdSkippedEvent) {
-                    for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
-                        ((OnAdSkippedListener) listener).onAdSkipped((AdSkippedEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnAdSkippedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
+                            ((OnAdSkippedListener) listener).onAdSkipped((AdSkippedEvent) event);
+                        }
                     }
                 } else if (event instanceof ErrorEvent) {
-                    for (EventListener listener : eventListeners.get(OnErrorListener.class)) {
-                        ((OnErrorListener) listener).onError((ErrorEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnErrorListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnErrorListener.class)) {
+                            ((OnErrorListener) listener).onError((ErrorEvent) event);
+                        }
                     }
                 } else if (event instanceof WarningEvent) {
-                    for (EventListener listener : eventListeners.get(OnWarningListener.class)) {
-                        ((OnWarningListener) listener).onWarning((WarningEvent) event);
+                    List<EventListener> listeners = eventListeners.get(OnWarningListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : eventListeners.get(OnWarningListener.class)) {
+                            ((OnWarningListener) listener).onWarning((WarningEvent) event);
+                        }
+                    }
+                } else if (event instanceof TimeChangedEvent) {
+                    List<EventListener> listeners = eventListeners.get(OnTimeChangedListener.class);
+                    if (listeners != null) {
+                        for (EventListener listener : listeners) {
+                            ((OnTimeChangedListener) listener).onTimeChanged((TimeChangedEvent) event);
+                        }
                     }
                 }
             }
@@ -125,6 +162,8 @@ public class YospaceEventEmitter {
             javaClass = OnErrorListener.class;
         } else if (listener instanceof OnWarningListener) {
             javaClass = OnWarningListener.class;
+        } else if (listener instanceof OnTimeChangedListener) {
+            javaClass = OnTimeChangedListener.class;
         }
 
         return javaClass;

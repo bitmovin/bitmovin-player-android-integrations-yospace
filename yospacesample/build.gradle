@@ -6,8 +6,8 @@ android {
         applicationId "com.bitmovin.player.integration.yospacesample"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 14
-        versionName "0.9.11"
+        versionCode 15
+        versionName "0.9.12"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -31,7 +31,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.bitmovin.player:playercore:2.25.3'
+    implementation 'com.bitmovin.player:playercore:2.27+'
     implementation ('com.truex:TruexAdRenderer:1.0.8') {
         exclude group: 'com.android.support'
         exclude module: 'appcompat-v7'

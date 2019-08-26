@@ -32,6 +32,11 @@ public class AdTimeline {
         return str;
     }
 
+    /**
+     * Returns the current ad break the player is in
+     * @param time - absolute time of the player
+     * @return current ad break
+     */
     public AdBreak currentAdBreak(double time) {
         AdBreak currentAdBreak = null;
 
@@ -44,6 +49,11 @@ public class AdTimeline {
         return currentAdBreak;
     }
 
+    /**
+     * Returns the current ad the player is in
+     * @param time - current absolute time
+     * @return
+     */
     public Ad currentAd(double time) {
         AdBreak currentAdBreak = null;
         Ad currentAd = null;
@@ -71,6 +81,11 @@ public class AdTimeline {
         return currentAd;
     }
 
+    /**
+     * Converts the time from absolute to relative
+     * @param time - current absolute time
+     * @return
+     */
     public double absoluteToRelative(double time) {
         double passedAdBreakDurations = 0;
         AdBreak currentAdBreak = currentAdBreak(time);
@@ -88,6 +103,11 @@ public class AdTimeline {
         return (time - passedAdBreakDurations);
     }
 
+    /**
+     * Converts the time from relative into absolute
+     * @param time - current relative time
+     * @return
+     */
     public double relativeToAbsolute(double time) {
         double passedAdBreakDurations = 0;
 
@@ -100,6 +120,11 @@ public class AdTimeline {
         return (time + passedAdBreakDurations);
     }
 
+    /**
+     * Returns the sum of all of the ad break durations
+     *
+     * @return total ad break duraitons
+     */
     public double totalAdBreakDurations() {
         double breakDurations = 0;
 
@@ -110,6 +135,24 @@ public class AdTimeline {
         return breakDurations;
     }
 
+    /**
+     * Returns the current progress through the ad (if we are in an ad). Otherwise returns the time passed in
+     * @param time - current absolute time
+     * @return progress through the ad
+     */
+    public double adTime(double time) {
+        Ad currentAd = this.currentAd(time);
+        if (currentAd != null) {
+            return time - currentAd.getAbsoluteStart();
+        } else {
+            return time;
+        }
+    }
+
+    /**
+     * Returns a list of all ad breaks
+     * @return
+     */
     public List<AdBreak> getAdBreaks() {
         return adBreaks;
     }

@@ -535,6 +535,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onTimeChanged(TimeChangedEvent timeChangedEvent) {
 
+            if (session == null || getAdTimeline() == null) {
+                yospaceEventEmitter.emit(timeChangedEvent);
+            }
+
             if (session != null && getAdTimeline() != null) {
                 if (isYospaceAd) {
                     // If we are in a YospaceAd, send the adTime
@@ -549,10 +553,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (!(session instanceof SessionLive)) {
                     stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
                 }
-            } else {
-                yospaceEventEmitter.emit(timeChangedEvent);
             }
-
         }
     };
 

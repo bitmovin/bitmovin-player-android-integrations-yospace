@@ -2,7 +2,9 @@ package com.bitmovin.player.integration.yospace;
 
 import android.util.Log;
 
+import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.MetadataEvent;
+import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.model.emsg.EventMessage;
 import com.bitmovin.player.model.id3.BinaryFrame;
 import com.yospace.hls.TimedMetadata;
@@ -100,5 +102,9 @@ public class YospaceUtil {
         }
 
         return null;
+    }
+
+    public static AdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset) {
+        return new AdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000);
     }
 }

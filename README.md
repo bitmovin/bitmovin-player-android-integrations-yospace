@@ -20,7 +20,7 @@ And this line to your main project `build.gradle`
 
 ```
 dependencies {
-    compile 'com.bitmovin.player.integration:yospace:0.9.4'
+    compile 'com.bitmovin.player.integration:yospace:0.9.14'
 }
 ```
 
@@ -29,9 +29,16 @@ dependencies {
 The following example creates a `BitmovinYospacePlayer` object and loads a `YospaceSourceConfiguration`
 
 #### Basic video playback 
+
 ```java
+//Create a YospaceConfiguration using the YospaceConfigurationBuilder
+YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
+
+//Optionally create a TrueXConfiguration
+TrueXConfiguration trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+
 //Create a BitmovinYospacePlayer
-BitmovinYospacePlayer bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext());
+BitmovinYospacePlayer bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration, trueXConfiguration);
     
 //Set it to your BitmovinPlayerView
 bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
@@ -43,7 +50,7 @@ sourceConfig.addSourceItem(sourceItem);
     
 //Create a YospaceSourceConfiguration with your SourceConfiguration and a YospaceAssetType
 YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR_START_OVER);
-    
+
 //Load your YospaceSourceConfiguration
 bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
 ```
@@ -77,16 +84,4 @@ In order to properly track ads, you must call `clickThroughPressed()` whenever t
 ```java
 bitmovinYospacePlayer.clickThroughPressed();
 ```
-
-#### Configuration
-You can configure the yospace ad management sdk through the YospaceSourceConfiguration. These properties can be set between each call to `load`
-
-```java
-yospaceSourceConfiguration.debug = true;
-yospaceSourceConfiguration.connectTimeout = 5000;
-yospaceSourceConfiguration.requestTimeout = 5000;
-yospaceSourceConfiguration.readTimeout = 5000;
-yospaceSourceConfiguration.userAgent = "BitmovinPlayerUserAgent";
-```
-
 

@@ -534,12 +534,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnTimeChangedListener onTimeChangedListener = new OnTimeChangedListener() {
         @Override
         public void onTimeChanged(TimeChangedEvent timeChangedEvent) {
-
-            if (session == null || getAdTimeline() == null) {
-                yospaceEventEmitter.emit(timeChangedEvent);
-            }
-
             if (session != null && getAdTimeline() != null) {
+                // Notify Yospace of the Time Update
+                if (!(session instanceof SessionLive)) {
+                    stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
+                }
+
                 if (isYospaceAd) {
                     // If we are in a YospaceAd, send the adTime
                     yospaceEventEmitter.emit(new TimeChangedEvent(getAdTimeline().adTime(timeChangedEvent.getTime())));
@@ -548,11 +548,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
                     yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
                 }
-
-                // Notify Yospace of the Time Update
-                if (!(session instanceof SessionLive)) {
-                    stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
-                }
+            } else {
+                yospaceEventEmitter.emit(timeChangedEvent);
             }
         }
     };

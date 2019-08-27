@@ -370,7 +370,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public double getCurrentTime() {
         if (adTimeline != null) {
-            return adTimeline.absoluteToRelative(super.getCurrentTime());
+            if (isYospaceAd) {
+                return adTimeline.adTime(super.getCurrentTime());
+            } else {
+                return adTimeline.absoluteToRelative(super.getCurrentTime());
+            }
         } else {
             return super.getCurrentTime();
         }
@@ -530,11 +534,23 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnTimeChangedListener onTimeChangedListener = new OnTimeChangedListener() {
         @Override
         public void onTimeChanged(TimeChangedEvent timeChangedEvent) {
-            if (!(session instanceof SessionLive)) {
-                stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
+            if (session != null && getAdTimeline() != null) {
+                // Notify Yospace of the Time Update
+                if (!(session instanceof SessionLive)) {
+                    stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
+                }
+
+                if (isYospaceAd) {
+                    // If we are in a YospaceAd, send the adTime
+                    yospaceEventEmitter.emit(new TimeChangedEvent(getAdTimeline().adTime(timeChangedEvent.getTime())));
+                } else {
+                    // If we are not in an ad, send converted relativeTime
+                    double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
+                    yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
+                }
+            } else {
+                yospaceEventEmitter.emit(timeChangedEvent);
             }
-            double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
-            yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
         }
     };
 

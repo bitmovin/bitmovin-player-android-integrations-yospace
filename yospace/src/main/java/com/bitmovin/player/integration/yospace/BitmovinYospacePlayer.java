@@ -465,6 +465,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onSourceLoaded(SourceLoadedEvent sourceLoadedEvent) {
             Log.d(Constants.TAG, "Sending Initialising Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.INITIALISING, getYospaceTime(), false));
+            if (session instanceof SessionNonLinear) {
+                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
+                adTimeline = new AdTimeline(((SessionNonLinear) session).getAdBreaks());
+                Log.d(Constants.TAG, adTimeline.toString());
+            }
         }
     };
 
@@ -507,11 +512,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onReady(ReadyEvent readyEvent) {
             sessionStatus = YospaceSesssionStatus.INITIALIZED;
-            if (session instanceof SessionNonLinear) {
-                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
-                adTimeline = new AdTimeline(((SessionNonLinear) session).getAdBreaks());
-                Log.d(Constants.TAG, adTimeline.toString());
-            }
         }
     };
 

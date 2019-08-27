@@ -466,9 +466,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             Log.d(Constants.TAG, "Sending Initialising Event" + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.INITIALISING, getYospaceTime(), false));
             if (session instanceof SessionNonLinear) {
-                Log.d(Constants.TAG, "Ad Breaks: " + ((SessionNonLinear) session).getAdBreaks().toString());
-                adTimeline = new AdTimeline(((SessionNonLinear) session).getAdBreaks());
-                Log.d(Constants.TAG, adTimeline.toString());
+                List<com.yospace.android.hls.analytic.advert.AdBreak> adBreaks = ((SessionNonLinear) session).getAdBreaks();
+                if (adBreaks != null) {
+                    Log.d(Constants.TAG, "Ad Breaks: " + adBreaks.toString());
+                    adTimeline = new AdTimeline(adBreaks);
+                    Log.d(Constants.TAG, adTimeline.toString());
+                }
             }
         }
     };

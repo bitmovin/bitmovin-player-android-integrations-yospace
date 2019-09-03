@@ -227,7 +227,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Ad activeAd = bitmovinYospacePlayer.getActiveAd();
             if (activeAd != null) {
                 Toast.makeText(getApplicationContext(), "Ad Started: " + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
-
             }
         }
     };

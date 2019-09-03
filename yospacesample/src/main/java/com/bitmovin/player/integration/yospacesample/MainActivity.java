@@ -37,6 +37,7 @@ import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
+import com.bitmovin.player.integration.yospace.Ad;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
 import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
@@ -223,8 +224,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 clickThrough.setEnabled(true);
                 clickThrough.setClickable(true);
             }
-            Toast.makeText(getApplicationContext(), "Ad Started: " + bitmovinYospacePlayer.getActiveAd().getIdentifier(), Toast.LENGTH_SHORT).show();
+            Ad activeAd = bitmovinYospacePlayer.getActiveAd();
+            if (activeAd != null) {
+                Toast.makeText(getApplicationContext(), "Ad Started: " + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
 
+            }
         }
     };
 

@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadLive() {
-        SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=false"));
+        SourceItem sourceItem = new SourceItem(new HLSSource("https://ssai.cdn.turner.com/csmp/cmaf/live/2000073/tbse-clear/master.m3u8?yo.aas=true&yo.av=2&yo.ac=true"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);

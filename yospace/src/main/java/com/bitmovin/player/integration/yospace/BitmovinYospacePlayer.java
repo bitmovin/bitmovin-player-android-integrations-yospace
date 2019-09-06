@@ -213,12 +213,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
             session.shutdown();
+            session = null;
             unload();
         }
         isYospaceAd = false;
         adFree = false;
         liveAd = null;
         liveAdBreak = null;
+        adTimeline = null;
     }
 
     private void loadLive() {
@@ -248,9 +250,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     Log.i(Constants.TAG, "Session Player Url: " + session.getPlayerUrl());
                     session.setPlayerStateSource(stateSource);
                     session.setPlayerPolicy(yospacePlayerPolicy);
-
-                    startPlayback(session.getPlayerUrl());
-
                     if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
                     } else {

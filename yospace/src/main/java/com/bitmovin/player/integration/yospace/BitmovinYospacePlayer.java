@@ -97,6 +97,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Context context;
     private boolean adFree = false;
     private AdTimeline adTimeline;
+    private Ad liveAd;
+    private AdBreak liveAdBreak;
 
     public BitmovinYospacePlayer(Context context, PlayerConfiguration playerConfiguration, YospaceConfiguration yospaceConfiguration) {
         super(context, playerConfiguration);
@@ -184,18 +186,22 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     public Ad getActiveAd() {
-        if (adTimeline == null) {
-            return null;
-        } else {
+        if (isLive()) {
+            return liveAd;
+        } else if (adTimeline != null) {
             return adTimeline.currentAd(this.currentTimeWithAds());
+        } else {
+            return null;
         }
     }
 
     public AdBreak getActiveAdBreak() {
-        if (adTimeline == null) {
-            return null;
-        } else {
+        if (isLive()) {
+            return liveAdBreak;
+        } else if (adTimeline != null) {
             return adTimeline.currentAdBreak(this.currentTimeWithAds());
+        } else {
+            return null;
         }
     }
 
@@ -207,11 +213,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
             session.shutdown();
+            session = null;
             unload();
         }
         isYospaceAd = false;
         adFree = false;
-
+        liveAd = null;
+        liveAdBreak = null;
+        adTimeline = null;
     }
 
     private void loadLive() {
@@ -241,9 +250,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     Log.i(Constants.TAG, "Session Player Url: " + session.getPlayerUrl());
                     session.setPlayerStateSource(stateSource);
                     session.setPlayerPolicy(yospacePlayerPolicy);
-
-                    startPlayback(session.getPlayerUrl());
-
                     if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
                     } else {
@@ -369,14 +375,26 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     @Override
     public double getCurrentTime() {
-        if (adTimeline != null) {
-            if (isYospaceAd) {
-                return adTimeline.adTime(super.getCurrentTime());
+        if (isAd()) {
+            if (isLive()) {
+                if (liveAd != null) {
+                    return super.getCurrentTime() - liveAd.getRelativeStart();
+                } else {
+                    return super.getCurrentTime();
+                }
             } else {
-                return adTimeline.absoluteToRelative(super.getCurrentTime());
+                if (adTimeline != null) {
+                    return adTimeline.adTime(super.getCurrentTime());
+                } else {
+                    return super.getCurrentTime();
+                }
             }
         } else {
-            return super.getCurrentTime();
+            if (adTimeline != null) {
+                return adTimeline.absoluteToRelative(super.getCurrentTime());
+            } else {
+                return super.getCurrentTime();
+            }
         }
     }
 
@@ -648,6 +666,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             Log.d(Constants.TAG, "OnAdvertBreakEnd: " + adBreak.toString());
             yospaceEventEmitter.emit(new AdBreakFinishedEvent());
+            liveAdBreak = null;
         }
 
         @Override
@@ -657,6 +676,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 seek(getCurrentTime() + 1);
             } else {
                 Log.d(Constants.TAG, "OnAdvertBreakStart: " + adBreak.toString());
+
+                if (isLive()) {
+                    String adId = adBreak.toString() + System.currentTimeMillis();
+                    double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
+                    liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, (adBreak.getStartMillis() + adBreak.getDuration()) / 1000.0);
+                }
+
                 yospaceEventEmitter.emit(new AdBreakStartedEvent());
                 List<Advert> adverts = adBreak.getAdverts();
                 for (Advert advert : adverts) {
@@ -667,7 +693,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         Log.d(Constants.TAG, "TrueX Ad Found - Source:" + "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=turner_bm_ys_tester_001");
                         showTrueXAd("https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=turner_bm_ys_tester_001", "{\"user_id\":\"turner_bm_ys_tester_001\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=\"}");
                     }
-
                 }
             }
         }
@@ -677,6 +702,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             Log.d(Constants.TAG, "OnAdvertEnd: " + advert.getId() + " duration - " + advert.getDuration());
             isYospaceAd = false;
             yospaceEventEmitter.emit(new AdFinishedEvent());
+            liveAd = null;
         }
 
         @Override
@@ -691,6 +717,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
                     clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
                 }
+                double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
+                liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.hasLinearInteractiveUnit());
                 AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0);
                 yospaceEventEmitter.emit(adStartedEvent);
             }

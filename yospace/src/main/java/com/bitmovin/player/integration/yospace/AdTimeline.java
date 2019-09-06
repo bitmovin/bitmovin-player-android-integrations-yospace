@@ -12,11 +12,11 @@ public class AdTimeline {
         double count = 0;
 
         for (com.yospace.android.hls.analytic.advert.AdBreak adbreak : adBreaks) {
-            AdBreak entry = new AdBreak("unknown", adbreak.getStartMillis() - count, adbreak.getDuration(), adbreak.getStartMillis(), adbreak.getStartMillis() + adbreak.getDuration());
+            AdBreak entry = new AdBreak("unknown", (adbreak.getStartMillis() - count) / 1000, adbreak.getDuration() / 1000.0, adbreak.getStartMillis() / 1000.0, (adbreak.getStartMillis() + adbreak.getDuration()) / 1000.0);
             count += adbreak.getDuration();
 
             for (Advert advert : adbreak.getAdverts()) {
-                Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart(), advert.getDuration(), advert.getStartMillis(), advert.getStartMillis() + advert.getDuration(), advert.hasLinearInteractiveUnit());
+                Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart() / 1000, advert.getDuration() / 1000.0, advert.getStartMillis() / 1000.0, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.hasLinearInteractiveUnit());
                 entry.appendAd(ad);
             }
             this.adBreaks.add(entry);

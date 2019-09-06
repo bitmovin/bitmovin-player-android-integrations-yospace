@@ -188,16 +188,20 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     public Ad getActiveAd() {
         if (isLive()) {
             return liveAd;
-        } else {
+        } else if (adTimeline != null) {
             return adTimeline.currentAd(this.currentTimeWithAds());
+        } else {
+            return null;
         }
     }
 
     public AdBreak getActiveAdBreak() {
-        if (adTimeline == null) {
+        if (isLive()) {
             return liveAdBreak;
-        } else {
+        } else if (adTimeline != null) {
             return adTimeline.currentAdBreak(this.currentTimeWithAds());
+        } else {
+            return null;
         }
     }
 

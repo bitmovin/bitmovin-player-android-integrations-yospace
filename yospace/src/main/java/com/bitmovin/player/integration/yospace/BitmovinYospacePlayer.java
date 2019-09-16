@@ -308,6 +308,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             try {
                 pause();
                 JSONObject adParams = new JSONObject(adParameters);
+                adParams.put("user_id", trueXConfiguration.getUserId());
+                adParams.put("vastConfigUrl", trueXConfiguration.getVastConfigUrl());
                 truexAdRenderer = new TruexAdRenderer(context);
                 truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
                 truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);

@@ -11,12 +11,6 @@ public class TrueXConfiguration {
         this.viewGroup = viewGroup;
     }
 
-    public TrueXConfiguration(ViewGroup viewGroup, String userId, String vastConfigUrl) {
-        this.viewGroup = viewGroup;
-        this.userId = userId;
-        this.vastConfigUrl = vastConfigUrl;
-    }
-
     public ViewGroup getViewGroup() {
         return viewGroup;
     }
@@ -25,7 +19,15 @@ public class TrueXConfiguration {
         return userId;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public String getVastConfigUrl() {
         return vastConfigUrl;
+    }
+
+    public void setVastConfigUrl(String vastConfigUrl) {
+        this.vastConfigUrl = vastConfigUrl;
     }
 }

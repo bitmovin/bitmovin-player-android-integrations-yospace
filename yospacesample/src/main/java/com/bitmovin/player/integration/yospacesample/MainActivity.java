@@ -90,7 +90,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+        String userId = "turner_bm_ys_tester_001";
+        String vastConfigUrl = "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=";
+        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView, userId, vastConfigUrl);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
         this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);

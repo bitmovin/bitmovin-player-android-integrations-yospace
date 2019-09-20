@@ -104,7 +104,7 @@ public class YospaceUtil {
         return null;
     }
 
-    public static AdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset) {
-        return new AdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000);
+    public static YospaceAdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset, boolean isTrueX) {
+        return new YospaceAdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000, isTrueX);
     }
 }

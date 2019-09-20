@@ -609,7 +609,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             Log.d(Constants.TAG, "TrueX - adStarted");
-            AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0);
+            YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
@@ -718,8 +718,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
                 }
                 double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
-                liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.hasLinearInteractiveUnit());
-                AdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0);
+                boolean isTrueX = advert.getAdSystem().getAdSystemType().equals("trueX");
+                liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.hasLinearInteractiveUnit(), isTrueX);
+                YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, isTrueX);
                 yospaceEventEmitter.emit(adStartedEvent);
             }
         }

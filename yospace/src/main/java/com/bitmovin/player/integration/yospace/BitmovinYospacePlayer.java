@@ -231,7 +231,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
             session.shutdown();
             session = null;
-            unload();
+            super.unload();
         }
         isYospaceAd = false;
         adFree = false;

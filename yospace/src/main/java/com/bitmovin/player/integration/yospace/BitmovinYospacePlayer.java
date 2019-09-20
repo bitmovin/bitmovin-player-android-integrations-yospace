@@ -625,7 +625,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             Log.d(Constants.TAG, "TrueX - adStarted");
-            YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
+            YospaceAdStartedEvent adStartedEvent;
+            Ad activeAd = getActiveAd();
+            if (activeAd != null) {
+                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, activeAd.getClickThroughUrl(), activeAd.getSequence(), activeAd.getDuration(), activeAd.getRelativeStart(), "position", 0, activeAd.isTrueX());
+            } else {
+                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
+            }
             yospaceEventEmitter.emit(new AdBreakStartedEvent());
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
@@ -733,13 +739,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (!isTrueXRendering) {
                     Log.d(Constants.TAG, "OnAdvertStart: " + advert);
                     isYospaceAd = true;
-                    String clickThroughUrl = "";
-                    if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
-                        clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
-                    }
+                    String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
                     double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
                     boolean isTrueX = advert.getAdSystem().getAdSystemType().equals("trueX");
-                    liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.hasLinearInteractiveUnit(), isTrueX);
+                    liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTrueX);
                     YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, isTrueX);
                     yospaceEventEmitter.emit(adStartedEvent);
                 }

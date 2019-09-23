@@ -155,7 +155,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         SourceItem sourceItem = sourceConfiguration.getFirstSourceItem();
         if (sourceItem == null) {
-            emitYospaceEvent(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
+            yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
             unload();
             return;
         }
@@ -163,7 +163,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         HLSSource hlsSource = sourceItem.getHlsSource();
 
         if (hlsSource == null || hlsSource.getUrl() == null) {
-            emitYospaceEvent(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
+            yospaceEventEmitter.emit(new ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"));
             unload();
             return;
         }
@@ -255,15 +255,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         SessionNonLinearStartOver.create(sessionEventListener, properties);
     }
 
-    private void emitYospaceEvent(BitmovinPlayerEvent event) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                yospaceEventEmitter.emit(event);
-            }
-        });
-    }
-
     private EventListener<Session> sessionEventListener = new EventListener<Session>() {
 
         public void handle(Event<Session> event) {
@@ -305,7 +296,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             });
         } else {
             Log.i(Constants.TAG, "Yospace Session failed, shutting down playback");
-            emitYospaceEvent(new ErrorEvent(yospaceErrorCode, message));
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    yospaceEventEmitter.emit(new ErrorEvent(yospaceErrorCode, message));
+                }
+            });
         }
     }
 
@@ -483,7 +479,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public void scheduleAd(AdItem adItem) {
         if (yospaceSourceConfiguration != null) {
-            emitYospaceEvent(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "scheduleAd API is not available when playing back a Yospace asset"));
+            yospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "scheduleAd API is not available when playing back a Yospace asset"));
         } else {
             super.scheduleAd(adItem);
         }
@@ -492,7 +488,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public void setAdViewGroup(ViewGroup adViewGroup) {
         if (yospaceSourceConfiguration != null) {
-            emitYospaceEvent(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "setAdViewGroup API is not available when playing back a Yospace asset"));
+            yospaceEventEmitter.emit(new WarningEvent(YospaceWarningCodes.UNSUPPORTED_API, "setAdViewGroup API is not available when playing back a Yospace asset"));
         } else {
             super.setAdViewGroup(adViewGroup);
         }
@@ -591,17 +587,27 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (!(session instanceof SessionLive)) {
                     stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
                 }
-
-                if (isYospaceAd) {
-                    // If we are in a YospaceAd, send the adTime
-                    emitYospaceEvent(new TimeChangedEvent(getAdTimeline().adTime(timeChangedEvent.getTime())));
-                } else {
-                    // If we are not in an ad, send converted relativeTime
-                    double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
-                    emitYospaceEvent(new TimeChangedEvent(relativeTime));
-                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isYospaceAd) {
+                            // If we are in a Yospace ad, send the ad time
+                            double adTime = getAdTimeline().adTime(timeChangedEvent.getTime());
+                            yospaceEventEmitter.emit(new TimeChangedEvent(adTime));
+                        } else {
+                            // If we are not in an ad, send converted relative time
+                            double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
+                            yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
+                        }
+                    }
+                });
             } else {
-                emitYospaceEvent(timeChangedEvent);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        yospaceEventEmitter.emit(timeChangedEvent);
+                    }
+                });
             }
         }
     };
@@ -633,6 +639,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
+    private static final String TAG = "d9837438274";
+
     /**
      * TrueX Event Handlers
      */
@@ -647,8 +655,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             } else {
                 adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
             }
-            emitYospaceEvent(new AdBreakStartedEvent());
-            emitYospaceEvent(adStartedEvent);
+            yospaceEventEmitter.emit(new AdBreakStartedEvent());
+            yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
         }
@@ -735,7 +743,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
                         liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, (adBreak.getStartMillis() + adBreak.getDuration()) / 1000.0);
                     }
-                    emitYospaceEvent(new AdBreakStartedEvent());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            yospaceEventEmitter.emit(new AdBreakStartedEvent());
+                        }
+                    });
                 }
             }
         }
@@ -743,7 +756,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             if (!isTrueXRendering && !adFree) {
-                emitYospaceEvent(new AdBreakFinishedEvent());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        yospaceEventEmitter.emit(new AdBreakFinishedEvent());
+                    }
+                });
             }
             liveAdBreak = null;
             isTrueXRendering = false;
@@ -762,7 +780,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     boolean isTrueX = advert.getAdSystem().getAdSystemType().equals("trueX");
                     liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTrueX);
                     YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, isTrueX);
-                    emitYospaceEvent(adStartedEvent);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            yospaceEventEmitter.emit(adStartedEvent);
+                        }
+                    });
                 }
             }
         }
@@ -771,7 +794,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onAdvertEnd(Advert advert) {
             isYospaceAd = false;
             if (!isTrueXRendering && !adFree) {
-                emitYospaceEvent(new AdFinishedEvent());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        yospaceEventEmitter.emit(new AdFinishedEvent());
+                    }
+                });
             }
             liveAd = null;
             isTrueXRendering = false;

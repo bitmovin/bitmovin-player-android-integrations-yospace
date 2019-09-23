@@ -61,15 +61,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String currentClickThroughUrl;
     private TrueXConfiguration trueXConfiguration;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        vodButton = findViewById(R.id.turner_vod_button);
+        vodButton = findViewById(R.id.vod_button);
         vodButton.setOnClickListener(this);
-        liveButton = findViewById(R.id.turner_live_button);
+        liveButton = findViewById(R.id.live_button);
         liveButton.setOnClickListener(this);
         unloadButton = findViewById(R.id.unload_button);
         unloadButton.setOnClickListener(this);
@@ -79,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         customButton.setOnClickListener(this);
         trueXButton = findViewById(R.id.truex_button);
         trueXButton.setOnClickListener(this);
-        defaultButton = findViewById(R.id.yospace_vod_button);
+        defaultButton = findViewById(R.id.default_button);
         defaultButton.setOnClickListener(this);
         assetTypeSpinner = findViewById(R.id.asset_type_spinner);
         urlInputEditText = findViewById(R.id.url_edit_text);

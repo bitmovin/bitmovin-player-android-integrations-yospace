@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
-        app:layout_constraintBottom_toTopOf="@id/turner_vod_button"
+        app:layout_constraintBottom_toTopOf="@id/vod_button"
         app:layout_constraintEnd_toStartOf="@id/asset_type_spinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,25 +29,25 @@
         app:layout_constraintTop_toTopOf="@id/url_edit_text" />
 
     <Button
-        android:id="@+id/turner_vod_button"
+        android:id="@+id/vod_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/turner_vod"
-        app:layout_constraintEnd_toStartOf="@id/turner_live_button"
+        app:layout_constraintEnd_toStartOf="@id/live_button"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
-        android:id="@+id/turner_live_button"
+        android:id="@+id/live_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/turner_live"
         app:layout_constraintEnd_toStartOf="@id/truex_button"
-        app:layout_constraintStart_toEndOf="@id/turner_vod_button"
+        app:layout_constraintStart_toEndOf="@id/vod_button"
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
@@ -57,7 +57,7 @@
         android:background="@drawable/button_background"
         android:text="@string/truex"
         app:layout_constraintEnd_toStartOf="@id/custom_button"
-        app:layout_constraintStart_toEndOf="@id/turner_live_button"
+        app:layout_constraintStart_toEndOf="@id/live_button"
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
@@ -71,26 +71,26 @@
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
-        android:id="@+id/yospace_vod_button"
+        android:id="@+id/default_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/yospace_vod"
-        app:layout_constraintEnd_toStartOf="@id/yospace_nlso_button"
+        app:layout_constraintEnd_toStartOf="@id/nlso_button"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/turner_vod_button" />
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
 
     <Button
-        android:id="@+id/yospace_nlso_button"
+        android:id="@+id/nlso_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/yospace_nlso"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/yospace_vod_button"
-        app:layout_constraintTop_toBottomOf="@id/turner_vod_button" />
+        app:layout_constraintStart_toEndOf="@id/default_button"
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
 
     <Button
         android:id="@+id/click_through_button"
@@ -102,7 +102,7 @@
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/yospace_vod_button" />
+        app:layout_constraintTop_toBottomOf="@id/default_button" />
 
     <Button
         android:id="@+id/unload_button"
@@ -112,7 +112,7 @@
         android:text="@string/unload"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/click_through_button"
-        app:layout_constraintTop_toBottomOf="@id/yospace_vod_button" />
+        app:layout_constraintTop_toBottomOf="@id/default_button" />
 
     <com.bitmovin.player.BitmovinPlayerView
         android:id="@+id/bitmovinPlayerView"

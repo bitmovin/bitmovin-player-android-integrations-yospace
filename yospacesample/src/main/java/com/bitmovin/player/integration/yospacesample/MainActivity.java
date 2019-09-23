@@ -39,6 +39,8 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integration.yospace.Ad;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
+import com.bitmovin.player.integration.yospace.Constants;
+import com.bitmovin.player.integration.yospace.YospaceAdStartedEvent;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
 import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
@@ -214,11 +216,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnAdStartedListener onAdStartedListener = new OnAdStartedListener() {
         @Override
         public void onAdStarted(AdStartedEvent adStartedEvent) {
-            String clickThroughUrl = null;
-            if (adStartedEvent != null) {
-                clickThroughUrl = adStartedEvent.getClickThroughUrl();
+            if (!(adStartedEvent instanceof YospaceAdStartedEvent)) {
+                return;
             }
-            currentClickThroughUrl = clickThroughUrl;
+            Log.d(Constants.TAG, "onAdStarted: isTrueX: " + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
+
+            currentClickThroughUrl = adStartedEvent.getClickThroughUrl();
 
             String url = currentClickThroughUrl;
 

@@ -639,8 +639,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
-    private static final String TAG = "d9837438274";
-
     /**
      * TrueX Event Handlers
      */

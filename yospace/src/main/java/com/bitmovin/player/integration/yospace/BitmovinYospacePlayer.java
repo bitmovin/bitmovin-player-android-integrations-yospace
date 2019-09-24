@@ -723,15 +723,17 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
-                // Render TrueX ad if found in ad break
-                for (Advert advert : adBreak.getAdverts()) {
-                    if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
-                        Log.d(Constants.TAG, advert.toString());
-                        Log.d(Constants.TAG, advert.getLinearCreative().toString());
-                        String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
-                        Log.d(Constants.TAG, "TrueX Ad Found - Source:" + creativeUrl);
-                        String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
-                        renderTrueXAd(creativeUrl, adParams);
+                if (trueXConfiguration != null) {
+                    // Render TrueX ad if found in ad break
+                    for (Advert advert : adBreak.getAdverts()) {
+                        if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
+                            Log.d(Constants.TAG, advert.toString());
+                            Log.d(Constants.TAG, advert.getLinearCreative().toString());
+                            String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
+                            Log.d(Constants.TAG, "TrueX Ad Found - Source:" + creativeUrl);
+                            String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
+                            renderTrueXAd(creativeUrl, adParams);
+                        }
                     }
                 }
                 if (!isTrueXRendering) {

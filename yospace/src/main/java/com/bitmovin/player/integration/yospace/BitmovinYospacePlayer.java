@@ -330,23 +330,21 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
      * TrueXRendering
      */
     private void renderTrueXAd(String creativeURL, String adParameters) {
-        if (trueXConfiguration != null) {
-            try {
-                pause();
-                JSONObject adParams = new JSONObject(adParameters);
-                truexAdRenderer = new TruexAdRenderer(context);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_ERROR, this.adErrorListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
-                truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
-                truexAdRenderer.start(trueXConfiguration.getViewGroup());
-                isTrueXRendering = true;
-            } catch (JSONException e) {
-                Log.e(Constants.TAG, "JSON ERROR");
-            }
+        try {
+            pause();
+            JSONObject adParams = new JSONObject(adParameters);
+            truexAdRenderer = new TruexAdRenderer(context);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_ERROR, this.adErrorListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
+            truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
+            truexAdRenderer.start(trueXConfiguration.getViewGroup());
+            isTrueXRendering = true;
+        } catch (JSONException e) {
+            Log.e(Constants.TAG, "JSON ERROR");
         }
     }
 

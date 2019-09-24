@@ -53,16 +53,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button liveButton;
     private Button vodButton;
     private Button unloadButton;
-    private Button clickThrough;
+    private Button clickThroughButton;
     private Button customButton;
     private Button trueXButton;
     private Button defaultButton;
-    private Spinner customSpinner;
-    private EditText urlInput;
+    private Spinner assetTypeSpinner;
+    private EditText urlInputEditText;
 
     private String currentClickThroughUrl;
     private TrueXConfiguration trueXConfiguration;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,16 +74,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         liveButton.setOnClickListener(this);
         unloadButton = findViewById(R.id.unload_button);
         unloadButton.setOnClickListener(this);
-        clickThrough = findViewById(R.id.click_through);
-        clickThrough.setOnClickListener(this);
+        clickThroughButton = findViewById(R.id.click_through_button);
+        clickThroughButton.setOnClickListener(this);
         customButton = findViewById(R.id.custom_button);
         customButton.setOnClickListener(this);
-        customSpinner = findViewById(R.id.spinner1);
-        urlInput = findViewById(R.id.url_input);
         trueXButton = findViewById(R.id.truex_button);
         trueXButton.setOnClickListener(this);
         defaultButton = findViewById(R.id.default_button);
         defaultButton.setOnClickListener(this);
+        assetTypeSpinner = findViewById(R.id.asset_type_spinner);
+        urlInputEditText = findViewById(R.id.url_edit_text);
 
         // Creating a new PlayerConfiguration
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
@@ -156,14 +155,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadCustomUrl() {
-        String url = urlInput.getText().toString();
+        String url = urlInputEditText.getText().toString();
         SourceItem sourceItem = new SourceItem(new HLSSource(url));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
 
         YospaceSourceConfiguration yospaceSourceConfiguration;
 
-        if (customSpinner.getSelectedItemPosition() == 0) {
+        if (assetTypeSpinner.getSelectedItemPosition() == 0) {
             yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
         } else {
             yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
@@ -226,8 +225,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String url = currentClickThroughUrl;
 
             if (url != null && !url.isEmpty()) {
-                clickThrough.setEnabled(true);
-                clickThrough.setClickable(true);
+                clickThroughButton.setEnabled(true);
+                clickThroughButton.setClickable(true);
             }
             Ad activeAd = bitmovinYospacePlayer.getActiveAd();
             if (activeAd != null) {
@@ -239,8 +238,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnAdFinishedListener onAdFinishedListener = new OnAdFinishedListener() {
         @Override
         public void onAdFinished(AdFinishedEvent adFinishedEvent) {
-            clickThrough.setEnabled(false);
-            clickThrough.setClickable(false);
+            clickThroughButton.setEnabled(false);
+            clickThroughButton.setClickable(false);
             Toast.makeText(getApplicationContext(), "Ad Finished: " + bitmovinYospacePlayer.isAd(), Toast.LENGTH_SHORT).show();
         }
     };
@@ -295,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             loadVod();
         } else if (v == unloadButton) {
             unload();
-        } else if (v == clickThrough) {
+        } else if (v == clickThroughButton) {
             clickThroughPressed();
         } else if (v == customButton) {
             loadCustomUrl();

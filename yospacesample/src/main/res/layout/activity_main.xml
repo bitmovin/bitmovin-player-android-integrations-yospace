@@ -1,130 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <EditText
+        android:id="@+id/url_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
+        app:layout_constraintBottom_toTopOf="@id/vod_button"
+        app:layout_constraintEnd_toStartOf="@id/asset_type_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp">
+    <Spinner
+        android:id="@+id/asset_type_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/asset_types"
+        android:prompt="@string/asset_prompt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/url_edit_text"
+        app:layout_constraintTop_toTopOf="@id/url_edit_text" />
 
-            <EditText
-                android:id="@+id/url_input"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
-                android:autofillHints="" />
+    <Button
+        android:id="@+id/vod_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/turner_vod"
+        app:layout_constraintEnd_toStartOf="@id/live_button"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
-            <Spinner
-                android:id="@+id/spinner1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:entries="@array/asset_types"
-                android:prompt="@string/asset_prompt" />
-        </LinearLayout>
+    <Button
+        android:id="@+id/live_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/turner_live"
+        app:layout_constraintEnd_toStartOf="@id/truex_button"
+        app:layout_constraintStart_toEndOf="@id/vod_button"
+        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <Button
+        android:id="@+id/truex_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/truex"
+        app:layout_constraintEnd_toStartOf="@id/custom_button"
+        app:layout_constraintStart_toEndOf="@id/live_button"
+        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
-            <Button
-                android:id="@+id/vod_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="T VOD"
-                android:background="@drawable/button_background"
-                android:enabled="true"
-                android:clickable="true" />
+    <Button
+        android:id="@+id/custom_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/custom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/truex_button"
+        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
-            <Button
-                android:id="@+id/live_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_background"
-                android:text="T Live" />
-            <Button
-                android:id="@+id/truex_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TrueX"
-                android:background="@drawable/button_background"
-                android:enabled="true"
-                android:clickable="true" />
-            <Button
-                android:id="@+id/custom_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_background"
-                android:text="Custom" />
+    <Button
+        android:id="@+id/default_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/yospace_vod"
+        app:layout_constraintEnd_toStartOf="@id/nlso_button"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
 
-        </LinearLayout>
+    <Button
+        android:id="@+id/nlso_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/yospace_nlso"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/default_button"
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <Button
+        android:id="@+id/click_through_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/click_through"
+        app:layout_constraintEnd_toStartOf="@id/unload_button"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/default_button" />
 
-            <Button
-                android:id="@+id/default_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yo VOD"
-                android:background="@drawable/button_background"
-                android:enabled="true"
-                android:clickable="true" />
-
-            <Button
-                android:id="@+id/yospace_nlso_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yo NLSO"
-                android:background="@drawable/button_background"
-                android:enabled="true"
-                android:clickable="true" />
-
-        </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/click_through"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Click"
-            android:enabled="false"
-            android:clickable="false" />
-        <Button
-            android:id="@+id/unload_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Unload" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/unload_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/unload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/click_through_button"
+        app:layout_constraintTop_toBottomOf="@id/default_button" />
 
     <com.bitmovin.player.BitmovinPlayerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/bitmovinPlayerView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-    </com.bitmovin.player.BitmovinPlayerView>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/click_through_button" />
 
-    <!--<WebView-->
-    <!--android:layout_height="200dp"-->
-    <!--android:id="@+id/webView"-->
-    <!--android:layout_width="400dp"-->
-    <!--android:layout_centerVertical="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:visibility="invisible" />-->
-</LinearLayout>
 </android.support.constraint.ConstraintLayout>

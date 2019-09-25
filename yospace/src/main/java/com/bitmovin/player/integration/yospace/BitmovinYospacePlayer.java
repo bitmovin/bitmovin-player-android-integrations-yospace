@@ -111,6 +111,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         this.yospaceConfiguration = yospaceConfiguration;
         this.yospacePlayerPolicy = new YospacePlayerPolicy(new DefaultBitmovinYospacePlayerPolicy(this));
         this.uiLoadingState = UI_LOADING_STATE.UNKNOWN;
+        updateLogVisibility(yospaceConfiguration.isDebug());
 
         HandlerThread handlerThread = new HandlerThread("BitmovinYospaceHandlerThread");
         handlerThread.start();
@@ -251,6 +252,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     private void loadStartOver() {
         SessionNonLinearStartOver.create(sessionEventListener, properties);
+    }
+
+    private void updateLogVisibility(boolean isDebug) {
+        if (isDebug) {
+            BitmovinLogger.enableLogging();
+        } else {
+            BitmovinLogger.disableLogging();
+        }
     }
 
     private EventListener<Session> sessionEventListener = new EventListener<Session>() {

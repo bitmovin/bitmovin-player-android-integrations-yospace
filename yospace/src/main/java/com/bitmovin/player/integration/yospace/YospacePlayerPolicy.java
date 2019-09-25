@@ -19,85 +19,85 @@ public class YospacePlayerPolicy implements PolicyHandler {
 
     @Override
     public boolean canStart(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canStart");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canStart");
         return true;
     }
 
     @Override
     public boolean canStop(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canStart");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canStart");
         return true;
     }
 
     @Override
     public boolean canPause(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canPause");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canPause");
         return this.playerPolicy.canPause();
     }
 
     @Override
     public boolean canRewind(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canRewind");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canRewind");
         return true;
     }
 
     @Override
     public int canSkip(long l, List<AdBreak> list, long l1) {
-        Log.d(Constants.TAG, "Player Policy::canSkip");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canSkip");
         return this.playerPolicy.canSkip();
     }
 
     @Override
     public boolean canSeek(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canSeek");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canSeek");
         return this.playerPolicy.canSeek();
     }
 
     @Override
     public long willSeekTo(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::willSeekTo");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::willSeekTo");
         return this.playerPolicy.canSeekTo(l);
     }
 
     @Override
     public boolean canMute(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canMute");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canMute");
         return this.playerPolicy.canMute();
     }
 
     @Override
     public boolean canGoFullScreen(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canGoFullScreen");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canGoFullScreen");
         return true;
     }
 
     @Override
     public boolean canExitFullScreen(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canExitFullscreen");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canExitFullscreen");
         return true;
     }
 
     @Override
     public boolean canExpandCreative(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canExpandCreative");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canExpandCreative");
         return true;
     }
 
     @Override
     public boolean canCollapseCreative(long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canCollapseCreative");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canCollapseCreative");
         return true;
     }
 
     @Override
     public boolean canClickThrough(String s, long l, List<AdBreak> list) {
-        Log.d(Constants.TAG, "Player Policy::canClickThrough");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::canClickThrough");
         return true;
     }
 
     @Override
     public void setPlaybackMode(Session.PlaybackMode playbackMode) {
-        Log.d(Constants.TAG, "Player Policy::setPlaybackMode");
+        BitmovinLogger.d(Constants.TAG, "Player Policy::setPlaybackMode");
         mPlaybackMode = playbackMode;
     }
 

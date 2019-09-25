@@ -1,5 +1,7 @@
 package com.bitmovin.player.integration.yospace.config;
 
+import com.bitmovin.player.integration.yospace.BitmovinLogger;
+
 public class YospaceConfiguration {
     private String userAgent;
     private int readTimeout;
@@ -16,6 +18,7 @@ public class YospaceConfiguration {
         this.connectTimeout = connectTimeout;
         this.requestTimeout = requestTimeout;
         this.debug = debug;
+        updateLogVisibility(debug);
     }
 
 
@@ -37,5 +40,13 @@ public class YospaceConfiguration {
 
     public boolean isDebug() {
         return debug;
+    }
+
+    private void updateLogVisibility(boolean isDebug) {
+        if (isDebug) {
+            BitmovinLogger.enableLogging();
+        } else {
+            BitmovinLogger.disableLogging();
+        }
     }
 }

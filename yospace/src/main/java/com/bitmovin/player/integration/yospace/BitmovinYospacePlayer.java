@@ -229,6 +229,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private void resetYospaceSession() {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
+            session.removeAnalyticListener(analyticEventListener);
             session.shutdown();
             session = null;
             super.unload();
@@ -330,23 +331,21 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
      * TrueXRendering
      */
     private void renderTrueXAd(String creativeURL, String adParameters) {
-        if (trueXConfiguration != null) {
-            try {
-                pause();
-                JSONObject adParams = new JSONObject(adParameters);
-                truexAdRenderer = new TruexAdRenderer(context);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_ERROR, this.adErrorListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
-                truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
-                truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
-                truexAdRenderer.start(trueXConfiguration.getViewGroup());
-                isTrueXRendering = true;
-            } catch (JSONException e) {
-                Log.e(Constants.TAG, "JSON ERROR");
-            }
+        try {
+            pause();
+            JSONObject adParams = new JSONObject(adParameters);
+            truexAdRenderer = new TruexAdRenderer(context);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_ERROR, this.adErrorListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
+            truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
+            truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
+            truexAdRenderer.start(trueXConfiguration.getViewGroup());
+            isTrueXRendering = true;
+        } catch (JSONException e) {
+            Log.e(Constants.TAG, "JSON ERROR");
         }
     }
 
@@ -525,10 +524,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             if (sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED) {
+                Log.d(Constants.TAG, "Sending Stopped Event" + getYospaceTime());
+                stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
                 resetYospaceSession();
             }
-            Log.d(Constants.TAG, "Sending Stopped Event" + getYospaceTime());
-            stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
         }
     };
 
@@ -723,15 +722,17 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 Log.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
-                // Render TrueX ad if found in ad break
-                for (Advert advert : adBreak.getAdverts()) {
-                    if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
-                        Log.d(Constants.TAG, advert.toString());
-                        Log.d(Constants.TAG, advert.getLinearCreative().toString());
-                        String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
-                        Log.d(Constants.TAG, "TrueX Ad Found - Source:" + creativeUrl);
-                        String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
-                        renderTrueXAd(creativeUrl, adParams);
+                if (trueXConfiguration != null) {
+                    // Render TrueX ad if found in ad break
+                    for (Advert advert : adBreak.getAdverts()) {
+                        if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
+                            Log.d(Constants.TAG, advert.toString());
+                            Log.d(Constants.TAG, advert.getLinearCreative().toString());
+                            String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
+                            Log.d(Constants.TAG, "TrueX Ad Found - Source:" + creativeUrl);
+                            String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
+                            renderTrueXAd(creativeUrl, adParams);
+                        }
                     }
                 }
                 if (!isTrueXRendering) {

@@ -229,6 +229,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private void resetYospaceSession() {
         if (session != null) {
             sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
+            session.removeAnalyticListener(analyticEventListener);
             session.shutdown();
             session = null;
             super.unload();
@@ -523,10 +524,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             if (sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED) {
+                Log.d(Constants.TAG, "Sending Stopped Event" + getYospaceTime());
+                stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
                 resetYospaceSession();
             }
-            Log.d(Constants.TAG, "Sending Stopped Event" + getYospaceTime());
-            stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
         }
     };
 

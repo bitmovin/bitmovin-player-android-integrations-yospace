@@ -147,7 +147,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         resetYospaceSession();
 
-        BitmovinLogger.d(Constants.TAG, "Load Yospace Source Configuration");
+        BitmovinLogger.d("Load Yospace Source Configuration");
         this.yospaceSourceConfiguration = yospaceSourceConfiguration;
         this.sourceConfiguration = sourceConfiguration;
 
@@ -268,11 +268,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
             // Retrieve the initialised session
             session = event.getPayload();
-            BitmovinLogger.d(Constants.TAG, "Session State: " + session.getState().toString() + " Result Code: " + session.getResultCode());
+            BitmovinLogger.d("Session State: " + session.getState().toString() + " Result Code: " + session.getResultCode());
             switch (session.getState()) {
                 case INITIALISED:
                     session.addAnalyticListener(analyticEventListener);
-                    BitmovinLogger.i(Constants.TAG, "Yospace Session Initialized. Session Player Url: " + session.getPlayerUrl());
+                    BitmovinLogger.i("Yospace Session Initialized. Session Player Url: " + session.getPlayerUrl());
                     session.setPlayerStateSource(stateSource);
                     session.setPlayerPolicy(yospacePlayerPolicy);
                     if (session instanceof SessionLive) {
@@ -302,7 +302,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 }
             });
         } else {
-            BitmovinLogger.i(Constants.TAG, "Yospace Session failed, shutting down playback");
+            BitmovinLogger.i("Yospace Session failed, shutting down playback");
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -350,9 +350,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
             truexAdRenderer.start(trueXConfiguration.getViewGroup());
             isTrueXRendering = true;
-            BitmovinLogger.d(Constants.TAG, "TrueX Ad rendered successfully");
+            BitmovinLogger.d("TrueX Ad rendered successfully");
         } catch (JSONException e) {
-            BitmovinLogger.e(Constants.TAG, "Failed to render TrueX Ad: " + e);
+            BitmovinLogger.e("Failed to render TrueX Ad: " + e);
         }
     }
 
@@ -438,15 +438,15 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (adTimeline != null) {
                     long seekTime = session.willSeekTo((long) time);
                     double absoluteSeekTime = adTimeline.relativeToAbsolute(seekTime);
-                    BitmovinLogger.d(Constants.TAG, "Seeking to " + absoluteSeekTime);
+                    BitmovinLogger.d("Seeking to " + absoluteSeekTime);
                     super.seek(absoluteSeekTime);
                 } else {
-                    BitmovinLogger.d(Constants.TAG, "Seeking to " + time);
+                    BitmovinLogger.d("Seeking to " + time);
                     super.seek(time);
                 }
             }
         } else {
-            BitmovinLogger.d(Constants.TAG, "Seeking to " + time);
+            BitmovinLogger.d("Seeking to " + time);
             super.seek(time);
         }
     }
@@ -517,14 +517,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnSourceLoadedListener onSourceLoadedListener = new OnSourceLoadedListener() {
         @Override
         public void onSourceLoaded(SourceLoadedEvent sourceLoadedEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Initialising Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Initialising Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.INITIALISING, getYospaceTime(), false));
             if (session instanceof SessionNonLinear) {
                 List<com.yospace.android.hls.analytic.advert.AdBreak> adBreaks = ((SessionNonLinear) session).getAdBreaks();
                 if (adBreaks != null) {
-                    BitmovinLogger.d(Constants.TAG, "Ad Breaks: " + adBreaks.toString());
+                    BitmovinLogger.d("Ad Breaks: " + adBreaks.toString());
                     adTimeline = new AdTimeline(adBreaks);
-                    BitmovinLogger.d(Constants.TAG, adTimeline.toString());
+                    BitmovinLogger.d(adTimeline.toString());
                 }
             }
         }
@@ -534,7 +534,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent sourceUnloadedEvent) {
             if (sessionStatus != YospaceSesssionStatus.NOT_INITIALIZED) {
-                BitmovinLogger.d(Constants.TAG, "Sending Stopped Event: " + getYospaceTime());
+                BitmovinLogger.d("Sending Stopped Event: " + getYospaceTime());
                 stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
                 resetYospaceSession();
             }
@@ -544,7 +544,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnPlaybackFinishedListener onPlaybackFinishedListener = new OnPlaybackFinishedListener() {
         @Override
         public void onPlaybackFinished(PlaybackFinishedEvent playbackFinishedEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Stopped Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Stopped Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.STOPPED, getYospaceTime(), false));
         }
     };
@@ -552,7 +552,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnPausedListener onPausedListener = new OnPausedListener() {
         @Override
         public void onPaused(PausedEvent pausedEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Paused Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Paused Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
         }
     };
@@ -560,7 +560,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnPlayingListener onPlayingListener = new OnPlayingListener() {
         @Override
         public void onPlaying(PlayingEvent playingEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Playing Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Playing Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
         }
     };
@@ -575,7 +575,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnStallEndedListener onStallEndedListener = new OnStallEndedListener() {
         @Override
         public void onStallEnded(StallEndedEvent stallEndedEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Stall Ended Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Stall Ended Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.BUFFERING_END, getYospaceTime(), false));
         }
     };
@@ -583,7 +583,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnStallStartedListener onStallStartedListener = new OnStallStartedListener() {
         @Override
         public void onStallStarted(StallStartedEvent stallStartedEvent) {
-            BitmovinLogger.d(Constants.TAG, "Sending Stall Started Event: " + getYospaceTime());
+            BitmovinLogger.d("Sending Stall Started Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.BUFFERING_START, getYospaceTime(), false));
         }
     };
@@ -645,7 +645,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
                 TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
-                    BitmovinLogger.d(Constants.TAG, "Sending Metadata Event: " + timedMetadata.toString());
+                    BitmovinLogger.d("Sending Metadata Event: " + timedMetadata.toString());
                     metadataSource.notify(timedMetadata);
                 }
             }
@@ -658,7 +658,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler adStartedListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - Ad started");
+            BitmovinLogger.d("TrueX - Ad started");
             YospaceAdStartedEvent adStartedEvent;
             Ad activeAd = getActiveAd();
             if (activeAd != null) {
@@ -666,9 +666,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             } else {
                 adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
             }
-            BitmovinLogger.d(Constants.TAG, "Emitting AdBreakStartedEvent");
+            BitmovinLogger.d("Emitting AdBreakStartedEvent");
             yospaceEventEmitter.emit(new AdBreakStartedEvent());
-            BitmovinLogger.d(Constants.TAG, "Emitting AdStartedEvent");
+            BitmovinLogger.d("Emitting AdStartedEvent");
             yospaceEventEmitter.emit(adStartedEvent);
             isYospaceAd = true;
             pause();
@@ -678,10 +678,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler adCompletedListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - Ad completed");
+            BitmovinLogger.d("TrueX - Ad completed");
             isYospaceAd = false;
             if (!adFree) {
-                BitmovinLogger.d(Constants.TAG, "Emitting AdFinishedEvent");
+                BitmovinLogger.d("Emitting AdFinishedEvent");
                 yospaceEventEmitter.emit(new AdFinishedEvent());
                 play();
             }
@@ -691,7 +691,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler adErrorListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - Ad error");
+            BitmovinLogger.d("TrueX - Ad error");
             isYospaceAd = false;
             play();
         }
@@ -700,7 +700,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler noAdsListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - No ads found");
+            BitmovinLogger.d("TrueX - No ads found");
             isYospaceAd = false;
             play();
         }
@@ -709,20 +709,20 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private IEventHandler popupListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - Popup");
+            BitmovinLogger.d("TrueX - Popup");
         }
     };
 
     private IEventHandler adFreeListener = new IEventHandler() {
         @Override
         public void handleEvent(Map<String, ?> data) {
-            BitmovinLogger.d(Constants.TAG, "TrueX - Ad free");
+            BitmovinLogger.d("TrueX - Ad free");
             adFree = true;
             Ad currentAd = getActiveAd();
             if (currentAd != null) {
-                BitmovinLogger.d(Constants.TAG, "Emitting AdFinishedEvent");
+                BitmovinLogger.d("Emitting AdFinishedEvent");
                 yospaceEventEmitter.emit(new AdFinishedEvent());
-                BitmovinLogger.d(Constants.TAG, "Emitting AdBreakFinishedEvent");
+                BitmovinLogger.d("Emitting AdBreakFinishedEvent");
                 yospaceEventEmitter.emit(new AdBreakFinishedEvent());
                 // Seek to end of underlying non-TrueX ad
                 seek(currentAd.getAbsoluteEnd() + 1);
@@ -738,7 +738,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertBreakStart(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             if (adFree) {
-                BitmovinLogger.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
+                BitmovinLogger.d("Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
                 if (trueXConfiguration != null) {
@@ -746,9 +746,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     for (Advert advert : adBreak.getAdverts()) {
                         if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
                             String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
-                            BitmovinLogger.d(Constants.TAG, "TrueX Ad Found - Source:" + creativeUrl);
+                            BitmovinLogger.d("TrueX Ad Found - Source:" + creativeUrl);
                             String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
-                            BitmovinLogger.d(Constants.TAG, "Rendering TrueX Ad: " + advert.toString());
+                            BitmovinLogger.d("Rendering TrueX Ad: " + advert.toString());
                             renderTrueXAd(creativeUrl, adParams);
                         }
                     }
@@ -763,7 +763,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            BitmovinLogger.d(Constants.TAG, "Emitting AdBreakStartedEvent");
+                            BitmovinLogger.d("Emitting AdBreakStartedEvent");
                             yospaceEventEmitter.emit(new AdBreakStartedEvent());
                         }
                     });
@@ -777,7 +777,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        BitmovinLogger.d(Constants.TAG, "Emitting AdBreakFinishedEvent");
+                        BitmovinLogger.d("Emitting AdBreakFinishedEvent");
                         yospaceEventEmitter.emit(new AdBreakFinishedEvent());
                     }
                 });
@@ -789,7 +789,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertStart(Advert advert) {
             if (adFree) {
-                BitmovinLogger.d(Constants.TAG, "Skipping Ad Break due to TrueX ad free experience");
+                BitmovinLogger.d("Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
                 if (!isTrueXRendering) {
@@ -802,7 +802,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            BitmovinLogger.d(Constants.TAG, "Emitting AdStartedEvent");
+                            BitmovinLogger.d("Emitting AdStartedEvent");
                             yospaceEventEmitter.emit(adStartedEvent);
                         }
                     });
@@ -817,7 +817,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        BitmovinLogger.d(Constants.TAG, "Emitting AdFinishedEvent");
+                        BitmovinLogger.d("Emitting AdFinishedEvent");
                         yospaceEventEmitter.emit(new AdFinishedEvent());
                     }
                 });
@@ -828,17 +828,17 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onTimelineUpdateReceived(VmapPayload vmapPayload) {
-            BitmovinLogger.d(Constants.TAG, "onTimelineUpdateReceived: ");
+            BitmovinLogger.d("onTimelineUpdateReceived: ");
         }
 
         @Override
         public void onTrackingUrlCalled(Advert advert, String s, String s1) {
-            BitmovinLogger.d(Constants.TAG, "OnTrackingUrlCalled: " + s);
+            BitmovinLogger.d("OnTrackingUrlCalled: " + s);
         }
 
         @Override
         public void onVastReceived(VastPayload vastPayload) {
-            BitmovinLogger.d(Constants.TAG, "OnVastReceived: " + vastPayload.getRaw());
+            BitmovinLogger.d("OnVastReceived: " + vastPayload.getRaw());
         }
     };
 }

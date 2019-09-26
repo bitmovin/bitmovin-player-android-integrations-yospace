@@ -73,7 +73,7 @@ public class YospaceUtil {
                     continue;
                 }
 
-                BitmovinLogger.d(Constants.TAG, "Key: " + key + " Value: " + value);
+                BitmovinLogger.d("Key: " + key + " Value: " + value);
 
                 if (key.equals("YMID")) {
                     ymid = value;

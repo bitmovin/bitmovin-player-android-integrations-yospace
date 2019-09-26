@@ -254,8 +254,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         SessionNonLinearStartOver.create(sessionEventListener, properties);
     }
 
-    private void updateLogVisibility(boolean isDebug) {
-        if (isDebug) {
+    private void updateLogVisibility(boolean isLoggingEnabled) {
+        if (isLoggingEnabled) {
             BitmovinLogger.enableLogging();
         } else {
             BitmovinLogger.disableLogging();

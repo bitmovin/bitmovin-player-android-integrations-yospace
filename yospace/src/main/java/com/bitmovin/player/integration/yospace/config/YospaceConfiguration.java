@@ -18,7 +18,6 @@ public class YospaceConfiguration {
         this.debug = debug;
     }
 
-
     public String getUserAgent() {
         return userAgent;
     }
@@ -38,4 +37,5 @@ public class YospaceConfiguration {
     public boolean isDebug() {
         return debug;
     }
+
 }

@@ -1,8 +1,5 @@
 package com.bitmovin.player.integration.yospace;
 
-import android.util.Log;
-
-import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.MetadataEvent;
 import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.model.emsg.EventMessage;
@@ -76,7 +73,7 @@ public class YospaceUtil {
                     continue;
                 }
 
-                Log.d(Constants.TAG, "Key: " + key + " Value: " + value);
+                BitmovinLogger.d(Constants.TAG, "Key: " + key + " Value: " + value);
 
                 if (key.equals("YMID")) {
                     ymid = value;

@@ -4,6 +4,7 @@ import android.util.Log;
 
 public class BitmovinLogger {
 
+    private static final String TAG = BitmovinLogger.class.getSimpleName();
     private static boolean isDebugEnabled;
 
     public static void enableLogging() {
@@ -14,33 +15,33 @@ public class BitmovinLogger {
         isDebugEnabled = false;
     }
 
-    public static void d(String tag, String message) {
+    public static void d(String message) {
         if (isDebugEnabled) {
-            Log.d(tag, message);
+            Log.d(TAG, message);
         }
     }
 
-    public static void e(String tag, String message) {
+    public static void e(String message) {
         if (isDebugEnabled) {
-            Log.e(tag, message);
+            Log.e(TAG, message);
         }
     }
 
-    public static void i(String tag, String message) {
+    public static void i(String message) {
         if (isDebugEnabled) {
-            Log.i(tag, message);
+            Log.i(TAG, message);
         }
     }
 
-    public static void wtf(String tag, String message) {
+    public static void wtf(String message) {
         if (isDebugEnabled) {
-            Log.wtf(tag, message);
+            Log.wtf(TAG, message);
         }
     }
 
-    public static void v(String tag, String message) {
+    public static void v(String message) {
         if (isDebugEnabled) {
-            Log.v(tag, message);
+            Log.v(TAG, message);
         }
     }
 }

@@ -21,7 +21,7 @@ import com.bitmovin.player.api.event.data.AdFinishedEvent;
 import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
-import com.bitmovin.player.api.event.data.PlayingEvent;
+import com.bitmovin.player.api.event.data.ReadyEvent;
 import com.bitmovin.player.api.event.data.WarningEvent;
 import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdBreakStartedListener;
@@ -31,7 +31,7 @@ import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
-import com.bitmovin.player.api.event.listener.OnPlayingListener;
+import com.bitmovin.player.api.event.listener.OnReadyListener;
 import com.bitmovin.player.api.event.listener.OnWarningListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.media.HLSSource;
@@ -39,7 +39,6 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integration.yospace.Ad;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
-import com.bitmovin.player.integration.yospace.Constants;
 import com.bitmovin.player.integration.yospace.YospaceAdStartedEvent;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
 import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
@@ -48,8 +47,6 @@ import com.bitmovin.player.integration.yospace.config.YospaceConfigurationBuilde
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, KeyEvent.Callback {
-    private BitmovinPlayerView bitmovinPlayerView;
-    private BitmovinYospacePlayer bitmovinYospacePlayer;
     private Button liveButton;
     private Button vodButton;
     private Button unloadButton;
@@ -59,9 +56,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button defaultButton;
     private Spinner assetTypeSpinner;
     private EditText urlInputEditText;
+    private BitmovinPlayerView bitmovinPlayerView;
+
+    private BitmovinYospacePlayer bitmovinYospacePlayer;
 
     private String currentClickThroughUrl;
     private TrueXConfiguration trueXConfiguration;
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,36 +71,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         vodButton = findViewById(R.id.vod_button);
-        vodButton.setOnClickListener(this);
         liveButton = findViewById(R.id.live_button);
-        liveButton.setOnClickListener(this);
         unloadButton = findViewById(R.id.unload_button);
-        unloadButton.setOnClickListener(this);
-        clickThroughButton = findViewById(R.id.click_through_button);
-        clickThroughButton.setOnClickListener(this);
         customButton = findViewById(R.id.custom_button);
-        customButton.setOnClickListener(this);
         trueXButton = findViewById(R.id.truex_button);
-        trueXButton.setOnClickListener(this);
+        clickThroughButton = findViewById(R.id.click_through_button);
         defaultButton = findViewById(R.id.default_button);
-        defaultButton.setOnClickListener(this);
         assetTypeSpinner = findViewById(R.id.asset_type_spinner);
         urlInputEditText = findViewById(R.id.url_edit_text);
-
-        // Creating a new PlayerConfiguration
-        PlayerConfiguration playerConfiguration = new PlayerConfiguration();
-
         bitmovinPlayerView = findViewById(R.id.bitmovinPlayerView);
 
+        vodButton.setOnClickListener(this);
+        liveButton.setOnClickListener(this);
+        unloadButton.setOnClickListener(this);
+        customButton.setOnClickListener(this);
+        trueXButton.setOnClickListener(this);
+        clickThroughButton.setOnClickListener(this);
+        defaultButton.setOnClickListener(this);
+
+        PlayerConfiguration playerConfiguration = new PlayerConfiguration();
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-        String userId = "turner_bm_ys_tester_001";
-        String vastConfigUrl = "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=";
-        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView, userId, vastConfigUrl);
+        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView, "turner_bm_ys_tester_001", "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=");
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
-        this.bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
-
         bitmovinYospacePlayer.addEventListener(onAdBreakStartedListener);
         bitmovinYospacePlayer.addEventListener(onAdBreakFinishedListener);
         bitmovinYospacePlayer.addEventListener(onAdStartedListener);
@@ -107,10 +103,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdErrorListener);
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
-        bitmovinYospacePlayer.addEventListener(onPlayingListener);
+        bitmovinYospacePlayer.addEventListener(onReadyListener);
         bitmovinYospacePlayer.addEventListener(onWarningListener);
-
         bitmovinYospacePlayer.setPlayerPolicy(new BitmovinYospacePolicy(bitmovinYospacePlayer));
+
+        bitmovinPlayerView.setPlayer(bitmovinYospacePlayer);
     }
 
     private void unload() {
@@ -121,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=false"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
+
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR);
 
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
@@ -140,7 +138,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SourceItem sourceItem = new SourceItem(new HLSSource("http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
+
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
+
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnErrorListener onErrorListener = new OnErrorListener() {
         @Override
         public void onError(final ErrorEvent errorEvent) {
-            Toast.makeText(getApplicationContext(), "Error: " + errorEvent.getCode() + " - " + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error - code=" + errorEvent.getCode() + ", message=" + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
         }
     };
 
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!(adStartedEvent instanceof YospaceAdStartedEvent)) {
                 return;
             }
-            Log.d(Constants.TAG, "onAdStarted: isTrueX: " + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
+            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
 
             currentClickThroughUrl = adStartedEvent.getClickThroughUrl();
 
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Ad activeAd = bitmovinYospacePlayer.getActiveAd();
             if (activeAd != null) {
-                Toast.makeText(getApplicationContext(), "Ad Started: " + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ad Started - id=" + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onAdFinished(AdFinishedEvent adFinishedEvent) {
             clickThroughButton.setEnabled(false);
             clickThroughButton.setClickable(false);
-            Toast.makeText(getApplicationContext(), "Ad Finished: " + bitmovinYospacePlayer.isAd(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Ad Finished", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -251,10 +251,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
+    private OnReadyListener onReadyListener = new OnReadyListener() {
         @Override
-        public void onPlaying(PlayingEvent playingEvent) {
-            Log.d("BitmovinYospaceSample", "ad breaks - " + bitmovinYospacePlayer.getAdTimeline().toString());
+        public void onReady(ReadyEvent readyEvent) {
+            Log.d(TAG, "Ad Breaks - " + bitmovinYospacePlayer.getAdTimeline());
         }
     };
 

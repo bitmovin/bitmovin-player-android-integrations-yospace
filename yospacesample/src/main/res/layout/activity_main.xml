@@ -11,6 +11,7 @@
         android:id="@+id/url_edit_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:maxLines="2"
         android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
         app:layout_constraintBottom_toTopOf="@id/vod_button"
         app:layout_constraintEnd_toStartOf="@id/asset_type_spinner"

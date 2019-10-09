@@ -256,9 +256,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
     private void updateLogVisibility(boolean isLoggingEnabled) {
         if (isLoggingEnabled) {
-            BitLog.enableLogging();
+            BitLog.enable();
         } else {
-            BitLog.disableLogging();
+            BitLog.disable();
         }
     }
 

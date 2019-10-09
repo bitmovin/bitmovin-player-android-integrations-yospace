@@ -5,43 +5,43 @@ import android.util.Log;
 public class BitLog {
 
     private static final String TAG = BitLog.class.getSimpleName();
-    private static boolean isLogEnabled;
+    private static boolean isEnabled;
 
-    public static void enableLogging() {
-        isLogEnabled = true;
+    public static void enable() {
+        isEnabled = true;
     }
 
-    public static void disableLogging() {
-        isLogEnabled = false;
+    public static void disable() {
+        isEnabled = false;
     }
 
     public static void d(String message) {
-        if (isLogEnabled) {
-            Log.d(TAG, "[DEBUG]" + getStackInfo() + " -> " + message);
+        if (isEnabled) {
+            Log.d(TAG, getStackInfo() + " -> " + message);
         }
     }
 
     public static void e(String message) {
-        if (isLogEnabled) {
-            Log.e(TAG, "[ERROR]" + getStackInfo() + " -> " + message);
+        if (isEnabled) {
+            Log.e(TAG, getStackInfo() + " -> " + message);
         }
     }
 
     public static void i(String message) {
-        if (isLogEnabled) {
-            Log.i(TAG, "[INFO]" + getStackInfo() + " -> " + message);
+        if (isEnabled) {
+            Log.i(TAG, getStackInfo() + " -> " + message);
         }
     }
 
     public static void wtf(String message) {
-        if (isLogEnabled) {
-            Log.wtf(TAG, "[WTF]" + getStackInfo() + " -> " + message);
+        if (isEnabled) {
+            Log.wtf(TAG, getStackInfo() + " -> " + message);
         }
     }
 
     public static void v(String message) {
-        if (isLogEnabled) {
-            Log.v(TAG, "[VERBOSE]" + getStackInfo() + " -> " + message);
+        if (isEnabled) {
+            Log.v(TAG, getStackInfo() + " -> " + message);
         }
     }
 

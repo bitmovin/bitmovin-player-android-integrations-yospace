@@ -39,7 +39,6 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integration.yospace.Ad;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
-import com.bitmovin.player.integration.yospace.Constants;
 import com.bitmovin.player.integration.yospace.YospaceAdStartedEvent;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
 import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
@@ -63,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String currentClickThroughUrl;
     private TrueXConfiguration trueXConfiguration;
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sourceConfig.addSourceItem(sourceItem);
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD);
-        
+
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
@@ -200,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnErrorListener onErrorListener = new OnErrorListener() {
         @Override
         public void onError(final ErrorEvent errorEvent) {
-            Toast.makeText(getApplicationContext(), "Error: " + errorEvent.getCode() + " - " + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error - code=" + errorEvent.getCode() + ", message=" + errorEvent.getMessage(), Toast.LENGTH_LONG).show();
         }
     };
 
@@ -217,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!(adStartedEvent instanceof YospaceAdStartedEvent)) {
                 return;
             }
-            Log.d(Constants.TAG, "onAdStarted: isTrueX: " + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
+            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
 
             currentClickThroughUrl = adStartedEvent.getClickThroughUrl();
 
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Ad activeAd = bitmovinYospacePlayer.getActiveAd();
             if (activeAd != null) {
-                Toast.makeText(getApplicationContext(), "Ad Started: " + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ad Started - id=" + activeAd.getIdentifier(), Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -239,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onAdFinished(AdFinishedEvent adFinishedEvent) {
             clickThroughButton.setEnabled(false);
             clickThroughButton.setClickable(false);
-            Toast.makeText(getApplicationContext(), "Ad Finished: " + bitmovinYospacePlayer.isAd(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Ad Finished", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -253,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OnPlayingListener onPlayingListener = new OnPlayingListener() {
         @Override
         public void onPlaying(PlayingEvent playingEvent) {
-            Log.d("BitmovinYospaceSample", "ad breaks - " + bitmovinYospacePlayer.getAdTimeline().toString());
+            Log.d(TAG, "Ad Breaks - " + bitmovinYospacePlayer.getAdTimeline());
         }
     };
 

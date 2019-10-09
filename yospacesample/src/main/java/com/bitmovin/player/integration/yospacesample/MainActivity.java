@@ -22,6 +22,7 @@ import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.PlayingEvent;
+import com.bitmovin.player.api.event.data.ReadyEvent;
 import com.bitmovin.player.api.event.data.WarningEvent;
 import com.bitmovin.player.api.event.listener.OnAdBreakFinishedListener;
 import com.bitmovin.player.api.event.listener.OnAdBreakStartedListener;
@@ -32,6 +33,7 @@ import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
 import com.bitmovin.player.api.event.listener.OnAdStartedListener;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
 import com.bitmovin.player.api.event.listener.OnPlayingListener;
+import com.bitmovin.player.api.event.listener.OnReadyListener;
 import com.bitmovin.player.api.event.listener.OnWarningListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.media.HLSSource;
@@ -103,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.addEventListener(onAdErrorListener);
         bitmovinYospacePlayer.addEventListener(onAdSkippedListener);
         bitmovinYospacePlayer.addEventListener(onErrorListener);
-        bitmovinYospacePlayer.addEventListener(onPlayingListener);
+        bitmovinYospacePlayer.addEventListener(onReadyListener);
         bitmovinYospacePlayer.addEventListener(onWarningListener);
         bitmovinYospacePlayer.setPlayerPolicy(new BitmovinYospacePolicy(bitmovinYospacePlayer));
 
@@ -251,9 +253,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
+    private OnReadyListener onReadyListener = new OnReadyListener() {
         @Override
-        public void onPlaying(PlayingEvent playingEvent) {
+        public void onReady(ReadyEvent readyEvent) {
             Log.d(TAG, "Ad Breaks - " + bitmovinYospacePlayer.getAdTimeline());
         }
     };

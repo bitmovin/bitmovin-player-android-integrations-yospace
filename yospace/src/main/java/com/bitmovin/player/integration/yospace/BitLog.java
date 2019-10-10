@@ -17,35 +17,35 @@ public class BitLog {
 
     public static void d(String message) {
         if (isEnabled) {
-            Log.d(TAG, getStackInfo() + " -> " + message);
+            Log.d(TAG, getStackTraceInfo() + " -> " + message);
         }
     }
 
     public static void e(String message) {
         if (isEnabled) {
-            Log.e(TAG, getStackInfo() + " -> " + message);
+            Log.e(TAG, getStackTraceInfo() + " -> " + message);
         }
     }
 
     public static void i(String message) {
         if (isEnabled) {
-            Log.i(TAG, getStackInfo() + " -> " + message);
+            Log.i(TAG, getStackTraceInfo() + " -> " + message);
         }
     }
 
     public static void wtf(String message) {
         if (isEnabled) {
-            Log.wtf(TAG, getStackInfo() + " -> " + message);
+            Log.wtf(TAG, getStackTraceInfo() + " -> " + message);
         }
     }
 
     public static void v(String message) {
         if (isEnabled) {
-            Log.v(TAG, getStackInfo() + " -> " + message);
+            Log.v(TAG, getStackTraceInfo() + " -> " + message);
         }
     }
 
-    private static String getStackInfo() {
+    private static String getStackTraceInfo() {
         StackTraceElement[] trace = new Exception().getStackTrace();
         String info = "";
         // Trace index is 2 levels up

@@ -31,8 +31,10 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation files('libs/yoAdManagement-debug.aar')
-    implementation files('libs/yoUtil-debug.aar')
+    debugImplementation files('libs/yoAdManagement-debug.aar')
+    debugImplementation files('libs/yoUtil-debug.aar')
+    releaseImplementation files('libs/yoAdManagement-release.aar')
+    releaseImplementation files('libs/yoUtil-release.aar')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

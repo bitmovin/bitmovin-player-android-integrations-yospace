@@ -16,7 +16,7 @@ object BitLog {
                 val classPath = trace[traceIndex].className
                 val startIndex = classPath.lastIndexOf(".")
                 // Get class name from full path
-                var className = classPath.substring(startIndex + 1).trim { it <= ' ' }
+                var className = classPath.substring(startIndex + 1).trim { char -> char <= ' ' }
                 // Remove appended anonymous class name (e.g. $2) if present
                 if (className.contains("$")) {
                     className = className.substring(0, className.indexOf("$"))

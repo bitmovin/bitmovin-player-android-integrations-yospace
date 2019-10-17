@@ -72,12 +72,12 @@ private fun MetadataEvent.emsgToId3(): TimedMetadata? {
     return generateTimedMetadata(ymid, yseq, ytyp, ydur, yprg)
 }
 
-private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?): TimedMetadata? {
-    if (ymid != null && yseq != null && ytyp != null && ydur != null) {
-        return TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur)
-    } else if (yprg != null) {
-        return TimedMetadata.createFromId3Tags(yprg, 0.0f)
-    }
-    return null
-}
+private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?): TimedMetadata? =
+        if (ymid != null && yseq != null && ytyp != null && ydur != null) {
+            TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur)
+        } else if (yprg != null) {
+            TimedMetadata.createFromId3Tags(yprg, 0.0f)
+        } else {
+            null
+        }
 

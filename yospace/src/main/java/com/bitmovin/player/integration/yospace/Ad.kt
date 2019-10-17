@@ -8,6 +8,6 @@ data class Ad(
         val absoluteEnd: Double,
         val sequence: Int,
         val clickThroughUrl: String,
-        val isHasInteractiveUnit: Boolean,
+        val hasInteractiveUnit: Boolean,
         val isTrueX: Boolean
 )

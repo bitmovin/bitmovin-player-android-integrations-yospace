@@ -6,9 +6,9 @@ import com.bitmovin.player.model.emsg.EventMessage
 import com.bitmovin.player.model.id3.BinaryFrame
 import com.yospace.hls.TimedMetadata
 
-fun MetadataEvent.toTimedMetadata(): TimedMetadata? = when {
-    type == "EMSG" -> emsgToId3()
-    type == "ID3" -> processId3()
+fun MetadataEvent.toTimedMetadata(): TimedMetadata? = when (type) {
+    "EMSG" -> emsgToId3()
+    "ID3" -> processId3()
     else -> null
 }
 

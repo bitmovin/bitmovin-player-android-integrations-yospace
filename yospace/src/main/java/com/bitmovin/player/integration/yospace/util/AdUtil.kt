@@ -10,7 +10,7 @@ import com.yospace.android.hls.analytic.advert.Advert as YospaceAd
 fun Ad.toAdStartedEvent(): YospaceAdStartedEvent =
     YospaceAdStartedEvent(AdSourceType.UNKNOWN, clickThroughUrl, sequence, duration / 1000, relativeStart / 1000, "position", 0.0, isTrueX)
 
-fun buildEmptyAdStartedEvent(): YospaceAdStartedEvent =
+fun emptyAdStartedEvent(): YospaceAdStartedEvent =
     YospaceAdStartedEvent(AdSourceType.UNKNOWN, "", 0, 0.0, 0.0, "0", 0.0, true)
 
 fun List<YospaceAdBreak>.toAdBreaks(): List<AdBreak> {

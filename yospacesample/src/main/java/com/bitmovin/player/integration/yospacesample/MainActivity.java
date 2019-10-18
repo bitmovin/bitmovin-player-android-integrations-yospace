@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.LINEAR, false);
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration, null);
     }
 
     private void loadVod() {
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD, false);
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration, null);
     }
 
     private void loadDefault() {
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         YospaceSourceConfiguration yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD, false);
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration, null);
     }
 
     private void loadTrueX() {
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             yospaceSourceConfiguration = new YospaceSourceConfiguration(YospaceAssetType.VOD, false);
         }
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration, null);
     }
 
     @Override

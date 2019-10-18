@@ -74,9 +74,9 @@ private fun MetadataEvent.emsgToId3(): TimedMetadata? {
 
 private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?): TimedMetadata? =
     if (ymid != null && yseq != null && ytyp != null && ydur != null) {
-        TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur)
+        TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur)
     } else if (yprg != null) {
-        TimedMetadata.createFromMetadata(yprg, 0.0f)
+        TimedMetadata.createFromId3Tags(yprg, 0.0f)
     } else {
         null
     }

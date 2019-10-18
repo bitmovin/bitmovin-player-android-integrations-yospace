@@ -68,6 +68,161 @@ class BitmovinYospacePlayer(
     private var loadState: LoadState = LoadState.UNKNOWN
     private val handler = Handler(Looper.getMainLooper())
 
+    fun load(sourceConfiguration: SourceConfiguration, yospaceSourceConfiguration: YospaceSourceConfiguration, trueXConfiguration: TrueXConfiguration? = null) {
+        Validate.notNull(sourceConfiguration, "SourceConfiguration must not be null")
+        Validate.notNull(yospaceSourceConfiguration, "YospaceSourceConfiguration must not be null")
+
+        loadState = LoadState.LOADING
+
+        this.sourceConfiguration = sourceConfiguration
+        this.yospaceSourceConfiguration = yospaceSourceConfiguration
+        this.trueXConfiguration = trueXConfiguration
+
+        if (trueXConfiguration == null) {
+            truexAdRenderer = null
+        }
+
+        val sourceItem = sourceConfiguration.firstSourceItem
+        if (sourceItem == null) {
+            yospaceEventEmitter.emit(ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"))
+            unload()
+            return
+        }
+
+        val hlsSource = sourceItem.hlsSource
+        if (hlsSource == null || hlsSource.url == null) {
+            yospaceEventEmitter.emit(ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"))
+            unload()
+            return
+        }
+
+        sessionPrimaryUrl = hlsSource.url
+        sessionProperties = Session.SessionProperties(sessionPrimaryUrl)
+            .readTimeout(yospaceConfiguration.readTimeout)
+            .connectTimeout(yospaceConfiguration.connectTimeout)
+            .requestTimeout(yospaceConfiguration.requestTimeout)
+
+        yospaceConfiguration.userAgent?.let { userAgent ->
+            sessionProperties!!.userAgent(userAgent)
+        }
+
+        if (yospaceConfiguration.isDebug) {
+            sessionProperties!!.addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
+        }
+
+        when (yospaceSourceConfiguration.assetType) {
+            YospaceAssetType.LINEAR -> loadLive()
+            YospaceAssetType.VOD -> loadVod()
+            YospaceAssetType.LINEAR_START_OVER -> loadStartOver()
+        }
+    }
+
+    fun getActiveAd(): Ad? = when {
+        isLive -> liveAd
+        else -> adTimeline?.currentAd(currentTimeWithAds())
+    }
+
+    fun currentTimeWithAds(): Double = currentTime
+
+    fun clickThroughPressed() {
+        session?.onLinearClickThrough()
+    }
+
+    fun setPlayerPolicy(bitmovinYospacePlayerPolicy: BitmovinYospacePlayerPolicy) {
+        yospacePlayerPolicy.playerPolicy = bitmovinYospacePlayerPolicy
+    }
+
+    private fun loadLive() {
+        sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, sessionProperties)
+        startPlayback(sessionFactory!!.playerUrl)
+    }
+
+    private fun loadVod() {
+        SessionNonLinear.create(sessionEventListener, sessionProperties)
+    }
+
+    private fun loadStartOver() {
+        SessionNonLinearStartOver.create(sessionEventListener, sessionProperties)
+    }
+
+    override fun unload() {
+        loadState = LoadState.UNLOADING
+        super.unload()
+    }
+
+    private fun resetYospaceSession() {
+        sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
+        session?.removeAnalyticListener(analyticEventListener)
+        session?.shutdown()
+        session = null
+        isYospaceAd = false
+        adFree = false
+        liveAd = null
+        liveAdBreak = null
+        adTimeline = null
+        isTrueXRendering = false
+        super.unload()
+    }
+
+    private fun handleYospaceSessionFailure(yospaceErrorCode: Int, message: String) {
+        if (yospaceSourceConfiguration.retryExcludingYospace) {
+            handler.post {
+                yospaceEventEmitter.emit(WarningEvent(yospaceErrorCode, message))
+                if (loadState != LoadState.UNLOADING) {
+                    load(sourceConfiguration)
+                }
+            }
+        } else {
+            BitLog.i("Yospace Session failed, shutting down playback")
+            handler.post { yospaceEventEmitter.emit(ErrorEvent(yospaceErrorCode, message)) }
+        }
+    }
+
+    private fun startPlayback(playbackUrl: String) {
+        if (loadState != LoadState.UNLOADING) {
+            handler.post {
+                val newSourceConfiguration = SourceConfiguration()
+                val sourceItem = SourceItem(HLSSource(playbackUrl))
+                val drmConfiguration = sourceConfiguration.firstSourceItem.getDrmConfiguration(DRMSystems.WIDEVINE_UUID)
+                drmConfiguration?.let {
+                    sourceItem.addDRMConfiguration(drmConfiguration)
+                }
+                newSourceConfiguration.addSourceItem(sourceItem)
+                load(newSourceConfiguration)
+            }
+        }
+    }
+
+    private fun renderTrueXAd(creativeURL: String, adParameters: String) {
+        try {
+            pause()
+            val adParams = JSONObject(adParameters)
+            trueXConfiguration?.let { trueXConfig ->
+                truexAdRenderer = TruexAdRenderer(context)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_STARTED, adStartedListener)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_COMPLETED, adCompletedListener)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_ERROR, adErrorListener)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, noAdsListener)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_FREE_POD, adFreeListener)
+                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, popupListener)
+                truexAdRenderer!!.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL)
+                truexAdRenderer!!.start(trueXConfig.viewGroup)
+                isTrueXRendering = true
+                BitLog.d("TrueX Ad rendered successfully")
+            }
+        } catch (e: JSONException) {
+            BitLog.e("Failed to render TrueX Ad: $e")
+        }
+    }
+
+    private fun getYospaceTime(): Int {
+        var i = (currentTimeWithAds() * 1000).roundToInt()
+        if (i < 0) {
+            i = 0
+        }
+        return i
+    }
+
     /**
      * Player Listeners
      */
@@ -339,160 +494,5 @@ class BitmovinYospacePlayer(
         super.addEventListener(onFullscreenEnterListener)
         super.addEventListener(onFullscreenExitListener)
         super.addEventListener(onReadyListener)
-    }
-
-    fun load(sourceConfiguration: SourceConfiguration, yospaceSourceConfiguration: YospaceSourceConfiguration, trueXConfiguration: TrueXConfiguration? = null) {
-        Validate.notNull(sourceConfiguration, "SourceConfiguration must not be null")
-        Validate.notNull(yospaceSourceConfiguration, "YospaceSourceConfiguration must not be null")
-
-        loadState = LoadState.LOADING
-
-        this.sourceConfiguration = sourceConfiguration
-        this.yospaceSourceConfiguration = yospaceSourceConfiguration
-        this.trueXConfiguration = trueXConfiguration
-
-        if (trueXConfiguration == null) {
-            truexAdRenderer = null
-        }
-
-        val sourceItem = sourceConfiguration.firstSourceItem
-        if (sourceItem == null) {
-            yospaceEventEmitter.emit(ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"))
-            unload()
-            return
-        }
-
-        val hlsSource = sourceItem.hlsSource
-        if (hlsSource == null || hlsSource.url == null) {
-            yospaceEventEmitter.emit(ErrorEvent(YospaceErrorCodes.YOSPACE_INVALID_SOURCE, "Invalid Yospace source. You must provide an HLS source"))
-            unload()
-            return
-        }
-
-        sessionPrimaryUrl = hlsSource.url
-        sessionProperties = Session.SessionProperties(sessionPrimaryUrl)
-            .readTimeout(yospaceConfiguration.readTimeout)
-            .connectTimeout(yospaceConfiguration.connectTimeout)
-            .requestTimeout(yospaceConfiguration.requestTimeout)
-
-        yospaceConfiguration.userAgent?.let { userAgent ->
-            sessionProperties!!.userAgent(userAgent)
-        }
-
-        if (yospaceConfiguration.isDebug) {
-            sessionProperties!!.addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
-        }
-
-        when (yospaceSourceConfiguration.assetType) {
-            YospaceAssetType.LINEAR -> loadLive()
-            YospaceAssetType.VOD -> loadVod()
-            YospaceAssetType.LINEAR_START_OVER -> loadStartOver()
-        }
-    }
-
-    fun getActiveAd(): Ad? = when {
-        isLive -> liveAd
-        else -> adTimeline?.currentAd(currentTimeWithAds())
-    }
-
-    fun currentTimeWithAds(): Double = currentTime
-
-    fun clickThroughPressed() {
-        session?.onLinearClickThrough()
-    }
-
-    fun setPlayerPolicy(bitmovinYospacePlayerPolicy: BitmovinYospacePlayerPolicy) {
-        yospacePlayerPolicy.playerPolicy = bitmovinYospacePlayerPolicy
-    }
-
-    private fun loadLive() {
-        sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, sessionProperties)
-        startPlayback(sessionFactory!!.playerUrl)
-    }
-
-    private fun loadVod() {
-        SessionNonLinear.create(sessionEventListener, sessionProperties)
-    }
-
-    private fun loadStartOver() {
-        SessionNonLinearStartOver.create(sessionEventListener, sessionProperties)
-    }
-
-    override fun unload() {
-        loadState = LoadState.UNLOADING
-        super.unload()
-    }
-
-    private fun resetYospaceSession() {
-        sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
-        session?.removeAnalyticListener(analyticEventListener)
-        session?.shutdown()
-        session = null
-        isYospaceAd = false
-        adFree = false
-        liveAd = null
-        liveAdBreak = null
-        adTimeline = null
-        isTrueXRendering = false
-        super.unload()
-    }
-
-    private fun handleYospaceSessionFailure(yospaceErrorCode: Int, message: String) {
-        if (yospaceSourceConfiguration.retryExcludingYospace) {
-            handler.post {
-                yospaceEventEmitter.emit(WarningEvent(yospaceErrorCode, message))
-                if (loadState != LoadState.UNLOADING) {
-                    load(sourceConfiguration)
-                }
-            }
-        } else {
-            BitLog.i("Yospace Session failed, shutting down playback")
-            handler.post { yospaceEventEmitter.emit(ErrorEvent(yospaceErrorCode, message)) }
-        }
-    }
-
-    private fun startPlayback(playbackUrl: String) {
-        if (loadState != LoadState.UNLOADING) {
-            handler.post {
-                val newSourceConfiguration = SourceConfiguration()
-                val sourceItem = SourceItem(HLSSource(playbackUrl))
-                val drmConfiguration = sourceConfiguration.firstSourceItem.getDrmConfiguration(DRMSystems.WIDEVINE_UUID)
-                drmConfiguration?.let {
-                    sourceItem.addDRMConfiguration(drmConfiguration)
-                }
-                newSourceConfiguration.addSourceItem(sourceItem)
-                load(newSourceConfiguration)
-            }
-        }
-    }
-
-    private fun renderTrueXAd(creativeURL: String, adParameters: String) {
-        try {
-            pause()
-            val adParams = JSONObject(adParameters)
-            trueXConfiguration?.let { trueXConfig ->
-                truexAdRenderer = TruexAdRenderer(context)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_STARTED, adStartedListener)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_COMPLETED, adCompletedListener)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_ERROR, adErrorListener)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, noAdsListener)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.AD_FREE_POD, adFreeListener)
-                truexAdRenderer!!.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, popupListener)
-                truexAdRenderer!!.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL)
-                truexAdRenderer!!.start(trueXConfig.viewGroup)
-                isTrueXRendering = true
-                BitLog.d("TrueX Ad rendered successfully")
-            }
-        } catch (e: JSONException) {
-            BitLog.e("Failed to render TrueX Ad: $e")
-        }
-    }
-
-    private fun getYospaceTime(): Int {
-        var i = (currentTimeWithAds() * 1000).roundToInt()
-        if (i < 0) {
-            i = 0
-        }
-        return i
     }
 }

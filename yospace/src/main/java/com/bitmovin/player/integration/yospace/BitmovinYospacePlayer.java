@@ -595,7 +595,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (session != null && getAdTimeline() != null) {
                 // Notify Yospace of the Time Update
                 if (!(session instanceof SessionLive)) {
-                    // BitLog.INSTANCE.d(Constants.TAG, "Sending Playhead Update Event" + getYospaceTime());
+                    // BitLog.INSTANCE.d(TAG, "Sending Playhead Update Event" + getYospaceTime());
                     stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
                 }
                 handler.post(new Runnable() {

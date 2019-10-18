@@ -292,7 +292,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     };
 
     private void handleYospaceSessionFailure(int yospaceErrorCode, String message) {
-        if (yospaceSourceConfiguration.getRetryExcludingYospace()) {
+        if (yospaceSourceConfiguration.shouldRetryExcludingYospace()) {
             handler.post(new Runnable() {
                 public void run() {
                     yospaceEventEmitter.emit(new WarningEvent(yospaceErrorCode, message));

@@ -44,12 +44,12 @@ private fun MetadataEvent.emsgToId3(): TimedMetadata? {
 
     for (i in 0 until metadata.length()) {
         val message = metadata.get(i) as EventMessage
-        val data = String(message.messageData).split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val data = String(message.messageData).split(",".toRegex()).dropLastWhile { char -> char.isEmpty() }.toTypedArray()
 
         for (j in data.indices) {
             var key: String?
             var value: String?
-            val entry = data[j].split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val entry = data[j].split("=".toRegex()).dropLastWhile { char -> char.isEmpty() }.toTypedArray()
             if (entry.size > 1) {
                 key = entry[0]
                 value = entry[1]

@@ -38,7 +38,6 @@ import com.bitmovin.player.api.event.listener.OnStallStartedListener;
 import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.advertising.AdItem;
-import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.config.drm.DRMConfiguration;
 import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
@@ -47,6 +46,8 @@ import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
+import com.bitmovin.player.integration.yospace.util.AdUtilKt;
+import com.bitmovin.player.integration.yospace.util.MetadataUtilKt;
 import com.truex.adrenderer.IEventHandler;
 import com.truex.adrenderer.TruexAdRenderer;
 import com.truex.adrenderer.TruexAdRendererConstants;
@@ -640,7 +641,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
-                TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
+                TimedMetadata timedMetadata = MetadataUtilKt.toTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
                     BitLog.INSTANCE.d("Sending Metadata Event: " + timedMetadata.toString());
                     metadataSource.notify(timedMetadata);
@@ -659,9 +660,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             YospaceAdStartedEvent adStartedEvent;
             Ad activeAd = getActiveAd();
             if (activeAd != null) {
-                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, activeAd.getClickThroughUrl(), activeAd.getSequence(), activeAd.getDuration(), activeAd.getRelativeStart(), "position", 0, activeAd.isTrueX());
+                adStartedEvent = AdUtilKt.toAdStartedEvent(activeAd);
             } else {
-                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true);
+                adStartedEvent = AdUtilKt.buildEmptyAdStartedEvent();
             }
             BitLog.INSTANCE.d("Emitting AdBreakStartedEvent");
             yospaceEventEmitter.emit(new AdBreakStartedEvent());
@@ -791,11 +792,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             } else {
                 if (!isTrueXRendering) {
                     isYospaceAd = true;
-                    String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
+                    String clickThroughUrl = AdUtilKt.getAdClickThroughUrl(advert);
                     double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
                     boolean isTrueX = advert.getAdSystem().getAdSystemType().equals("trueX");
                     liveAd = new Ad(advert.getIdentifier(), absoluteTime, advert.getDuration() / 1000.0, absoluteTime, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTrueX);
-                    YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, isTrueX);
+                    YospaceAdStartedEvent adStartedEvent = AdUtilKt.toAdStartedEvent(advert);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

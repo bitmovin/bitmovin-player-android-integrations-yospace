@@ -11,5 +11,5 @@ class YospaceAdStartedEvent(
     timeOffset: Double,
     position: String,
     skipOffset: Double,
-    val isTrueX: Boolean
+    val isTruex: Boolean
 ) : AdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration, timeOffset, position, skipOffset)

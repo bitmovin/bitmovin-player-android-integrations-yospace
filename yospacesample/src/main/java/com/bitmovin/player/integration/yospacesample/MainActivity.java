@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!(adStartedEvent instanceof YospaceAdStartedEvent)) {
                 return;
             }
-            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
+            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTruex());
 
             currentClickThroughUrl = adStartedEvent.getClickThroughUrl();
 

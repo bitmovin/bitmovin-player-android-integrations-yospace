@@ -47,12 +47,12 @@
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/turner_live"
-        app:layout_constraintEnd_toStartOf="@id/trueXButton"
+        app:layout_constraintEnd_toStartOf="@id/truexButton"
         app:layout_constraintStart_toEndOf="@id/vodButton"
         app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/trueXButton"
+        android:id="@+id/truexButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
@@ -68,7 +68,7 @@
         android:background="@drawable/button_background"
         android:text="@string/custom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/trueXButton"
+        app:layout_constraintStart_toEndOf="@id/truexButton"
         app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button

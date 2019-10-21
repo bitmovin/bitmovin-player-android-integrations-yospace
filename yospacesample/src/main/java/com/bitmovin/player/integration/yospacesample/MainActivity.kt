@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import com.bitmovin.player.api.event.data.*
 import com.bitmovin.player.api.event.listener.*
 import com.bitmovin.player.config.PlayerConfiguration
 import com.bitmovin.player.config.media.HLSSource
@@ -26,10 +25,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private val TAG = "MainActivity"
 
-    private var bitmovinYospacePlayer: BitmovinYospacePlayer? = null
+    private lateinit var bitmovinYospacePlayer: BitmovinYospacePlayer
+    private lateinit var trueXConfiguration: TrueXConfiguration
 
     private var currentClickThroughUrl: String? = null
-    private var trueXConfiguration: TrueXConfiguration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,98 +38,39 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         liveButton.setOnClickListener(this)
         unloadButton.setOnClickListener(this)
         customButton.setOnClickListener(this)
-        trueXButton.setOnClickListener(this)
+        truexButton.setOnClickListener(this)
         clickThroughButton.setOnClickListener(this)
         defaultButton.setOnClickListener(this)
 
         val playerConfiguration = PlayerConfiguration()
-        val yospaceConfiguration = YospaceConfiguration(null, 25_000, 25_000, 25_000, true)
+        val yospaceConfiguration = YospaceConfiguration(readTimeout = 25_000, connectTimeout = 25_000, requestTimeout = 25_000)
         trueXConfiguration = TrueXConfiguration(bitmovinPlayerView, "turner_bm_ys_tester_001", "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=")
 
         bitmovinYospacePlayer = BitmovinYospacePlayer(applicationContext, playerConfiguration, yospaceConfiguration)
-        bitmovinYospacePlayer!!.config.playbackConfiguration.isAutoplayEnabled = true
-        bitmovinYospacePlayer!!.addEventListener(onAdBreakStartedListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdBreakFinishedListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdStartedListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdFinishedListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdClickedListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdErrorListener)
-        bitmovinYospacePlayer!!.addEventListener(onAdSkippedListener)
-        bitmovinYospacePlayer!!.addEventListener(onErrorListener)
-        bitmovinYospacePlayer!!.addEventListener(onReadyListener)
-        bitmovinYospacePlayer!!.addEventListener(onWarningListener)
-        bitmovinYospacePlayer!!.setPlayerPolicy(BitmovinYospacePolicy(bitmovinYospacePlayer!!))
+        bitmovinYospacePlayer.config.playbackConfiguration.isAutoplayEnabled = true
+        bitmovinYospacePlayer.addEventListener(onAdBreakStartedListener)
+        bitmovinYospacePlayer.addEventListener(onAdBreakFinishedListener)
+        bitmovinYospacePlayer.addEventListener(onAdStartedListener)
+        bitmovinYospacePlayer.addEventListener(onAdFinishedListener)
+        bitmovinYospacePlayer.addEventListener(onAdClickedListener)
+        bitmovinYospacePlayer.addEventListener(onAdErrorListener)
+        bitmovinYospacePlayer.addEventListener(onAdSkippedListener)
+        bitmovinYospacePlayer.addEventListener(onErrorListener)
+        bitmovinYospacePlayer.addEventListener(onReadyListener)
+        bitmovinYospacePlayer.addEventListener(onWarningListener)
+        bitmovinYospacePlayer.setPlayerPolicy(BitmovinYospacePolicy(bitmovinYospacePlayer))
 
         bitmovinPlayerView.player = bitmovinYospacePlayer
-    }
-
-    private fun unload() {
-        bitmovinYospacePlayer?.unload()
-    }
-
-    private fun loadLive() {
-        val sourceItem = SourceItem(HLSSource("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=false"))
-        val sourceConfig = SourceConfiguration()
-        sourceConfig.addSourceItem(sourceItem)
-
-        val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
-
-        bitmovinYospacePlayer?.load(sourceConfig, yospaceSourceConfiguration)
-    }
-
-    private fun loadVod() {
-        val sourceItem = SourceItem(HLSSource("https://turnercmaf.cdn.turner.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525947592"))
-        val sourceConfig = SourceConfiguration()
-        sourceConfig.addSourceItem(sourceItem)
-
-        val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.VOD)
-
-        bitmovinYospacePlayer?.load(sourceConfig, yospaceSourceConfiguration)
-    }
-
-    private fun loadDefault() {
-        val sourceItem = SourceItem(HLSSource("http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap"))
-        val sourceConfig = SourceConfiguration()
-        sourceConfig.addSourceItem(sourceItem)
-
-        val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.VOD)
-
-        bitmovinYospacePlayer?.load(sourceConfig, yospaceSourceConfiguration)
-    }
-
-    private fun loadTrueX() {
-        val sourceItem = SourceItem(HLSSource("https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525955018"))
-        val sourceConfig = SourceConfiguration()
-        sourceConfig.addSourceItem(sourceItem)
-
-        val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.VOD)
-
-        bitmovinYospacePlayer?.load(sourceConfig, yospaceSourceConfiguration, trueXConfiguration)
-    }
-
-    private fun loadCustomUrl() {
-        val url = urlEditText.text.toString()
-        val sourceItem = SourceItem(HLSSource(url))
-        val sourceConfig = SourceConfiguration()
-        sourceConfig.addSourceItem(sourceItem)
-
-        val yospaceSourceConfiguration = if (assetTypeSpinner.selectedItemPosition == 0) {
-            YospaceSourceConfiguration(YospaceAssetType.LINEAR, false)
-        } else {
-            YospaceSourceConfiguration(YospaceAssetType.VOD, false)
-        }
-
-        bitmovinYospacePlayer?.load(sourceConfig, yospaceSourceConfiguration)
     }
 
     override fun onResume() {
         super.onResume()
         bitmovinPlayerView.onResume()
-        bitmovinYospacePlayer?.play()
+        bitmovinYospacePlayer.play()
     }
 
     override fun onPause() {
-        bitmovinYospacePlayer?.pause()
+        bitmovinYospacePlayer.pause()
         bitmovinPlayerView.onPause()
         super.onPause()
     }
@@ -140,66 +80,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onDestroy()
     }
 
-    private val onAdBreakStartedListener = OnAdBreakStartedListener {
-        Toast.makeText(applicationContext, "Ad Break Started", Toast.LENGTH_SHORT).show()
-    }
-
-    private val onErrorListener = OnErrorListener { errorEvent -> Toast.makeText(applicationContext, "Error - code=" + errorEvent.code + ", message=" + errorEvent.message, Toast.LENGTH_LONG).show() }
-
-    private val onAdBreakFinishedListener = OnAdBreakFinishedListener { Toast.makeText(applicationContext, "Ad Break Finished", Toast.LENGTH_SHORT).show() }
-
-    private val onAdStartedListener = OnAdStartedListener { adStartedEvent ->
-        if (adStartedEvent !is YospaceAdStartedEvent) {
-            return@OnAdStartedListener
-        }
-        Log.d(TAG, "Ad Started - truex=" + adStartedEvent.isTrueX)
-
-        currentClickThroughUrl = adStartedEvent.getClickThroughUrl()
-
-        val url = currentClickThroughUrl
-
-        if (url != null && url.isNotEmpty()) {
-            clickThroughButton.isEnabled = true
-            clickThroughButton.isClickable = true
-        }
-        val activeAd = bitmovinYospacePlayer?.getActiveAd()
-        if (activeAd != null) {
-            Toast.makeText(applicationContext, "Ad Started - id=" + activeAd.identifier, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val onAdFinishedListener = OnAdFinishedListener {
-        clickThroughButton.isEnabled = false
-        clickThroughButton.isClickable = false
-        Toast.makeText(applicationContext, "Ad Finished", Toast.LENGTH_SHORT).show()
-    }
-
-    private val onAdSkippedListener = OnAdSkippedListener { Toast.makeText(applicationContext, "Ad Skipped", Toast.LENGTH_SHORT).show() }
-
-    private val onReadyListener = OnReadyListener { Log.d(TAG, "Ad Breaks - ${bitmovinYospacePlayer?.adTimeline}") }
-
-    private val onAdErrorListener = OnAdErrorListener { Toast.makeText(applicationContext, "Ad Error", Toast.LENGTH_SHORT).show() }
-
-    private val onAdClickedListener = OnAdClickedListener { Toast.makeText(applicationContext, "Ad Clicked", Toast.LENGTH_SHORT).show() }
-
-    private val onWarningListener = OnWarningListener { Toast.makeText(applicationContext, "On Warning", Toast.LENGTH_SHORT).show() }
-
-    private fun clickThroughPressed() {
-        bitmovinYospacePlayer?.clickThroughPressed()
-
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(currentClickThroughUrl))
-        startActivity(browserIntent)
-    }
-
-    override fun onClick(v: View) {
-        when {
-            v === liveButton -> loadLive()
-            v === vodButton -> loadVod()
-            v === unloadButton -> unload()
-            v === clickThroughButton -> clickThroughPressed()
-            v === customButton -> loadCustomUrl()
-            v === trueXButton -> loadTrueX()
-            v === defaultButton -> loadDefault()
+    override fun onClick(view: View) {
+        when (view) {
+            liveButton -> loadLive()
+            vodButton -> loadVod()
+            unloadButton -> unload()
+            clickThroughButton -> clickThroughPressed()
+            customButton -> loadCustomUrl()
+            truexButton -> loadTruex()
+            defaultButton -> loadDefault()
         }
     }
 
@@ -220,4 +109,102 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         return super.onKeyDown(keyCode, event)
     }
+
+    private fun unload() = bitmovinYospacePlayer.unload()
+
+    private fun loadLive() {
+        val sourceConfig = createSourceConfiguration("http://csm-e.cds1.yospace.com/csm/live/158519304.m3u8?yo.ac=false")
+        val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig)
+    }
+
+    private fun loadVod() {
+        val sourceConfig = createSourceConfiguration("https://turnercmaf.cdn.turner.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525947592")
+        val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig)
+    }
+
+    private fun loadDefault() {
+        val sourceConfig = createSourceConfiguration("http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap")
+        val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig)
+    }
+
+    private fun loadTruex() {
+        val sourceConfig = createSourceConfiguration("https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525955018")
+        val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig, trueXConfiguration)
+    }
+
+    private fun loadCustomUrl() {
+        val url = urlEditText.text.toString()
+        val sourceConfig = createSourceConfiguration(url)
+
+        val yospaceSourceConfig = if (assetTypeSpinner.selectedItemPosition == 0) {
+            YospaceSourceConfiguration(YospaceAssetType.LINEAR)
+        } else {
+            YospaceSourceConfiguration(YospaceAssetType.VOD)
+        }
+
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig)
+    }
+
+    private fun createSourceConfiguration(url: String) : SourceConfiguration {
+        val sourceItem = SourceItem(HLSSource(url))
+        val sourceConfig = SourceConfiguration()
+        sourceConfig.addSourceItem(sourceItem)
+        return sourceConfig
+    }
+
+    private fun clickThroughPressed() {
+        bitmovinYospacePlayer.clickThroughPressed()
+
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(currentClickThroughUrl))
+        startActivity(browserIntent)
+    }
+
+    private val onReadyListener = OnReadyListener { Log.d(TAG, "Ad breaks - ${bitmovinYospacePlayer.adTimeline}") }
+
+    private val onAdBreakStartedListener = OnAdBreakStartedListener { Toast.makeText(this, "Ad break started", Toast.LENGTH_SHORT).show() }
+
+    private val onAdBreakFinishedListener = OnAdBreakFinishedListener { Toast.makeText(this, "Ad break finished", Toast.LENGTH_SHORT).show() }
+
+    private val onAdStartedListener = OnAdStartedListener { adStartedEvent ->
+        if (adStartedEvent !is YospaceAdStartedEvent) {
+            return@OnAdStartedListener
+        }
+        Log.d(TAG, "Ad started - true[X]=${adStartedEvent.isTrueX}")
+
+        currentClickThroughUrl = adStartedEvent.getClickThroughUrl()
+
+        val url = currentClickThroughUrl
+
+        if (url != null && url.isNotEmpty()) {
+            clickThroughButton.isEnabled = true
+            clickThroughButton.isClickable = true
+        }
+        bitmovinYospacePlayer.getActiveAd()?.let { ad ->
+            Toast.makeText(this, "Ad started - id=${ad.identifier}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val onAdFinishedListener = OnAdFinishedListener {
+        clickThroughButton.isEnabled = false
+        clickThroughButton.isClickable = false
+        Toast.makeText(this, "Ad finished", Toast.LENGTH_SHORT).show()
+    }
+
+    private val onAdSkippedListener = OnAdSkippedListener { Toast.makeText(this, "Ad skipped", Toast.LENGTH_SHORT).show() }
+
+    private val onAdClickedListener = OnAdClickedListener { Toast.makeText(this, "Ad clicked", Toast.LENGTH_SHORT).show() }
+
+    private val onAdErrorListener = OnAdErrorListener { adErrorEvent ->  Toast.makeText(this, "Ad error - message=${adErrorEvent.message}", Toast.LENGTH_SHORT).show() }
+
+    private val onErrorListener = OnErrorListener { errorEvent -> Toast.makeText(this, "Error - code=${errorEvent.code}, message=${errorEvent.message}", Toast.LENGTH_SHORT).show() }
+
+    private val onWarningListener = OnWarningListener { warningEvent ->  Toast.makeText(this, "Warning - message=${warningEvent.message}", Toast.LENGTH_SHORT).show() }
 }

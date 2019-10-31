@@ -57,7 +57,7 @@ private fun MetadataEvent.emsgToId3(): TimedMetadata? {
                 continue
             }
 
-            BitLog.d("Key: $key Value: $value")
+            BitLog.d("Key: $key, value: $value")
 
             when (key) {
                 "YMID" -> ymid = value

@@ -16,7 +16,7 @@ import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAdStartedEvent
 import com.bitmovin.player.integration.yospace.YospaceAssetType
-import com.bitmovin.player.integration.yospace.config.TrueXConfiguration
+import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import kotlinx.android.synthetic.main.activity_main.*
@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val TAG = "MainActivity"
 
     private lateinit var bitmovinYospacePlayer: BitmovinYospacePlayer
-    private lateinit var trueXConfiguration: TrueXConfiguration
+    private lateinit var truexConfiguration: TruexConfiguration
 
     private var currentClickThroughUrl: String? = null
 
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val playerConfiguration = PlayerConfiguration()
         val yospaceConfiguration = YospaceConfiguration(readTimeout = 25_000, connectTimeout = 25_000, requestTimeout = 25_000)
-        trueXConfiguration = TrueXConfiguration(bitmovinPlayerView, "turner_bm_ys_tester_001", "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=")
+        truexConfiguration = TruexConfiguration(bitmovinPlayerView, "turner_bm_ys_tester_001", "qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast/config?asnw=&cpx_url=&dimension_2=0&flag=%2Bamcb%2Bemcr%2Bslcb%2Bvicb%2Baeti-exvt&fw_key_values=&metr=0&network_user_id=turner_bm_ys_tester_001&prof=g_as3_truex&ptgt=a&pvrn=&resp=vmap1&slid=fw_truex&ssnw=&stream_position=midroll&vdur=&vprn=")
 
         bitmovinYospacePlayer = BitmovinYospacePlayer(applicationContext, playerConfiguration, yospaceConfiguration)
         bitmovinYospacePlayer.config.playbackConfiguration.isAutoplayEnabled = true
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val sourceConfig = createSourceConfiguration("https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525955018")
         val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
 
-        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig, trueXConfiguration)
+        bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfig, truexConfiguration)
     }
 
     private fun loadCustomUrl() {
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         if (adStartedEvent !is YospaceAdStartedEvent) {
             return@OnAdStartedListener
         }
-        Log.d(TAG, "Ad started - true[X]=${adStartedEvent.isTrueX}")
+        Log.d(TAG, "Ad started - true[X]=${adStartedEvent.isTruex}")
 
         currentClickThroughUrl = adStartedEvent.getClickThroughUrl()
 

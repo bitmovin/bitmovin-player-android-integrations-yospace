@@ -7,6 +7,7 @@
 
 # Java class files
 *.class
+.DS_Store
 
 # Generated files
 bin/
@@ -28,6 +29,10 @@ proguard/
 
 # Android Studio Navigation editor temp files
 .navigation/
+
+# Libs
+yospace/libs/*.aar
+
 
 # Android Studio captures folder
 captures/

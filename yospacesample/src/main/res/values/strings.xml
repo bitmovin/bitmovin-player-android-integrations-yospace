@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">BitmovinYospace</string>
+    <string name="asset_prompt">Asset Type</string>
+    <string name="turner_vod">T VOD</string>
+    <string name="turner_live">T Live</string>
+    <string name="truex">TrueX</string>
+    <string name="custom">Custom</string>
+    <string name="yospace_vod">Yo VOD</string>
+    <string name="yospace_nlso">Yo NLSO</string>
+    <string name="click_through">Click</string>
+    <string name="unload">Unload</string>
+
+    <string-array name="asset_types">
+        <item>Live</item>
+        <item>Vod</item>
+    </string-array>
+</resources>

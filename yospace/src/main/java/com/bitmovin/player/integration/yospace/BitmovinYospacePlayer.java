@@ -283,7 +283,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     session.setPlayerPolicy(yospacePlayerPolicy);
                     if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
-                        if (yospaceConfiguration.getInitialisationType() == YospaceInitialisationType.PROXY) {
+                        if (yospaceConfiguration.getInitialisationType() != YospaceInitialisationType.DIRECT) {
                             return;
                         }
                     }

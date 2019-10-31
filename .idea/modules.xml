@@ -3,14 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" filepath="$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" filepath="$PROJECT_DIR$/bitmovin-player-android-integrations-yospace.iml" />
-      <module fileurl="file://$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" filepath="$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" />
       <module fileurl="file://$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" filepath="$PROJECT_DIR$/yoAdManagement-debug/yoAdManagement-debug.iml" />
       <module fileurl="file://$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" filepath="$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" />
-      <module fileurl="file://$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" filepath="$PROJECT_DIR$/yoUtil-debug/yoUtil-debug.iml" />
       <module fileurl="file://$PROJECT_DIR$/yospace/yospace.iml" filepath="$PROJECT_DIR$/yospace/yospace.iml" />
-      <module fileurl="file://$PROJECT_DIR$/yospace/yospace.iml" filepath="$PROJECT_DIR$/yospace/yospace.iml" />
-      <module fileurl="file://$PROJECT_DIR$/yospacesample/yospacesample.iml" filepath="$PROJECT_DIR$/yospacesample/yospacesample.iml" />
       <module fileurl="file://$PROJECT_DIR$/yospacesample/yospacesample.iml" filepath="$PROJECT_DIR$/yospacesample/yospacesample.iml" />
     </modules>
   </component>

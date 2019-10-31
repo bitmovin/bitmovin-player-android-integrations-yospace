@@ -2,14 +2,15 @@ package com.bitmovin.player.integration.yospace.config;
 
 import android.view.ViewGroup;
 
+import com.bitmovin.player.integration.yospace.YospaceInitialisationType;
+
 public class YospaceConfigurationBuilder {
     private String userAgent;
     private int readTimeout;
     private int connectTimeout;
     private int requestTimeout;
+    private YospaceInitialisationType initialisationType = YospaceInitialisationType.PROXY;
     private boolean debug = false;
-    private ViewGroup trueXViewGroup;
-
 
     public YospaceConfigurationBuilder() {
     }
@@ -34,12 +35,17 @@ public class YospaceConfigurationBuilder {
         return this;
     }
 
+    public YospaceConfigurationBuilder setInitialisationType(YospaceInitialisationType initialisationType) {
+        this.initialisationType = initialisationType;
+        return this;
+    }
+
     public YospaceConfigurationBuilder setDebug(boolean debug) {
         this.debug = debug;
         return this;
     }
 
     public YospaceConfiguration build() {
-        return new YospaceConfiguration(userAgent, readTimeout, connectTimeout, requestTimeout, debug);
+        return new YospaceConfiguration(userAgent, readTimeout, connectTimeout, requestTimeout, initialisationType, debug);
     }
 }

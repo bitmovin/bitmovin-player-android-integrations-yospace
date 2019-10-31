@@ -76,7 +76,6 @@ import java.util.Map;
 
 public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;
-    private SessionFactory sessionFactory;
     private final EventSourceImpl<PlayerState> stateSource = new EventSourceImpl<>();
     private final EventSourceImpl<TimedMetadata> metadataSource = new EventSourceImpl<>();
     private final YospacePlayerPolicy yospacePlayerPolicy;
@@ -241,9 +240,16 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     private void loadLive() {
-        sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
-        String url = sessionFactory.getPlayerUrl();
-        startPlayback(url);
+        switch (yospaceConfiguration.getLiveInitialisationType()) {
+            case PROXY:
+                SessionFactory sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
+                String url = sessionFactory.getPlayerUrl();
+                startPlayback(url);
+                break;
+            case DIRECT:
+                SessionLive.create(sessionEventListener, properties);
+                break;
+        }
     }
 
     private void loadVod() {
@@ -277,9 +283,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     session.setPlayerPolicy(yospacePlayerPolicy);
                     if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
-                    } else {
-                        startPlayback(session.getPlayerUrl());
+                        if (yospaceConfiguration.getLiveInitialisationType() != YospaceLiveInitialisationType.DIRECT) {
+                            return;
+                        }
                     }
+                    startPlayback(session.getPlayerUrl());
                     return;
                 case NO_ANALYTICS:
                     handleYospaceSessionFailure(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream");

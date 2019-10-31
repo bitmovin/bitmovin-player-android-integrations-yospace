@@ -240,7 +240,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     private void loadLive() {
-        switch (yospaceConfiguration.getInitialisationType()) {
+        switch (yospaceConfiguration.getLiveInitialisationType()) {
             case PROXY:
                 SessionFactory sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, properties);
                 String url = sessionFactory.getPlayerUrl();
@@ -283,7 +283,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     session.setPlayerPolicy(yospacePlayerPolicy);
                     if (session instanceof SessionLive) {
                         ((SessionLive) session).setTimedMetadataSource(metadataSource);
-                        if (yospaceConfiguration.getInitialisationType() != YospaceInitialisationType.DIRECT) {
+                        if (yospaceConfiguration.getLiveInitialisationType() != YospaceLiveInitialisationType.DIRECT) {
                             return;
                         }
                     }

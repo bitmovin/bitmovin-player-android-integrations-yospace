@@ -8,112 +8,112 @@
     tools:context=".MainActivity">
 
     <EditText
-        android:id="@+id/url_edit_text"
+        android:id="@+id/urlEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:maxLines="2"
         android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
-        app:layout_constraintBottom_toTopOf="@id/vod_button"
-        app:layout_constraintEnd_toStartOf="@id/asset_type_spinner"
+        app:layout_constraintBottom_toTopOf="@id/vodButton"
+        app:layout_constraintEnd_toStartOf="@id/assetTypeSpinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/asset_type_spinner"
+        android:id="@+id/assetTypeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:entries="@array/asset_types"
         android:prompt="@string/asset_prompt"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/url_edit_text"
-        app:layout_constraintTop_toTopOf="@id/url_edit_text" />
+        app:layout_constraintStart_toEndOf="@id/urlEditText"
+        app:layout_constraintTop_toTopOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/vod_button"
+        android:id="@+id/vodButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/turner_vod"
-        app:layout_constraintEnd_toStartOf="@id/live_button"
+        app:layout_constraintEnd_toStartOf="@id/liveButton"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
+        app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/live_button"
+        android:id="@+id/liveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/turner_live"
-        app:layout_constraintEnd_toStartOf="@id/truex_button"
-        app:layout_constraintStart_toEndOf="@id/vod_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
+        app:layout_constraintEnd_toStartOf="@id/truexButton"
+        app:layout_constraintStart_toEndOf="@id/vodButton"
+        app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/truex_button"
+        android:id="@+id/truexButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/truex"
-        app:layout_constraintEnd_toStartOf="@id/custom_button"
-        app:layout_constraintStart_toEndOf="@id/live_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
+        app:layout_constraintEnd_toStartOf="@id/customButton"
+        app:layout_constraintStart_toEndOf="@id/liveButton"
+        app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/custom_button"
+        android:id="@+id/customButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/custom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/truex_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
+        app:layout_constraintStart_toEndOf="@id/truexButton"
+        app:layout_constraintTop_toBottomOf="@id/urlEditText" />
 
     <Button
-        android:id="@+id/default_button"
+        android:id="@+id/defaultButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/yospace_vod"
-        app:layout_constraintEnd_toStartOf="@id/nlso_button"
+        app:layout_constraintEnd_toStartOf="@id/nlsoButton"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+        app:layout_constraintTop_toBottomOf="@id/vodButton" />
 
     <Button
-        android:id="@+id/nlso_button"
+        android:id="@+id/nlsoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/yospace_nlso"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/default_button"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+        app:layout_constraintStart_toEndOf="@id/defaultButton"
+        app:layout_constraintTop_toBottomOf="@id/vodButton" />
 
     <Button
-        android:id="@+id/click_through_button"
+        android:id="@+id/clickThroughButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/click_through"
-        app:layout_constraintEnd_toStartOf="@id/unload_button"
+        app:layout_constraintEnd_toStartOf="@id/unloadButton"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/default_button" />
+        app:layout_constraintTop_toBottomOf="@id/defaultButton" />
 
     <Button
-        android:id="@+id/unload_button"
+        android:id="@+id/unloadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/unload"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/click_through_button"
-        app:layout_constraintTop_toBottomOf="@id/default_button" />
+        app:layout_constraintStart_toEndOf="@id/clickThroughButton"
+        app:layout_constraintTop_toBottomOf="@id/defaultButton" />
 
     <com.bitmovin.player.BitmovinPlayerView
         android:id="@+id/bitmovinPlayerView"
@@ -122,6 +122,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/click_through_button" />
+        app:layout_constraintTop_toBottomOf="@id/clickThroughButton" />
 
 </android.support.constraint.ConstraintLayout>

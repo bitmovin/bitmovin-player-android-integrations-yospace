@@ -5,7 +5,7 @@ import android.util.Log
 object BitLog {
 
     private val TAG = BitLog::class.java.simpleName
-    private var isEnabled: Boolean = false
+    var isEnabled: Boolean = false
     private val stackTraceInfo: String
         get() {
             val trace = Exception().stackTrace
@@ -25,14 +25,6 @@ object BitLog {
             }
             return info
         }
-
-    fun enable() {
-        isEnabled = true
-    }
-
-    fun disable() {
-        isEnabled = false
-    }
 
     fun d(message: String) {
         if (isEnabled) {

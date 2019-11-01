@@ -11,6 +11,7 @@ import com.bitmovin.player.config.drm.DRMSystems
 import com.bitmovin.player.config.media.HLSSource
 import com.bitmovin.player.config.media.SourceConfiguration
 import com.bitmovin.player.config.media.SourceItem
+import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType.*
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
@@ -134,8 +135,13 @@ class BitmovinYospacePlayer(private val context: Context, playerConfiguration: P
     }
 
     private fun loadLive() {
-        sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, sessionProperties)
-        startPlayback(sessionFactory!!.playerUrl)
+        when (yospaceConfiguration.liveInitialisationType) {
+            DIRECT -> SessionLive.create(sessionEventListener, sessionProperties)
+            PROXY -> {
+                sessionFactory = SessionFactory.createForLiveWithThread(sessionEventListener, sessionProperties)
+                startPlayback(sessionFactory!!.playerUrl)
+            }
+        }
     }
 
     private fun loadVod() {
@@ -461,9 +467,11 @@ class BitmovinYospacePlayer(private val context: Context, playerConfiguration: P
                     session.setPlayerPolicy(yospacePlayerPolicy)
                     if (session is SessionLive) {
                         session.setTimedMetadataSource(metadataSource)
-                    } else {
-                        startPlayback(session.playerUrl)
+                        if (yospaceConfiguration.liveInitialisationType != DIRECT) {
+                            return@EventListener
+                        }
                     }
+                    startPlayback(session.playerUrl)
                 }
                 Session.State.NO_ANALYTICS -> {
                     handleYospaceSessionFailure(YospaceErrorCodes.YOSPACE_NO_ANALYTICS, "Source URL does not refer to a Yospace stream")

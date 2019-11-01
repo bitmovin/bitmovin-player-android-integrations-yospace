@@ -7,7 +7,7 @@ public class YospaceConfigurationBuilder {
     private int readTimeout;
     private int connectTimeout;
     private int requestTimeout;
-    private YospaceLiveInitialisationType liveInitialisationType = YospaceLiveInitialisationType.PROXY;
+    private YospaceLiveInitialisationType liveInitialisationType = YospaceLiveInitialisationType.DIRECT;
     private boolean debug = false;
 
     public YospaceConfigurationBuilder() {

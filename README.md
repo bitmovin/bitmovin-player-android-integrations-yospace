@@ -20,7 +20,7 @@ And this line to your main project `build.gradle`
 
 ```
 dependencies {
-    compile 'com.bitmovin.player.integration:yospace:1.0.1'
+    implementation 'com.bitmovin.player.integration:yospace:1.0.1'
 }
 ```
 

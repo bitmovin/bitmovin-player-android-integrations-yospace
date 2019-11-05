@@ -709,6 +709,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad error");
             isYospaceAd = false;
+            stopTruexAdRenderer();
             play();
         }
     };

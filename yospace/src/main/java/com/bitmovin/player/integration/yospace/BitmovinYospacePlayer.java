@@ -192,6 +192,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public void unload() {
         uiLoadingState = UI_LOADING_STATE.UNLOADING;
+        stopTruexAdRenderer();
         super.unload();
     }
 
@@ -236,7 +237,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         liveAd = null;
         liveAdBreak = null;
         adTimeline = null;
-        isTrueXRendering = false;
+        stopTruexAdRenderer();
     }
 
     private void loadLive() {
@@ -362,6 +363,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         } catch (JSONException e) {
             BitLog.e("Failed to render TrueX Ad: " + e);
         }
+    }
+
+    private void stopTruexAdRenderer() {
+        if (truexAdRenderer != null) {
+            truexAdRenderer.stop();
+        }
+        isTrueXRendering = false;
     }
 
     public void clickThroughPressed() {
@@ -710,6 +718,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - No ads found");
             isYospaceAd = false;
+            stopTruexAdRenderer();
             play();
         }
     };

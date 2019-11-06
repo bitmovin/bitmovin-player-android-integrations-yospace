@@ -57,6 +57,7 @@ import com.yospace.android.hls.analytic.SessionLive;
 import com.yospace.android.hls.analytic.SessionNonLinear;
 import com.yospace.android.hls.analytic.SessionNonLinearStartOver;
 import com.yospace.android.hls.analytic.advert.Advert;
+import com.yospace.android.hls.analytic.advert.InteractiveUnit;
 import com.yospace.android.xml.VastPayload;
 import com.yospace.android.xml.VmapPayload;
 import com.yospace.hls.TimedMetadata;
@@ -696,11 +697,18 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad completed");
             isYospaceAd = false;
-            if (!adFree) {
-                BitLog.d("Emitting AdFinishedEvent");
-                yospaceEventEmitter.emit(new AdFinishedEvent());
-                play();
+            BitLog.d("Emitting AdFinishedEvent");
+            yospaceEventEmitter.emit(new AdFinishedEvent());
+            if (adFree) {
+                Ad currentAd = getActiveAd();
+                if (currentAd != null) {
+                    BitLog.d("Emitting AdBreakFinishedEvent");
+                    yospaceEventEmitter.emit(new AdBreakFinishedEvent());
+                    // Seek to end of underlying non-TrueX ad
+                    seek(currentAd.getAbsoluteEnd() + 1);
+                }
             }
+            play();
         }
     };
 
@@ -736,16 +744,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad free");
             adFree = true;
-            Ad currentAd = getActiveAd();
-            if (currentAd != null) {
-                BitLog.d("Emitting AdFinishedEvent");
-                yospaceEventEmitter.emit(new AdFinishedEvent());
-                BitLog.d("Emitting AdBreakFinishedEvent");
-                yospaceEventEmitter.emit(new AdBreakFinishedEvent());
-                // Seek to end of underlying non-TrueX ad
-                seek(currentAd.getAbsoluteEnd() + 1);
-                play();
-            }
         }
     };
 
@@ -763,11 +761,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
                         if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
-                            String creativeUrl = "https://qa-get.truex.com/07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092/vast?dimension_2=0&stream_position=midroll&network_user_id=" + trueXConfiguration.getUserId();
-                            BitLog.d("TrueX Ad Found - Source:" + creativeUrl);
-                            String adParams = "{\"user_id\":\"" + trueXConfiguration.getUserId() + "\",\"placement_hash\":\"07d5fe7cc7f9b5ab86112433cf0a83b6fb41b092\",\"vast_config_url\":\"" + trueXConfiguration.getVastConfigUrl() + "\"}";
-                            BitLog.d("Rendering TrueX Ad: " + advert.toString());
+                            InteractiveUnit interactiveUnit = advert.getLinearCreative().getInteractiveUnit();
+                            String creativeUrl = interactiveUnit.getSource();
+                            String adParams = interactiveUnit.getAdParameters();
                             renderTrueXAd(creativeUrl, adParams);
+                            BitLog.d("TrueX Ad Found - Source:" + creativeUrl);
+                            BitLog.d("Rendering TrueX Ad: " + advert.toString());
                         }
                     }
                 }

@@ -357,7 +357,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
-            truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.PREROLL);
+            truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.MIDROLL);
             truexAdRenderer.start(trueXConfiguration.getViewGroup());
             isTrueXRendering = true;
             BitLog.d("TrueX Ad rendered successfully");

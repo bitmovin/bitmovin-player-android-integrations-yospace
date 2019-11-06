@@ -773,6 +773,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             BitLog.d("Rendering TrueX Ad: " + advert.toString());
                             pause();
                             renderTrueXAd(source, adParams);
+                            break;
                         }
                     }
                 }

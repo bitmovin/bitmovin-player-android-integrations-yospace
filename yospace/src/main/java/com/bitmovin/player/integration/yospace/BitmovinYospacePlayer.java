@@ -348,7 +348,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
      */
     private void renderTrueXAd(String creativeURL, String adParameters) {
         try {
-            pause();
             JSONObject adParams = new JSONObject(adParameters);
             truexAdRenderer = new TruexAdRenderer(context);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
@@ -762,11 +761,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     for (Advert advert : adBreak.getAdverts()) {
                         if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
                             InteractiveUnit interactiveUnit = advert.getLinearCreative().getInteractiveUnit();
-                            String creativeUrl = interactiveUnit.getSource();
+                            String source = interactiveUnit.getSource();
                             String adParams = interactiveUnit.getAdParameters();
-                            renderTrueXAd(creativeUrl, adParams);
-                            BitLog.d("TrueX Ad Found - Source:" + creativeUrl);
+                            BitLog.d("TrueX Ad Found - Source:" + source);
                             BitLog.d("Rendering TrueX Ad: " + advert.toString());
+                            pause();
+                            renderTrueXAd(source, adParams);
                         }
                     }
                 }

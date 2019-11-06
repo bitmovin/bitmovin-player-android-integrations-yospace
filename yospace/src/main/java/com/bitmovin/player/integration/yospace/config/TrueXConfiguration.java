@@ -7,6 +7,10 @@ public class TrueXConfiguration {
     private String userId;
     private String vastConfigUrl;
 
+    public TrueXConfiguration(ViewGroup viewGroup) {
+        this.viewGroup = viewGroup;
+    }
+
     public TrueXConfiguration(ViewGroup viewGroup, String userId, String vastConfigUrl) {
         this.viewGroup = viewGroup;
         this.userId = userId;

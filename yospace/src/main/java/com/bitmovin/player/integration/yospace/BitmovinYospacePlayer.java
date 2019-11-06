@@ -56,8 +56,10 @@ import com.yospace.android.hls.analytic.SessionFactory;
 import com.yospace.android.hls.analytic.SessionLive;
 import com.yospace.android.hls.analytic.SessionNonLinear;
 import com.yospace.android.hls.analytic.SessionNonLinearStartOver;
+import com.yospace.android.hls.analytic.advert.AdSystem;
 import com.yospace.android.hls.analytic.advert.Advert;
 import com.yospace.android.hls.analytic.advert.InteractiveUnit;
+import com.yospace.android.hls.analytic.advert.LinearCreative;
 import com.yospace.android.xml.VastPayload;
 import com.yospace.android.xml.VmapPayload;
 import com.yospace.hls.TimedMetadata;
@@ -765,15 +767,23 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (trueXConfiguration != null) {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
-                        if (advert.getAdSystem().getAdSystemType().equals("trueX")) {
-                            InteractiveUnit interactiveUnit = advert.getLinearCreative().getInteractiveUnit();
-                            String source = interactiveUnit.getSource();
-                            String adParams = interactiveUnit.getAdParameters();
-                            BitLog.d("TrueX Ad Found - Source:" + source);
-                            BitLog.d("Rendering TrueX Ad: " + advert.toString());
-                            pause();
-                            renderTrueXAd(source, adParams);
-                            break;
+                        AdSystem adSystem = advert.getAdSystem();
+                        if (adSystem != null) {
+                            if (adSystem.getAdSystemType().equals("trueX")) {
+                                LinearCreative linearCreative = advert.getLinearCreative();
+                                if (linearCreative != null) {
+                                    InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
+                                    if (interactiveUnit != null) {
+                                        String source = interactiveUnit.getSource();
+                                        String adParams = interactiveUnit.getAdParameters();
+                                        BitLog.d("TrueX Ad Found - Source:" + source);
+                                        BitLog.d("Rendering TrueX Ad: " + advert.toString());
+                                        pause();
+                                        renderTrueXAd(source, adParams);
+                                    }
+                                }
+                                break;
+                            }
                         }
                     }
                 }

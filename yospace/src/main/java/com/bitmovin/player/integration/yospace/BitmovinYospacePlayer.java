@@ -348,7 +348,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
      */
     private void renderTrueXAd(String creativeURL, String adParameters) {
         try {
-            JSONObject adParams = new JSONObject(adParameters);
             truexAdRenderer = new TruexAdRenderer(context);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_STARTED, this.adStartedListener);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_COMPLETED, this.adCompletedListener);
@@ -356,6 +355,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             truexAdRenderer.addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE, this.noAdsListener);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.AD_FREE_POD, this.adFreeListener);
             truexAdRenderer.addEventListener(TruexAdRendererConstants.POPUP_WEBSITE, this.popupListener);
+            JSONObject adParams = new JSONObject(adParameters);
+            if (trueXConfiguration.getUserId() != null) {
+                adParams.put("user_id", trueXConfiguration.getUserId());
+            }
+            if (trueXConfiguration.getVastConfigUrl() != null) {
+                adParams.put("vast_config_url", trueXConfiguration.getVastConfigUrl());
+            }
             truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.MIDROLL);
             truexAdRenderer.start(trueXConfiguration.getViewGroup());
             isTrueXRendering = true;

@@ -9,9 +9,9 @@ public class Ad {
     private int sequence;
     private String clickThroughUrl;
     private boolean hasInteractiveUnit;
-    private boolean isTrueX;
+    private boolean isTruex;
 
-    public Ad(String identifier, double relativeStart, double duration, double absoluteStart, double absoluteEnd, int sequence, String clickThroughUrl, boolean hasInteractiveUnit, boolean isTrueX) {
+    public Ad(String identifier, double relativeStart, double duration, double absoluteStart, double absoluteEnd, int sequence, String clickThroughUrl, boolean hasInteractiveUnit, boolean isTruex) {
         this.identifier = identifier;
         this.relativeStart = relativeStart;
         this.duration = duration;
@@ -20,7 +20,7 @@ public class Ad {
         this.sequence = sequence;
         this.clickThroughUrl = clickThroughUrl;
         this.hasInteractiveUnit = hasInteractiveUnit;
-        this.isTrueX = isTrueX;
+        this.isTruex = isTruex;
     }
 
     public String getIdentifier() {
@@ -55,7 +55,7 @@ public class Ad {
         return hasInteractiveUnit;
     }
 
-    public boolean isTrueX() {
-        return isTrueX;
+    public boolean isTruex() {
+        return isTruex;
     }
 }

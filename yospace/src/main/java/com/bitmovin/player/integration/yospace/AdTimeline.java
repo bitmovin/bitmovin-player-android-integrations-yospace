@@ -1,7 +1,5 @@
 package com.bitmovin.player.integration.yospace;
 
-import android.util.Log;
-
 import com.yospace.android.hls.analytic.advert.Advert;
 
 import java.util.ArrayList;
@@ -19,8 +17,8 @@ public class AdTimeline {
 
             for (Advert advert : adbreak.getAdverts()) {
                 String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
-                boolean isTrueX = advert.getAdSystem().getAdSystemType().equals("trueX");
-                Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart() / 1000, advert.getDuration() / 1000.0, advert.getStartMillis() / 1000.0, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTrueX);
+                boolean isTruex = advert.getAdSystem().getAdSystemType().equals("trueX");
+                Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart() / 1000, advert.getDuration() / 1000.0, advert.getStartMillis() / 1000.0, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTruex);
                 entry.appendAd(ad);
             }
             this.adBreaks.add(entry);

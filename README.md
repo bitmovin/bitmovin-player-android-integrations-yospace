@@ -34,8 +34,8 @@ The following example creates a `BitmovinYospacePlayer` object and loads a `Yosp
 //Create a YospaceConfiguration using the YospaceConfigurationBuilder
 YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
 
-//Optionally create a TrueXConfiguration
-TrueXConfiguration trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+//Optionally create a TruexConfiguration
+TruexConfiguration truexConfiguration = new TruexConfiguration(bitmovinPlayerView);
 
 //Create a BitmovinYospacePlayer
 BitmovinYospacePlayer bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration, trueXConfiguration);

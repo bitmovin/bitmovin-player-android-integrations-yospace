@@ -129,6 +129,13 @@ public class YospaceEventEmitter {
                     ((OnTimeChangedListener) listener).onTimeChanged((TimeChangedEvent) event);
                 }
             }
+        } else if (event instanceof TruexAdFreeEvent) {
+            List<EventListener> listeners = eventListeners.get(OnTruexAdFreeListener.class);
+            if (listeners != null) {
+                for (EventListener listener : listeners) {
+                    ((OnTruexAdFreeListener) listener).onTruexAdFree((TruexAdFreeEvent) event);
+                }
+            }
         }
     }
 

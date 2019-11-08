@@ -41,7 +41,7 @@ import com.bitmovin.player.integration.yospace.Ad;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
 import com.bitmovin.player.integration.yospace.YospaceAdStartedEvent;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
-import com.bitmovin.player.integration.yospace.config.TrueXConfiguration;
+import com.bitmovin.player.integration.yospace.config.TruexConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfigurationBuilder;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BitmovinYospacePlayer bitmovinYospacePlayer;
 
     private String currentClickThroughUrl;
-    private TrueXConfiguration trueXConfiguration;
+    private TruexConfiguration trueXConfiguration;
 
     private static final String TAG = "MainActivity";
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-        trueXConfiguration = new TrueXConfiguration(bitmovinPlayerView);
+        trueXConfiguration = new TruexConfiguration(bitmovinPlayerView);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration);
     }
 
-    private void loadTrueX() {
+    private void loadTruex() {
         SourceItem sourceItem = new SourceItem(new HLSSource("https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525955018"));
         SourceConfiguration sourceConfig = new SourceConfiguration();
         sourceConfig.addSourceItem(sourceItem);
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!(adStartedEvent instanceof YospaceAdStartedEvent)) {
                 return;
             }
-            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTrueX());
+            Log.d(TAG, "Ad Started - truex=" + ((YospaceAdStartedEvent) adStartedEvent).isTruex());
 
             currentClickThroughUrl = adStartedEvent.getClickThroughUrl();
 
@@ -299,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (v == customButton) {
             loadCustomUrl();
         } else if (v == trueXButton) {
-            loadTrueX();
+            loadTruex();
         } else if (v == defaultButton) {
             loadDefault();
         }

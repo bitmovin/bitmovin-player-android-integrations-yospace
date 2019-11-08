@@ -710,7 +710,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 AdBreak activeAdBreak = getActiveAdBreak();
                 if (activeAdBreak != null) {
                     BitLog.d("Emitting AdBreakFinishedEvent");
-                    yospaceEventEmitter.emit(new YospaceAdBreakFinishedEvent(true));
+                    yospaceEventEmitter.emit(new AdBreakFinishedEvent());
+                    yospaceEventEmitter.emit(new TruexAdFreeEvent());
                     // Seek to end of underlying non-TrueX ad
                     seek(activeAdBreak.getRelativeStart() + 1);
                 }
@@ -812,7 +813,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     @Override
                     public void run() {
                         BitLog.d("Emitting AdBreakFinishedEvent");
-                        yospaceEventEmitter.emit(new YospaceAdBreakFinishedEvent(false));
+                        yospaceEventEmitter.emit(new AdBreakFinishedEvent());
                     }
                 });
             }

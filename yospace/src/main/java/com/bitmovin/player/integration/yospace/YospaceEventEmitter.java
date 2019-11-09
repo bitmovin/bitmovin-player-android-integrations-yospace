@@ -162,6 +162,8 @@ public class YospaceEventEmitter {
             javaClass = OnWarningListener.class;
         } else if (listener instanceof OnTimeChangedListener) {
             javaClass = OnTimeChangedListener.class;
+        } else if (listener instanceof OnTruexAdFreeListener) {
+            javaClass = OnTruexAdFreeListener.class;
         }
 
         return javaClass;

@@ -147,6 +147,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             truexAdRenderer = null;
         }
 
+        if (session != null) {
+            super.unload();
+        }
         resetYospaceSession();
 
         BitLog.d("Load Yospace Source Configuration");
@@ -233,7 +236,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             session.removeAnalyticListener(analyticEventListener);
             session.shutdown();
             session = null;
-            super.unload();
         }
         isYospaceAd = false;
         adFree = false;

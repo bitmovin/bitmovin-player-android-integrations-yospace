@@ -806,7 +806,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     if (isLive()) {
                         String adId = adBreak.toString() + System.currentTimeMillis();
                         double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
-                        liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, (absoluteTime + adBreak.getDuration() / 1000.0));
+                        liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, absoluteTime + adBreak.getDuration() / 1000.0);
                     }
                     handler.post(new Runnable() {
                         @Override

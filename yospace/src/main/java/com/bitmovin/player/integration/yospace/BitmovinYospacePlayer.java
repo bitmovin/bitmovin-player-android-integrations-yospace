@@ -10,6 +10,7 @@ import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
+import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.data.FullscreenEnterEvent;
 import com.bitmovin.player.api.event.data.FullscreenExitEvent;
@@ -99,6 +100,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private AdTimeline adTimeline;
     private Ad liveAd;
     private AdBreak liveAdBreak;
+    private double pausedTime;
+    private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
 
     private enum UI_LOADING_STATE {
@@ -576,6 +579,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private OnPausedListener onPausedListener = new OnPausedListener() {
         @Override
         public void onPaused(PausedEvent pausedEvent) {
+            isLiveAdPaused = isLive() && isAd();
+            pausedTime = currentTimeWithAds();
             BitLog.d("Sending Paused Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
         }
@@ -618,7 +623,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (session != null && getAdTimeline() != null) {
                 // Notify Yospace of the Time Update
                 if (!(session instanceof SessionLive)) {
-                    // BitLog.d(Constants.TAG, "Sending Playhead Update Event" + getYospaceTime());
                     stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
                 }
                 handler.post(new Runnable() {
@@ -627,22 +631,31 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         if (isYospaceAd) {
                             // If we are in a Yospace ad, send the ad time
                             double adTime = getAdTimeline().adTime(timeChangedEvent.getTime());
-                            // BitLog.d(Constants.TAG, "Emitting TimeChangedEvent");
                             yospaceEventEmitter.emit(new TimeChangedEvent(adTime));
                         } else {
                             // If we are not in an ad, send converted relative time
                             double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
-                            // BitLog.d(Constants.TAG, "Emitting TimeChangedEvent");
                             yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
                         }
                     }
                 });
             } else {
+                AdBreak activeAdBreak = liveAdBreak;
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        // BitLog.d(Constants.TAG, "Emitting TimeChangedEvent");
                         yospaceEventEmitter.emit(timeChangedEvent);
+                        if (isLiveAdPaused) {
+                            if (activeAdBreak != null) {
+                                double currentTime = timeChangedEvent.getTime();
+                                double adBreakAbsEnd = activeAdBreak.getAbsoluteEnd();
+                                if (currentTime - pausedTime > adBreakAbsEnd - pausedTime) {
+                                    BitLog.d("Emitting AdSkippedEvent");
+                                    yospaceEventEmitter.emit(new AdSkippedEvent());
+                                }
+                            }
+                        }
+                        isLiveAdPaused = false;
                     }
                 });
             }
@@ -793,7 +806,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     if (isLive()) {
                         String adId = adBreak.toString() + System.currentTimeMillis();
                         double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
-                        liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, (adBreak.getStartMillis() + adBreak.getDuration()) / 1000.0);
+                        liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, (absoluteTime + adBreak.getDuration() / 1000.0));
                     }
                     handler.post(new Runnable() {
                         @Override

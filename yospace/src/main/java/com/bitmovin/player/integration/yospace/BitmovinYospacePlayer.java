@@ -240,6 +240,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
         isYospaceAd = false;
         adFree = false;
+        isLiveAdPaused = false;
+        pausedTime = 0;
         liveAd = null;
         liveAdBreak = null;
         adTimeline = null;

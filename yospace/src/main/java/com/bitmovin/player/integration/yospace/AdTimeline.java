@@ -1,6 +1,9 @@
 package com.bitmovin.player.integration.yospace;
 
+import com.yospace.android.hls.analytic.advert.AdSystem;
 import com.yospace.android.hls.analytic.advert.Advert;
+import com.yospace.android.hls.analytic.advert.LinearCreative;
+import com.yospace.android.hls.analytic.advert.NonLinearCreative;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +15,51 @@ public class AdTimeline {
         double count = 0;
 
         for (com.yospace.android.hls.analytic.advert.AdBreak adbreak : adBreaks) {
-            AdBreak entry = new AdBreak("unknown", (adbreak.getStartMillis() - count) / 1000, adbreak.getDuration() / 1000.0, adbreak.getStartMillis() / 1000.0, (adbreak.getStartMillis() + adbreak.getDuration()) / 1000.0);
+            AdBreak entry = new AdBreak("unknown", (adbreak.getStartMillis() - count) / 1000, adbreak.getDuration() / 1000.0, adbreak.getStartMillis() / 1000.0, (adbreak.getStartMillis() + adbreak.getDuration()) / 1000.0, 0);
             count += adbreak.getDuration();
 
             for (Advert advert : adbreak.getAdverts()) {
                 String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
-                boolean isTruex = advert.getAdSystem().getAdSystemType().equals("trueX");
-                Ad ad = new Ad(advert.getIdentifier(), entry.getRelativeStart() / 1000, advert.getDuration() / 1000.0, advert.getStartMillis() / 1000.0, (advert.getStartMillis() + advert.getDuration()) / 1000.0, advert.getSequence(), clickThroughUrl, advert.hasLinearInteractiveUnit(), isTruex);
+                AdSystem adSystem = advert.getAdSystem();
+                boolean isTruex = adSystem != null && adSystem.getAdSystemType().equals("trueX");
+                boolean isLinear = !isTruex;
+                double absoluteEnd = advert.getStartMillis() + advert.getDuration();
+                int width = -1;
+                int height = -1;
+                String mediaFileUrl = "";
+                String mimeType = "";
+
+                if (isLinear) {
+                    LinearCreative linearCreative = advert.getLinearCreative();
+                    mediaFileUrl = linearCreative.getAssetUri();
+                    mimeType = linearCreative.getInteractiveUnit().getMIMEType();
+                } else {
+                    List<NonLinearCreative> nonLinearCreatives = advert.getNonLinearCreatives();
+                    if (!nonLinearCreatives.isEmpty()) {
+                        NonLinearCreative nonLinearCreative = nonLinearCreatives.get(0);
+                        width = nonLinearCreative.getWidth();
+                        height = nonLinearCreative.getHeight();
+                    }
+                }
+
+                AdData adData = new AdData(-1, -1, -1, mimeType);
+
+                Ad ad = new Ad(
+                        advert.getIdentifier(),
+                        entry.getRelativeStart() / 1000,
+                        advert.getDuration() / 1000.0,
+                        advert.getStartMillis() / 1000.0,
+                        absoluteEnd / 1000.0,
+                        advert.getSequence(),
+                        clickThroughUrl,
+                        mediaFileUrl,
+                        isLinear,
+                        advert.hasLinearInteractiveUnit(),
+                        isTruex,
+                        width,
+                        height,
+                        adData
+                );
                 entry.appendAd(ad);
             }
             this.adBreaks.add(entry);
@@ -36,6 +77,7 @@ public class AdTimeline {
 
     /**
      * Returns the current ad break the player is in
+     *
      * @param time - absolute time of the player
      * @return current ad break
      */
@@ -53,6 +95,7 @@ public class AdTimeline {
 
     /**
      * Returns the current ad the player is in
+     *
      * @param time - current absolute time
      * @return
      */
@@ -71,11 +114,12 @@ public class AdTimeline {
             return null;
         }
 
-        List<Ad> ads = currentAdBreak.getAds();
+        List<com.bitmovin.player.model.advertising.Ad> ads = currentAdBreak.getAds();
 
-        for (Ad ad : ads) {
-            if (ad.getAbsoluteStart() < time && (ad.getAbsoluteEnd() > time)) {
-                currentAd = ad;
+        for (com.bitmovin.player.model.advertising.Ad ad : ads) {
+            Ad ysAd = ((Ad) ad);
+            if (ysAd.getAbsoluteStart() < time && (ysAd.getAbsoluteEnd() > time)) {
+                currentAd = ysAd;
                 break;
             }
         }
@@ -85,6 +129,7 @@ public class AdTimeline {
 
     /**
      * Converts the time from absolute to relative
+     *
      * @param time - current absolute time
      * @return
      */
@@ -107,6 +152,7 @@ public class AdTimeline {
 
     /**
      * Converts the time from relative into absolute
+     *
      * @param time - current relative time
      * @return
      */
@@ -139,6 +185,7 @@ public class AdTimeline {
 
     /**
      * Returns the current progress through the ad (if we are in an ad). Otherwise returns the time passed in
+     *
      * @param time - current absolute time
      * @return progress through the ad
      */
@@ -153,6 +200,7 @@ public class AdTimeline {
 
     /**
      * Returns a list of all ad breaks
+     *
      * @return
      */
     public List<AdBreak> getAdBreaks() {

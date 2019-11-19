@@ -95,9 +95,9 @@ public class YospaceUtil {
 
     private static TimedMetadata generateTimedMetadata(String ymid, String yseq, String ytyp, String ydur, String yprg) {
         if (ymid != null && yseq != null && ytyp != null && ydur != null) {
-            return TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur);
+            return TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur);
         } else if (yprg != null) {
-            return TimedMetadata.createFromId3Tags(yprg, 0.0f);
+            return TimedMetadata.createFromMetadata(yprg, 0.0f);
         }
 
         return null;

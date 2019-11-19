@@ -32,7 +32,9 @@ public class AdTimeline {
                 if (isLinear) {
                     LinearCreative linearCreative = advert.getLinearCreative();
                     mediaFileUrl = linearCreative.getAssetUri();
-                    mimeType = linearCreative.getInteractiveUnit().getMIMEType();
+                    if (linearCreative.getInteractiveUnit() != null) {
+                        mimeType = linearCreative.getInteractiveUnit().getMIMEType();
+                    }
                 } else {
                     List<NonLinearCreative> nonLinearCreatives = advert.getNonLinearCreatives();
                     if (!nonLinearCreatives.isEmpty()) {

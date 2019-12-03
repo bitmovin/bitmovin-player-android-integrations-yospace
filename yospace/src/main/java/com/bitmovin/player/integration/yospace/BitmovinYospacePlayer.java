@@ -75,6 +75,7 @@ import org.apache.commons.lang3.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -103,6 +104,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private double pausedTime;
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
+    private boolean isPlayerStateSent;
+    private List<TimedMetadata> timedMetadataList = new ArrayList<>();
 
     private enum UI_LOADING_STATE {
         LOADING,
@@ -595,6 +598,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onPlaying(PlayingEvent playingEvent) {
             BitLog.d("Sending Playing Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
+            for (TimedMetadata timedMetadata : timedMetadataList) {
+                BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
+                metadataSource.notify(timedMetadata);
+            }
+            timedMetadataList.clear();
+            isPlayerStateSent = true;
         }
     };
 
@@ -687,8 +696,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
                 TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
-                    BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
-                    metadataSource.notify(timedMetadata);
+                    if (isPlayerStateSent) {
+                        BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
+                        metadataSource.notify(timedMetadata);
+                    } else {
+                        timedMetadataList.add(timedMetadata);
+                    }
                 }
             }
         }

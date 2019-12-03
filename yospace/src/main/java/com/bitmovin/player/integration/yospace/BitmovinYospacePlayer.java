@@ -252,6 +252,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         liveAdBreak = null;
         adTimeline = null;
         stopTruexAdRenderer();
+        timedMetadataEvents.clear();
     }
 
     private void loadLive() {

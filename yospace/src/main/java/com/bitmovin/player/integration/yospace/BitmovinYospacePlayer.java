@@ -246,6 +246,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         isYospaceAd = false;
         adFree = false;
         isLiveAdPaused = false;
+        isPlayingEventSent = false;
         pausedTime = 0;
         liveAd = null;
         liveAdBreak = null;
@@ -590,6 +591,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             pausedTime = currentTimeWithAds();
             BitLog.d("Sending Paused Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
+            isPlayingEventSent = false;
         }
     };
 

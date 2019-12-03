@@ -104,8 +104,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private double pausedTime;
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
-    private boolean isPlayerStateSent;
-    private List<TimedMetadata> timedMetadataList = new ArrayList<>();
+    private boolean isPlayingEventSent;
+    private List<TimedMetadata> timedMetadataEvents = new ArrayList<>();
 
     private enum UI_LOADING_STATE {
         LOADING,
@@ -598,12 +598,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onPlaying(PlayingEvent playingEvent) {
             BitLog.d("Sending Playing Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
-            for (TimedMetadata timedMetadata : timedMetadataList) {
+            isPlayingEventSent = true;
+
+            // Send any cached metadata events
+            for (TimedMetadata timedMetadata : timedMetadataEvents) {
                 BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
                 metadataSource.notify(timedMetadata);
             }
-            timedMetadataList.clear();
-            isPlayerStateSent = true;
+            timedMetadataEvents.clear();
         }
     };
 
@@ -696,11 +698,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
                 TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
-                    if (isPlayerStateSent) {
+                    if (isPlayingEventSent) {
                         BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
                         metadataSource.notify(timedMetadata);
                     } else {
-                        timedMetadataList.add(timedMetadata);
+                        // Store metadata to be sent after play event
+                        timedMetadataEvents.add(timedMetadata);
                     }
                 }
             }

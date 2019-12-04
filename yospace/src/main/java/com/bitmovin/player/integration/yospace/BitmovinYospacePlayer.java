@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bitmovin.player.BitmovinPlayer;
@@ -76,8 +77,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import kotlin.jvm.Synchronized;
 
 public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;
@@ -105,7 +110,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
     private boolean isPlayingEventSent;
-    private List<TimedMetadata> timedMetadataEvents = new ArrayList<>();
+    private Set<TimedMetadata> timedMetadataEvents = new HashSet<>();
 
     private enum UI_LOADING_STATE {
         LOADING,
@@ -596,22 +601,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
-    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
-        @Override
-        public void onPlaying(PlayingEvent playingEvent) {
-            BitLog.d("Sending Playing Event: " + getYospaceTime());
-            stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
-            isPlayingEventSent = true;
-
-            // Send any cached metadata events
-            for (TimedMetadata timedMetadata : timedMetadataEvents) {
-                BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
-                metadataSource.notify(timedMetadata);
-            }
-            timedMetadataEvents.clear();
-        }
-    };
-
     private OnReadyListener onReadyListener = new OnReadyListener() {
         @Override
         public void onReady(ReadyEvent readyEvent) {
@@ -695,18 +684,29 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
+    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
+        @Override
+        public void onPlaying(PlayingEvent playingEvent) {
+            BitLog.d("Sending Playing Event: " + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
+            isPlayingEventSent = true;
+        }
+    };
+
     private OnMetadataListener onMetadataListener = new OnMetadataListener() {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
                 TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
+                    timedMetadataEvents.add(timedMetadata);
+                    // Only send metadata events if play event has been sent
                     if (isPlayingEventSent) {
-                        BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
-                        metadataSource.notify(timedMetadata);
-                    } else {
-                        // Store metadata to be sent after play event
-                        timedMetadataEvents.add(timedMetadata);
+                        for (TimedMetadata metadata : timedMetadataEvents) {
+                            BitLog.d("Sending Metadata Event: " + metadata.toString());
+                            metadataSource.notify(metadata);
+                        }
+                        timedMetadataEvents.clear();
                     }
                 }
             }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bitmovin.player.BitmovinPlayer;
@@ -76,13 +75,10 @@ import org.apache.commons.lang3.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import kotlin.jvm.Synchronized;
 
 public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;

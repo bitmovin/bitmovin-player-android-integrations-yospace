@@ -597,7 +597,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             pausedTime = currentTimeWithAds();
             BitLog.d("Sending Paused Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
-            isPlayingEventSent = false;
         }
     };
 

@@ -75,8 +75,10 @@ import org.apache.commons.lang3.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;
@@ -103,6 +105,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private double pausedTime;
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
+    private boolean isPlayingEventSent;
+    private Set<TimedMetadata> timedMetadataEvents = new HashSet<>();
 
     private enum UI_LOADING_STATE {
         LOADING,
@@ -243,11 +247,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         isYospaceAd = false;
         adFree = false;
         isLiveAdPaused = false;
+        isPlayingEventSent = false;
         pausedTime = 0;
         liveAd = null;
         liveAdBreak = null;
         adTimeline = null;
         stopTruexAdRenderer();
+        timedMetadataEvents.clear();
     }
 
     private void loadLive() {
@@ -590,14 +596,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
-    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
-        @Override
-        public void onPlaying(PlayingEvent playingEvent) {
-            BitLog.d("Sending Playing Event: " + getYospaceTime());
-            stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
-        }
-    };
-
     private OnReadyListener onReadyListener = new OnReadyListener() {
         @Override
         public void onReady(ReadyEvent readyEvent) {
@@ -681,14 +679,30 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     };
 
+    private OnPlayingListener onPlayingListener = new OnPlayingListener() {
+        @Override
+        public void onPlaying(PlayingEvent playingEvent) {
+            BitLog.d("Sending Playing Event: " + getYospaceTime());
+            stateSource.notify(new PlayerState(PlaybackState.PLAYING, getYospaceTime(), false));
+            isPlayingEventSent = true;
+        }
+    };
+
     private OnMetadataListener onMetadataListener = new OnMetadataListener() {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
                 TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
-                    BitLog.d("Sending Metadata Event: " + timedMetadata.toString());
-                    metadataSource.notify(timedMetadata);
+                    timedMetadataEvents.add(timedMetadata);
+                    // Only send metadata events if play event has been sent
+                    if (isPlayingEventSent) {
+                        for (TimedMetadata metadata : timedMetadataEvents) {
+                            BitLog.d("Sending Metadata Event: " + metadata.toString());
+                            metadataSource.notify(metadata);
+                        }
+                        timedMetadataEvents.clear();
+                    }
                 }
             }
         }

@@ -3,7 +3,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
-def libraryVersion = '1.0.3'
+def libraryVersion = '1.0.4'
 
 android {
     compileSdkVersion 27
@@ -11,8 +11,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 29
-        versionName "1.0.3"
+        versionCode 30
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -42,7 +42,7 @@ dependencies {
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
 
-    implementation 'com.bitmovin.player:playercore:2.32+'
+    implementation 'com.bitmovin.player:playercore:2.35+'
     implementation('com.truex:TruexAdRenderer:1.0.8') {
         exclude group: 'com.android.support'
         exclude module: 'appcompat-v7'

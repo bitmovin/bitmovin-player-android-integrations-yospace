@@ -2,6 +2,7 @@ package com.bitmovin.player.integration.yospace;
 
 import com.bitmovin.player.api.event.data.MetadataEvent;
 import com.bitmovin.player.config.advertising.AdSourceType;
+import com.bitmovin.player.model.advertising.Ad;
 import com.bitmovin.player.model.emsg.EventMessage;
 import com.bitmovin.player.model.id3.BinaryFrame;
 import com.yospace.android.hls.analytic.advert.Advert;
@@ -94,16 +95,16 @@ public class YospaceUtil {
 
     private static TimedMetadata generateTimedMetadata(String ymid, String yseq, String ytyp, String ydur, String yprg) {
         if (ymid != null && yseq != null && ytyp != null && ydur != null) {
-            return TimedMetadata.createFromId3Tags(ymid, yseq, ytyp, ydur);
+            return TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur);
         } else if (yprg != null) {
-            return TimedMetadata.createFromId3Tags(yprg, 0.0f);
+            return TimedMetadata.createFromMetadata(yprg, 0.0f);
         }
 
         return null;
     }
 
-    public static YospaceAdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset, boolean isTruex) {
-        return new YospaceAdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000, isTruex);
+    public static YospaceAdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset, boolean isTruex, Ad ad) {
+        return new YospaceAdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000, isTruex, ad);
     }
 
     public static String getAdClickThroughUrl(Advert advert) {

@@ -75,10 +75,9 @@ import org.apache.commons.lang3.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class BitmovinYospacePlayer extends BitmovinPlayer {
     private Session session;
@@ -106,7 +105,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
     private boolean isPlayingEventSent;
-    private Set<TimedMetadata> timedMetadataEvents = new HashSet<>();
+    private List<TimedMetadata> timedMetadataEvents = new ArrayList<>();
 
     private enum UI_LOADING_STATE {
         LOADING,

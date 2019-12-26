@@ -124,4 +124,14 @@ public class YospaceUtil {
         }
         return mimeType;
     }
+
+    public static boolean isAdTruex(Advert advert) {
+        boolean isTruex = false;
+        if (advert.getAdSystem() != null) {
+            if (advert.getAdSystem().getAdSystemType() != null) {
+                isTruex = advert.getAdSystem().getAdSystemType().equals("trueX");
+            }
+        }
+        return isTruex;
+    }
 }

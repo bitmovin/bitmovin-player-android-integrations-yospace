@@ -114,4 +114,14 @@ public class YospaceUtil {
         }
         return clickThroughUrl;
     }
+
+    public static String getAdMimeType(Advert advert) {
+        String mimeType = "";
+        if (advert.getLinearCreative() != null) {
+            if (advert.getLinearCreative().getInteractiveUnit() != null) {
+                mimeType = advert.getLinearCreative().getInteractiveUnit().getMIMEType();
+            }
+        }
+        return mimeType;
+    }
 }

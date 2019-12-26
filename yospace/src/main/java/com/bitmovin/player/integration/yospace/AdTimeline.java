@@ -2,68 +2,51 @@ package com.bitmovin.player.integration.yospace;
 
 import com.yospace.android.hls.analytic.advert.AdSystem;
 import com.yospace.android.hls.analytic.advert.Advert;
-import com.yospace.android.hls.analytic.advert.LinearCreative;
-import com.yospace.android.hls.analytic.advert.NonLinearCreative;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AdTimeline {
-    private List<AdBreak> adBreaks = new ArrayList<AdBreak>();
+    private List<AdBreak> adBreaks = new ArrayList<>();
 
     public AdTimeline(List<com.yospace.android.hls.analytic.advert.AdBreak> adBreaks) {
-        double count = 0;
+        double relativeOffset = 0;
 
-        for (com.yospace.android.hls.analytic.advert.AdBreak adbreak : adBreaks) {
-            AdBreak entry = new AdBreak("unknown", (adbreak.getStartMillis() - count) / 1000, adbreak.getDuration() / 1000.0, adbreak.getStartMillis() / 1000.0, (adbreak.getStartMillis() + adbreak.getDuration()) / 1000.0, 0);
-            count += adbreak.getDuration();
+        for (com.yospace.android.hls.analytic.advert.AdBreak adBreak : adBreaks) {
+            AdBreak entry = new AdBreak(
+                    "unknown",
+                    (adBreak.getStartMillis() - relativeOffset) / 1000,
+                    adBreak.getDuration() / 1000.0,
+                    adBreak.getStartMillis() / 1000.0,
+                    (adBreak.getStartMillis() + adBreak.getDuration()) / 1000.0,
+                    0
+            );
 
-            for (Advert advert : adbreak.getAdverts()) {
-                String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
+            relativeOffset += adBreak.getDuration();
+
+            for (Advert advert : adBreak.getAdverts()) {
                 AdSystem adSystem = advert.getAdSystem();
                 boolean isTruex = adSystem != null && adSystem.getAdSystemType().equals("trueX");
-                boolean isLinear = !isTruex;
-                double absoluteEnd = advert.getStartMillis() + advert.getDuration();
-                int width = -1;
-                int height = -1;
-                String mediaFileUrl = "";
-                String mimeType = "";
-
-                if (isLinear) {
-                    LinearCreative linearCreative = advert.getLinearCreative();
-                    mediaFileUrl = linearCreative.getAssetUri();
-                    if (linearCreative.getInteractiveUnit() != null) {
-                        mimeType = linearCreative.getInteractiveUnit().getMIMEType();
-                    }
-                } else {
-                    List<NonLinearCreative> nonLinearCreatives = advert.getNonLinearCreatives();
-                    if (!nonLinearCreatives.isEmpty()) {
-                        NonLinearCreative nonLinearCreative = nonLinearCreatives.get(0);
-                        width = nonLinearCreative.getWidth();
-                        height = nonLinearCreative.getHeight();
-                    }
-                }
-
-                AdData adData = new AdData(-1, -1, -1, mimeType);
+                String mimeType = YospaceUtil.getAdMimeType(advert);
+                AdData adData = new AdData(mimeType);
 
                 Ad ad = new Ad(
                         advert.getIdentifier(),
                         entry.getRelativeStart() / 1000,
                         advert.getDuration() / 1000.0,
                         advert.getStartMillis() / 1000.0,
-                        absoluteEnd / 1000.0,
+                        (advert.getStartMillis() + advert.getDuration()) / 1000.0,
                         advert.getSequence(),
-                        clickThroughUrl,
-                        mediaFileUrl,
-                        isLinear,
+                        YospaceUtil.getAdClickThroughUrl(advert),
+                        !isTruex,
                         advert.hasLinearInteractiveUnit(),
                         isTruex,
-                        width,
-                        height,
                         adData
                 );
+
                 entry.appendAd(ad);
             }
+
             this.adBreaks.add(entry);
         }
     }

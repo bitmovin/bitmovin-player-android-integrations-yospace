@@ -856,9 +856,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (!isTruexRendering) {
                     isYospaceAd = true;
                     String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
+                    String mimeType = YospaceUtil.getAdMimeType(advert);
+                    AdData adData = new AdData(mimeType);
                     double absoluteTime = currentTimeWithAds();
                     long absoluteEnd = advert.getStartMillis() + advert.getDuration();
-                    String mediaFileUrl = advert.getLinearCreative().getAssetUri();
                     liveAd = new Ad(
                             advert.getIdentifier(),
                             absoluteTime,
@@ -867,13 +868,10 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             absoluteEnd / 1000.0,
                             advert.getSequence(),
                             clickThroughUrl,
-                            mediaFileUrl,
                             true,
                             advert.hasLinearInteractiveUnit(),
                             false,
-                            -1,
-                            -1,
-                            null
+                            adData
                     );
                     YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, false, getActiveAd());
                     handler.post(new Runnable() {

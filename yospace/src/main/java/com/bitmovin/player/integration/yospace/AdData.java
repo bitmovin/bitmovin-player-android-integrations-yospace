@@ -6,11 +6,13 @@ public class AdData implements com.bitmovin.player.model.advertising.AdData {
     private int maxBitrate;
     private String mimeType;
 
-    public AdData(int bitrate, int minBitrate, int maxBitrate, String mimeType) {
-        this.bitrate = bitrate;
-        this.minBitrate = minBitrate;
-        this.maxBitrate = maxBitrate;
+    public AdData(String mimeType) {
         this.mimeType = mimeType;
+
+        // Properties we do not currently support
+        this.bitrate = -1;
+        this.minBitrate = -1;
+        this.maxBitrate = -1;
     }
 
     @Override

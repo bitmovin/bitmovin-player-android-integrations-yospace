@@ -57,7 +57,6 @@ import com.yospace.android.hls.analytic.SessionFactory;
 import com.yospace.android.hls.analytic.SessionLive;
 import com.yospace.android.hls.analytic.SessionNonLinear;
 import com.yospace.android.hls.analytic.SessionNonLinearStartOver;
-import com.yospace.android.hls.analytic.advert.AdSystem;
 import com.yospace.android.hls.analytic.advert.Advert;
 import com.yospace.android.hls.analytic.advert.InteractiveUnit;
 import com.yospace.android.hls.analytic.advert.LinearCreative;
@@ -92,16 +91,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private SourceConfiguration sourceConfiguration;
     private TruexConfiguration truexConfiguration;
     private YospaceSesssionStatus sessionStatus = YospaceSesssionStatus.NOT_INITIALIZED;
-    private String originalUrl;
-    private boolean isYospaceAd = false;
     private TruexAdRenderer truexAdRenderer;
     private Context context;
     private boolean adFree = false;
     private boolean isTruexRendering = false;
     private AdTimeline adTimeline;
-    private Ad liveAd;
-    private AdBreak liveAdBreak;
-    private double pausedTime;
+    private Ad activeAd;
+    private AdBreak activeAdBreak;
     private boolean isLiveAdPaused = false;
     private UI_LOADING_STATE uiLoadingState;
     private boolean isPlayingEventSent;
@@ -177,7 +173,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             return;
         }
 
-        originalUrl = hlsSource.getUrl();
+        String originalUrl = hlsSource.getUrl();
         properties = new Session.SessionProperties(originalUrl).readTimeout(yospaceConfiguration.getReadTimeout()).connectTimeout(yospaceConfiguration.getConnectTimeout()).requestTimeout(yospaceConfiguration.getRequestTimeout());
 
         if (yospaceConfiguration.getUserAgent() != null) {
@@ -213,23 +209,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     }
 
     public Ad getActiveAd() {
-        if (isLive()) {
-            return liveAd;
-        } else if (adTimeline != null) {
-            return adTimeline.currentAd(this.currentTimeWithAds());
-        } else {
-            return null;
-        }
+        return activeAd;
     }
 
     public AdBreak getActiveAdBreak() {
-        if (isLive()) {
-            return liveAdBreak;
-        } else if (adTimeline != null) {
-            return adTimeline.currentAdBreak(this.currentTimeWithAds());
-        } else {
-            return null;
-        }
+        return activeAdBreak;
     }
 
     public void setPlayerPolicy(BitmovinYospacePlayerPolicy bitmovinYospacePlayerPolicy) {
@@ -243,13 +227,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             session.shutdown();
             session = null;
         }
-        isYospaceAd = false;
         adFree = false;
         isLiveAdPaused = false;
         isPlayingEventSent = false;
-        pausedTime = 0;
-        liveAd = null;
-        liveAdBreak = null;
+        activeAd = null;
+        activeAdBreak = null;
         adTimeline = null;
         stopTruexAdRenderer();
         timedMetadataEvents.clear();
@@ -336,11 +318,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
     }
 
-    private void startPlayback(final String playbackUrl) {
+    private void startPlayback(String playbackUrl) {
         if (uiLoadingState != UI_LOADING_STATE.UNLOADING) {
             handler.post(new Runnable() {
                 public void run() {
-                    final SourceConfiguration newSourceConfiguration = new SourceConfiguration();
+                    SourceConfiguration newSourceConfiguration = new SourceConfiguration();
                     SourceItem sourceItem = new SourceItem(new HLSSource(playbackUrl));
                     DRMConfiguration drmConfiguration = sourceConfiguration.getFirstSourceItem().getDrmConfiguration(DRMSystems.WIDEVINE_UUID);
                     if (drmConfiguration != null) {
@@ -445,25 +427,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public double getCurrentTime() {
         if (isAd()) {
-            if (isLive()) {
-                if (liveAd != null) {
-                    return super.getCurrentTime() - liveAd.getRelativeStart();
-                } else {
-                    return super.getCurrentTime();
-                }
-            } else {
-                if (adTimeline != null) {
-                    return adTimeline.adTime(super.getCurrentTime());
-                } else {
-                    return super.getCurrentTime();
-                }
-            }
+            return super.getCurrentTime() - activeAd.getRelativeStart();
+        } else if (adTimeline != null) {
+            return adTimeline.absoluteToRelative(super.getCurrentTime());
         } else {
-            if (adTimeline != null) {
-                return adTimeline.absoluteToRelative(super.getCurrentTime());
-            } else {
-                return super.getCurrentTime();
-            }
+            return super.getCurrentTime();
         }
     }
 
@@ -506,7 +474,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     @Override
     public boolean isAd() {
         if (yospaceSourceConfiguration != null) {
-            return isYospaceAd;
+            return activeAd != null;
         } else {
             return super.isAd();
         }
@@ -589,7 +557,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onPaused(PausedEvent pausedEvent) {
             isLiveAdPaused = isLive() && isAd();
-            pausedTime = currentTimeWithAds();
             BitLog.d("Sending Paused Event: " + getYospaceTime());
             stateSource.notify(new PlayerState(PlaybackState.PAUSED, getYospaceTime(), false));
         }
@@ -626,33 +593,23 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (!(session instanceof SessionLive)) {
                     stateSource.notify(new PlayerState(PlaybackState.PLAYHEAD_UPDATE, getYospaceTime(), false));
                 }
+                TimeChangedEvent event = new TimeChangedEvent(getCurrentTime());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (isYospaceAd) {
-                            // If we are in a Yospace ad, send the ad time
-                            double adTime = getAdTimeline().adTime(timeChangedEvent.getTime());
-                            yospaceEventEmitter.emit(new TimeChangedEvent(adTime));
-                        } else {
-                            // If we are not in an ad, send converted relative time
-                            double relativeTime = getAdTimeline().absoluteToRelative(timeChangedEvent.getTime());
-                            yospaceEventEmitter.emit(new TimeChangedEvent(relativeTime));
-                        }
+                        yospaceEventEmitter.emit(event);
                     }
                 });
             } else {
-                AdBreak activeAdBreak = liveAdBreak;
-                final Ad activeAd = getActiveAd();
+                AdSkippedEvent adSkippedEvent = new AdSkippedEvent(activeAd);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         yospaceEventEmitter.emit(timeChangedEvent);
                         if (isLiveAdPaused) {
                             if (activeAdBreak != null) {
-                                double currentTime = timeChangedEvent.getTime();
-                                double adBreakAbsEnd = activeAdBreak.getAbsoluteEnd();
-                                if (currentTime - pausedTime > adBreakAbsEnd - pausedTime) {
-                                    yospaceEventEmitter.emit(new AdSkippedEvent(activeAd));
+                                if (timeChangedEvent.getTime() > activeAdBreak.getAbsoluteEnd()) {
+                                    yospaceEventEmitter.emit(adSkippedEvent);
                                 }
                             }
                         }
@@ -713,16 +670,19 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad started");
-            YospaceAdStartedEvent adStartedEvent;
-            Ad activeAd = getActiveAd();
-            if (activeAd != null) {
-                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, activeAd.getClickThroughUrl(), activeAd.getSequence(), activeAd.getDuration(), activeAd.getRelativeStart(), "position", 0, activeAd.isTruex(), activeAd);
-            } else {
-                adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "0", 0, true, null);
-            }
-            yospaceEventEmitter.emit(new AdBreakStartedEvent(getActiveAdBreak()));
+            YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(
+                    AdSourceType.UNKNOWN,
+                    activeAd.getClickThroughUrl(),
+                    activeAd.getSequence(),
+                    activeAd.getDuration() / 1000.0,
+                    activeAd.getRelativeStart() / 1000.0,
+                    "position",
+                    0,
+                    true,
+                    activeAd
+            );
+            yospaceEventEmitter.emit(new AdBreakStartedEvent(activeAdBreak));
             yospaceEventEmitter.emit(adStartedEvent);
-            isYospaceAd = true;
             pause();
         }
     };
@@ -731,16 +691,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad completed");
-            isYospaceAd = false;
-            yospaceEventEmitter.emit(new AdFinishedEvent(getActiveAd()));
+            yospaceEventEmitter.emit(new AdFinishedEvent(activeAd));
             if (adFree) {
-                AdBreak activeAdBreak = getActiveAdBreak();
-                if (activeAdBreak != null) {
-                    yospaceEventEmitter.emit(new AdBreakFinishedEvent(getActiveAdBreak()));
-                    yospaceEventEmitter.emit(new TruexAdFreeEvent());
-                    // Seek to end of underlying non-interactive ad
-                    seek(activeAdBreak.getRelativeStart() + 1);
-                }
+                yospaceEventEmitter.emit(new AdBreakFinishedEvent(activeAdBreak));
+                yospaceEventEmitter.emit(new TruexAdFreeEvent());
+                // Seek to end of underlying non-interactive ad
+                seek(activeAdBreak.getRelativeStart() + 1);
             }
             play();
         }
@@ -750,7 +706,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad error");
-            isYospaceAd = false;
             stopTruexAdRenderer();
             play();
         }
@@ -760,7 +715,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - No ads found");
-            isYospaceAd = false;
             stopTruexAdRenderer();
             play();
         }
@@ -794,38 +748,38 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (truexConfiguration != null) {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
-                        AdSystem adSystem = advert.getAdSystem();
-                        if (adSystem != null) {
-                            if (adSystem.getAdSystemType().equals("trueX")) {
-                                LinearCreative linearCreative = advert.getLinearCreative();
-                                if (linearCreative != null) {
-                                    InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
-                                    if (interactiveUnit != null) {
-                                        String source = interactiveUnit.getSource();
-                                        String adParams = interactiveUnit.getAdParameters();
-                                        BitLog.d("TrueX Ad Found - Source:" + source);
-                                        BitLog.d("Rendering TrueX Ad: " + advert.toString());
-                                        pause();
-                                        renderTruexAd(source, adParams);
-                                    }
+                        if (YospaceUtil.isAdTruex(advert)) {
+                            LinearCreative linearCreative = advert.getLinearCreative();
+                            if (linearCreative != null) {
+                                InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
+                                if (interactiveUnit != null) {
+                                    String source = interactiveUnit.getSource();
+                                    String adParams = interactiveUnit.getAdParameters();
+                                    BitLog.d("TrueX Ad Found - Source:" + source);
+                                    BitLog.d("Rendering TrueX Ad: " + advert.toString());
+                                    pause();
+                                    renderTruexAd(source, adParams);
                                 }
-                                break;
                             }
+                            break;
                         }
                     }
                 }
+                double absoluteTime = currentTimeWithAds();
+                activeAdBreak = new AdBreak(
+                        "unknown",
+                        absoluteTime,
+                        adBreak.getDuration() / 1000.0,
+                        absoluteTime,
+                        absoluteTime + adBreak.getDuration() / 1000.0,
+                        0
+                );
                 if (!isTruexRendering) {
-                    // No TrueX ad present in ad break, so handle ad events here
-                    if (isLive()) {
-                        String adId = adBreak.toString() + System.currentTimeMillis();
-                        double absoluteTime = BitmovinYospacePlayer.super.getCurrentTime();
-                        liveAdBreak = new AdBreak(adId, absoluteTime, adBreak.getDuration() / 1000.0, absoluteTime, absoluteTime + adBreak.getDuration() / 1000.0, 0);
-                    }
-                    AdBreak activeAdBreak = getActiveAdBreak();
+                    AdBreakStartedEvent adBreakStartedEvent = new AdBreakStartedEvent(activeAdBreak);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            yospaceEventEmitter.emit(new AdBreakStartedEvent(activeAdBreak));
+                            yospaceEventEmitter.emit(adBreakStartedEvent);
                         }
                     });
                 }
@@ -834,16 +788,16 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
+            AdBreakFinishedEvent adBreakFinishedEvent = new AdBreakFinishedEvent(activeAdBreak);
             if (!isTruexRendering && !adFree) {
-                final AdBreak activeAdBreak = getActiveAdBreak();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        yospaceEventEmitter.emit(new AdBreakFinishedEvent(activeAdBreak));
+                        yospaceEventEmitter.emit(adBreakFinishedEvent);
                     }
                 });
             }
-            liveAdBreak = null;
+            activeAdBreak = null;
             isTruexRendering = false;
         }
 
@@ -853,27 +807,35 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 BitLog.d("Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
+                String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
+                boolean isTruex = YospaceUtil.isAdTruex(advert);
+                AdData adData = new AdData(YospaceUtil.getAdMimeType(advert));
+                double absoluteTime = currentTimeWithAds();
+                activeAd = new Ad(
+                        advert.getIdentifier(),
+                        absoluteTime,
+                        advert.getDuration() / 1000.0,
+                        absoluteTime,
+                        absoluteTime + advert.getDuration() / 1000.0,
+                        advert.getSequence(),
+                        clickThroughUrl,
+                        !isTruex,
+                        advert.hasLinearInteractiveUnit(),
+                        isTruex,
+                        adData
+                );
                 if (!isTruexRendering) {
-                    isYospaceAd = true;
-                    String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
-                    String mimeType = YospaceUtil.getAdMimeType(advert);
-                    AdData adData = new AdData(mimeType);
-                    double absoluteTime = currentTimeWithAds();
-                    long absoluteEnd = advert.getStartMillis() + advert.getDuration();
-                    liveAd = new Ad(
-                            advert.getIdentifier(),
-                            absoluteTime,
-                            advert.getDuration() / 1000.0,
-                            absoluteTime,
-                            absoluteEnd / 1000.0,
-                            advert.getSequence(),
+                    YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(
+                            AdSourceType.UNKNOWN,
                             clickThroughUrl,
-                            true,
-                            advert.hasLinearInteractiveUnit(),
-                            false,
-                            adData
+                            advert.getSequence(),
+                            advert.getDuration() / 1000.0,
+                            advert.getStartMillis() / 1000.0,
+                            "position",
+                            0,
+                            isTruex,
+                            activeAd
                     );
-                    YospaceAdStartedEvent adStartedEvent = YospaceUtil.createAdStartEvent(AdSourceType.UNKNOWN, clickThroughUrl, advert.getSequence(), advert.getDuration(), advert.getStartMillis(), "position", 0, false, getActiveAd());
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -886,17 +848,16 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertEnd(Advert advert) {
-            isYospaceAd = false;
+            AdFinishedEvent adFinishedEvent = new AdFinishedEvent(activeAd);
             if (!isTruexRendering && !adFree) {
-                final Ad activeAd = getActiveAd();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        yospaceEventEmitter.emit(new AdFinishedEvent(activeAd));
+                        yospaceEventEmitter.emit(adFinishedEvent);
                     }
                 });
             }
-            liveAd = null;
+            activeAd = null;
             isTruexRendering = false;
         }
 

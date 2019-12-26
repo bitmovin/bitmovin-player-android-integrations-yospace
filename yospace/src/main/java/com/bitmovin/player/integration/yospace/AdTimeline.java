@@ -1,6 +1,5 @@
 package com.bitmovin.player.integration.yospace;
 
-import com.yospace.android.hls.analytic.advert.AdSystem;
 import com.yospace.android.hls.analytic.advert.Advert;
 
 import java.util.ArrayList;
@@ -84,15 +83,8 @@ public class AdTimeline {
      * @return
      */
     public Ad currentAd(double time) {
-        AdBreak currentAdBreak = null;
+        AdBreak currentAdBreak = currentAdBreak(time);
         Ad currentAd = null;
-
-        for (AdBreak adBreak : adBreaks) {
-            if (adBreak.getAbsoluteStart() < time && (adBreak.getAbsoluteStart() + adBreak.getDuration()) > time) {
-                currentAdBreak = adBreak;
-                break;
-            }
-        }
 
         if (currentAdBreak == null) {
             return null;

@@ -103,10 +103,6 @@ public class YospaceUtil {
         return null;
     }
 
-    public static YospaceAdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset, boolean isTruex, Ad ad) {
-        return new YospaceAdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000, isTruex, ad);
-    }
-
     public static String getAdClickThroughUrl(Advert advert) {
         String clickThroughUrl = "";
         if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {

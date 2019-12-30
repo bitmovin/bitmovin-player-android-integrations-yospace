@@ -96,7 +96,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private boolean isYospaceAd = false;
     private TruexAdRenderer truexAdRenderer;
     private Context context;
-    private boolean adFree = false;
+    private boolean isAdFree = false;
+    private boolean isTruexAdComplete = false;
+    private boolean isTruexAdPreroll = false;
     private boolean isTruexRendering = false;
     private AdTimeline adTimeline;
     private Ad liveAd;
@@ -244,7 +246,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             session = null;
         }
         isYospaceAd = false;
-        adFree = false;
+        isAdFree = false;
+        isTruexAdComplete = false;
+        isTruexAdPreroll = false;
         isLiveAdPaused = false;
         isPlayingEventSent = false;
         pausedTime = 0;
@@ -376,7 +380,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (truexConfiguration.getVastConfigUrl() != null) {
                 adParams.put("vast_config_url", truexConfiguration.getVastConfigUrl());
             }
-            truexAdRenderer.init(creativeURL, adParams, TruexAdRendererConstants.MIDROLL);
+            isTruexAdPreroll = getCurrentTime() == 0;
+            String slotType = isTruexAdPreroll ? TruexAdRendererConstants.PREROLL : TruexAdRendererConstants.MIDROLL;
+            truexAdRenderer.init(creativeURL, adParams, slotType);
             truexAdRenderer.start(truexConfiguration.getViewGroup());
             isTruexRendering = true;
             BitLog.d("TrueX Ad rendered successfully");
@@ -713,6 +719,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad started");
+            isTruexAdComplete = false;
+            isYospaceAd = true;
             YospaceAdStartedEvent adStartedEvent;
             Ad activeAd = getActiveAd();
             if (activeAd != null) {
@@ -722,27 +730,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             }
             yospaceEventEmitter.emit(new AdBreakStartedEvent(getActiveAdBreak()));
             yospaceEventEmitter.emit(adStartedEvent);
-            isYospaceAd = true;
             pause();
-        }
-    };
-
-    private IEventHandler adCompletedListener = new IEventHandler() {
-        @Override
-        public void handleEvent(Map<String, ?> data) {
-            BitLog.d("TrueX - Ad completed");
-            isYospaceAd = false;
-            yospaceEventEmitter.emit(new AdFinishedEvent(getActiveAd()));
-            if (adFree) {
-                AdBreak activeAdBreak = getActiveAdBreak();
-                if (activeAdBreak != null) {
-                    yospaceEventEmitter.emit(new AdBreakFinishedEvent(getActiveAdBreak()));
-                    yospaceEventEmitter.emit(new TruexAdFreeEvent());
-                    // Seek to end of underlying non-interactive ad
-                    seek(activeAdBreak.getRelativeStart() + 1);
-                }
-            }
-            play();
         }
     };
 
@@ -777,7 +765,23 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad free");
-            adFree = true;
+            isAdFree = isTruexAdPreroll;
+        }
+    };
+
+    private IEventHandler adCompletedListener = new IEventHandler() {
+        @Override
+        public void handleEvent(Map<String, ?> data) {
+            BitLog.d("TrueX - Ad completed");
+            isTruexAdComplete = true;
+            isYospaceAd = false;
+            yospaceEventEmitter.emit(new AdFinishedEvent(getActiveAd()));
+            yospaceEventEmitter.emit(new AdBreakFinishedEvent(getActiveAdBreak()));
+            if (isAdFree) {
+                yospaceEventEmitter.emit(new TruexAdFreeEvent());
+            }
+            seek(getCurrentTime() + 1);
+            play();
         }
     };
 
@@ -787,7 +791,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private AnalyticEventListener analyticEventListener = new AnalyticEventListener() {
         @Override
         public void onAdvertBreakStart(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
-            if (adFree) {
+            if (isAdFree) {
                 BitLog.d("Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
@@ -834,7 +838,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
-            if (!isTruexRendering && !adFree) {
+            if (!isTruexRendering && !isTruexAdComplete) {
                 final AdBreak activeAdBreak = getActiveAdBreak();
                 handler.post(new Runnable() {
                     @Override
@@ -849,7 +853,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertStart(Advert advert) {
-            if (adFree) {
+            if (isAdFree) {
                 BitLog.d("Skipping Ad Break due to TrueX ad free experience");
                 seek(getCurrentTime() + 1);
             } else {
@@ -889,7 +893,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertEnd(Advert advert) {
             isYospaceAd = false;
-            if (!isTruexRendering && !adFree) {
+            if (!isTruexRendering && !isTruexAdComplete) {
                 final Ad activeAd = getActiveAd();
                 handler.post(new Runnable() {
                     @Override

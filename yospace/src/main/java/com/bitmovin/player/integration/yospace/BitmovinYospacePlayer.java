@@ -773,8 +773,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void handleEvent(Map<String, ?> data) {
             BitLog.d("TrueX - Ad completed");
-            isTruexAdComplete = true;
-            isYospaceAd = false;
             yospaceEventEmitter.emit(new AdFinishedEvent(getActiveAd()));
             yospaceEventEmitter.emit(new AdBreakFinishedEvent(getActiveAdBreak()));
             if (isAdFree) {
@@ -782,6 +780,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             }
             seek(getCurrentTime() + 1);
             play();
+            isTruexAdComplete = true;
+            isYospaceAd = false;
+            isTruexRendering = false;
         }
     };
 
@@ -848,7 +849,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 });
             }
             liveAdBreak = null;
-            isTruexRendering = false;
         }
 
         @Override
@@ -903,7 +903,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 });
             }
             liveAd = null;
-            isTruexRendering = false;
         }
 
         @Override

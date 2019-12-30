@@ -839,7 +839,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
-            if (!isTruexRendering && !isTruexAdComplete) {
+            if (!isTruexAdComplete) {
                 final AdBreak activeAdBreak = getActiveAdBreak();
                 handler.post(new Runnable() {
                     @Override
@@ -893,7 +893,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onAdvertEnd(Advert advert) {
             isYospaceAd = false;
-            if (!isTruexRendering && !isTruexAdComplete) {
+            if (!isTruexAdComplete) {
                 final Ad activeAd = getActiveAd();
                 handler.post(new Runnable() {
                     @Override

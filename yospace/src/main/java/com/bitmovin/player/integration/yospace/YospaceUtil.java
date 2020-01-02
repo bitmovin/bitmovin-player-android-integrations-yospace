@@ -103,15 +103,31 @@ public class YospaceUtil {
         return null;
     }
 
-    public static YospaceAdStartedEvent createAdStartEvent(AdSourceType clientType, String clickThroughUrl, int indexInQueue, double duration, double timeOffset, String position, double skipOffset, boolean isTruex, Ad ad) {
-        return new YospaceAdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration / 1000, timeOffset / 1000, position, skipOffset / 1000, isTruex, ad);
-    }
-
     public static String getAdClickThroughUrl(Advert advert) {
         String clickThroughUrl = "";
         if (advert.getLinearCreative() != null && advert.getLinearCreative().getVideoClicks() != null) {
             clickThroughUrl = advert.getLinearCreative().getVideoClicks().getClickThroughUrl();
         }
         return clickThroughUrl;
+    }
+
+    public static String getAdMimeType(Advert advert) {
+        String mimeType = "";
+        if (advert.getLinearCreative() != null) {
+            if (advert.getLinearCreative().getInteractiveUnit() != null) {
+                mimeType = advert.getLinearCreative().getInteractiveUnit().getMIMEType();
+            }
+        }
+        return mimeType;
+    }
+
+    public static boolean isAdTruex(Advert advert) {
+        boolean isTruex = false;
+        if (advert.getAdSystem() != null) {
+            if (advert.getAdSystem().getAdSystemType() != null) {
+                isTruex = advert.getAdSystem().getAdSystemType().equals("trueX");
+            }
+        }
+        return isTruex;
     }
 }

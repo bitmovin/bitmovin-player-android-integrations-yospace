@@ -18,7 +18,7 @@ public class Ad implements com.bitmovin.player.model.advertising.Ad {
     private boolean isLinear;
     private AdData adData;
 
-    public Ad(String id, double relativeStart, double duration, double absoluteStart, double absoluteEnd, int sequence, String clickThroughUrl, String mediaFileUrl, boolean isLinear, boolean hasInteractiveUnit, boolean isTruex, int width, int height, AdData adData) {
+    public Ad(String id, double relativeStart, double duration, double absoluteStart, double absoluteEnd, int sequence, String clickThroughUrl, boolean isLinear, boolean hasInteractiveUnit, boolean isTruex, AdData adData) {
         this.id = id;
         this.relativeStart = relativeStart;
         this.duration = duration;
@@ -26,13 +26,15 @@ public class Ad implements com.bitmovin.player.model.advertising.Ad {
         this.absoluteEnd = absoluteEnd;
         this.sequence = sequence;
         this.clickThroughUrl = clickThroughUrl;
-        this.mediaFileUrl = mediaFileUrl;
         this.isLinear = isLinear;
         this.hasInteractiveUnit = hasInteractiveUnit;
         this.isTruex = isTruex;
-        this.width = width;
-        this.height = height;
         this.adData = adData;
+
+        // Properties we do not currently support
+        this.mediaFileUrl = "";
+        this.width = -1;
+        this.height = -1;
     }
 
     public double getRelativeStart() {

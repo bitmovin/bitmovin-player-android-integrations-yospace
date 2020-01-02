@@ -380,7 +380,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (truexConfiguration.getVastConfigUrl() != null) {
                 adParams.put("vast_config_url", truexConfiguration.getVastConfigUrl());
             }
-            isTruexAdPreroll = getCurrentTime() == 0;
             String slotType = isTruexAdPreroll ? TruexAdRendererConstants.PREROLL : TruexAdRendererConstants.MIDROLL;
             truexAdRenderer.init(creativeURL, adParams, slotType);
             truexAdRenderer.start(truexConfiguration.getViewGroup());
@@ -808,6 +807,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                                     if (interactiveUnit != null) {
                                         String source = interactiveUnit.getSource();
                                         String adParams = interactiveUnit.getAdParameters();
+                                        isTruexAdPreroll = adBreak.getStartMillis() == 0;
                                         BitLog.d("TrueX Ad Found - Source:" + source);
                                         BitLog.d("Rendering TrueX Ad: " + advert.toString());
                                         pause();

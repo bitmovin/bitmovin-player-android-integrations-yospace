@@ -840,7 +840,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 AdData adData = new AdData(YospaceUtil.getAdMimeType(advert));
                 double absoluteTime = currentTimeWithAds();
                 activeAd = new Ad(
-                        advert.getIdentifier(),
+                        advert.getId(),
                         absoluteTime,
                         advert.getDuration() / 1000.0,
                         absoluteTime,

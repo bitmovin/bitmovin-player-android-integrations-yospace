@@ -782,6 +782,26 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         absoluteTime + adBreak.getDuration() / 1000.0,
                         0
                 );
+                double absoluteStartOffset = absoluteTime;
+                for (Advert advert : adBreak.getAdverts()) {
+                    AdData adData = new AdData(YospaceUtil.getAdMimeType(advert));
+                    boolean isTruex = YospaceUtil.isAdTruex(advert);
+                    Ad ad = new Ad(
+                            advert.getId(),
+                            absoluteTime,
+                            advert.getDuration() / 1000.0,
+                            absoluteStartOffset,
+                            absoluteStartOffset + advert.getDuration() / 1000.0,
+                            advert.getSequence(),
+                            YospaceUtil.getAdClickThroughUrl(advert),
+                            !isTruex,
+                            advert.hasLinearInteractiveUnit(),
+                            isTruex,
+                            adData
+                    );
+                    activeAdBreak.appendAd(ad);
+                    absoluteStartOffset += advert.getDuration() / 1000.0;
+                }
                 if (!isTruexRendering) {
                     AdBreakStartedEvent adBreakStartedEvent = new AdBreakStartedEvent(activeAdBreak);
                     handler.post(new Runnable() {

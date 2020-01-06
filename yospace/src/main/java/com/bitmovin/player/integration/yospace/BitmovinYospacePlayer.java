@@ -738,7 +738,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             seek(getCurrentTime() + 1);
             play();
             isTruexAdComplete = true;
-            isYospaceAd = false;
             isTruexRendering = false;
         }
     };

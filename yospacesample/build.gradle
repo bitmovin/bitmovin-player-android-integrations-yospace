@@ -6,8 +6,8 @@ android {
         applicationId "com.bitmovin.player.integration.yospacesample"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 31
-        versionName "1.0.5"
+        versionCode 32
+        versionName "1.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

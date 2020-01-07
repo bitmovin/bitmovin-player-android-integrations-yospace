@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:keepScreenOn="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:keepScreenOn="true"
     tools:context=".MainActivity">
 
     <EditText
@@ -33,10 +33,10 @@
 
     <Button
         android:id="@+id/vod_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
-        android:text="@string/turner_vod"
+        android:text="@string/vod"
         app:layout_constraintEnd_toStartOf="@id/live_button"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
@@ -45,17 +45,17 @@
 
     <Button
         android:id="@+id/live_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
-        android:text="@string/turner_live"
+        android:text="@string/live"
         app:layout_constraintEnd_toStartOf="@id/truex_button"
         app:layout_constraintStart_toEndOf="@id/vod_button"
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
         android:id="@+id/truex_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/truex"
@@ -65,7 +65,7 @@
 
     <Button
         android:id="@+id/custom_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/custom"
@@ -74,48 +74,46 @@
         app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
 
     <Button
-        android:id="@+id/default_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/yospace_vod"
-        app:layout_constraintEnd_toStartOf="@id/nlso_button"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
-
-    <Button
-        android:id="@+id/nlso_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/yospace_nlso"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/default_button"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
-
-    <Button
         android:id="@+id/click_through_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/click_through"
-        app:layout_constraintEnd_toStartOf="@id/unload_button"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@id/live_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/default_button" />
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
 
     <Button
         android:id="@+id/unload_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/unload"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/live_button"
         app:layout_constraintStart_toEndOf="@id/click_through_button"
-        app:layout_constraintTop_toBottomOf="@id/default_button" />
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+
+    <Button
+        android:id="@+id/seek_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:text="@string/seek"
+        app:layout_constraintEnd_toEndOf="@id/truex_button"
+        app:layout_constraintStart_toEndOf="@id/live_button"
+        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+
+    <EditText
+        android:id="@+id/seek_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="2"
+        android:layout_margin="8dp"
+        android:text="205"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/seek_button"
+        app:layout_constraintTop_toBottomOf="@id/custom_button" />
 
     <com.bitmovin.player.BitmovinPlayerView
         android:id="@+id/bitmovinPlayerView"

@@ -684,17 +684,22 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             BitLog.d("TrueX - Ad started");
             isTruexAdFree = false;
             isTruexAdComplete = false;
-            YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(
-                    AdSourceType.UNKNOWN,
-                    activeAd.getClickThroughUrl(),
-                    activeAd.getSequence(),
-                    activeAd.getDuration() / 1000.0,
-                    activeAd.getRelativeStart() / 1000.0,
-                    "position",
-                    0,
-                    true,
-                    activeAd
-            );
+            YospaceAdStartedEvent adStartedEvent;
+            if (activeAd != null) {
+                adStartedEvent = new YospaceAdStartedEvent(
+                        AdSourceType.UNKNOWN,
+                        activeAd.getClickThroughUrl(),
+                        activeAd.getSequence(),
+                        activeAd.getDuration() / 1000.0,
+                        activeAd.getRelativeStart() / 1000.0,
+                        "position",
+                        0,
+                        true,
+                        activeAd
+                );
+            } else {
+                adStartedEvent = new YospaceAdStartedEvent(AdSourceType.UNKNOWN, "", 0, 0, 0, "position", 0, true, null);
+            }
             yospaceEventEmitter.emit(new AdBreakStartedEvent(activeAdBreak));
             yospaceEventEmitter.emit(adStartedEvent);
         }
@@ -744,9 +749,13 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     yospaceEventEmitter.emit(new TruexAdFreeEvent());
                     isAdFreeExperience = true;
                 }
-                forceSeek(activeAdBreak.getAbsoluteEnd());
+                if (activeAdBreak != null) {
+                    forceSeek(activeAdBreak.getAbsoluteEnd());
+                }
             } else {
-                forceSeek(activeAdBreak.getAbsoluteStart() + 1);
+                if (activeAdBreak != null) {
+                    forceSeek(activeAdBreak.getAbsoluteStart() + 1);
+                }
             }
             play();
             isTruexAdComplete = true;

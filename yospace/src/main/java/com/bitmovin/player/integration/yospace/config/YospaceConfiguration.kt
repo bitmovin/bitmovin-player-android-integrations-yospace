@@ -7,6 +7,6 @@ data class YospaceConfiguration(
     val readTimeout: Int,
     val connectTimeout: Int,
     val requestTimeout: Int,
-    val liveInitialisationType: YospaceLiveInitialisationType,
-    val isDebug: Boolean
+    val liveInitialisationType: YospaceLiveInitialisationType = YospaceLiveInitialisationType.DIRECT,
+    val isDebug: Boolean = false
 )

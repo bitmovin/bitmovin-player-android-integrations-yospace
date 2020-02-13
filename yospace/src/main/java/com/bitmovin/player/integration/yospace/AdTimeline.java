@@ -18,7 +18,9 @@ public class AdTimeline {
                     adBreak.getDuration() / 1000.0,
                     adBreak.getStartMillis() / 1000.0,
                     (adBreak.getStartMillis() + adBreak.getDuration()) / 1000.0,
-                    0
+                    0,
+                    0,
+                    new ArrayList<>()
             );
 
             relativeOffset += adBreak.getDuration();
@@ -45,7 +47,7 @@ public class AdTimeline {
                         null
                 );
 
-                entry.appendAd(ad);
+                entry.getAds().add(ad);
             }
 
             this.adBreaks.add(entry);

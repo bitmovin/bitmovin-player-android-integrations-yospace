@@ -817,11 +817,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             absoluteStartOffset,
                             absoluteStartOffset + advert.getDuration() / 1000.0,
                             advert.getSequence(),
-                            YospaceUtil.getAdClickThroughUrl(advert),
-                            !isTruex,
                             advert.hasLinearInteractiveUnit(),
                             isTruex,
-                            adData
+                            !isTruex,
+                            YospaceUtil.getAdClickThroughUrl(advert),
+                            adData,
+                            0,
+                            0,
+                            null
                     );
                     activeAdBreak.appendAd(ad);
                     absoluteStartOffset += advert.getDuration() / 1000.0;
@@ -871,11 +874,14 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         absoluteTime,
                         activeAdAbsoluteEnd,
                         advert.getSequence(),
-                        clickThroughUrl,
-                        !isTruex,
                         advert.hasLinearInteractiveUnit(),
                         isTruex,
-                        adData
+                        !isTruex,
+                        clickThroughUrl,
+                        adData,
+                        0,
+                        0,
+                        null
                 );
                 if (!isTruexRendering) {
                     YospaceAdStartedEvent adStartedEvent = new YospaceAdStartedEvent(

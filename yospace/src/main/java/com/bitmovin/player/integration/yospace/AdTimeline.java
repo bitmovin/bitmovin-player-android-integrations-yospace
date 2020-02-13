@@ -35,11 +35,14 @@ public class AdTimeline {
                         advert.getStartMillis() / 1000.0,
                         (advert.getStartMillis() + advert.getDuration()) / 1000.0,
                         advert.getSequence(),
-                        YospaceUtil.getAdClickThroughUrl(advert),
-                        !isTruex,
                         advert.hasLinearInteractiveUnit(),
                         isTruex,
-                        adData
+                        !isTruex,
+                        YospaceUtil.getAdClickThroughUrl(advert),
+                        adData,
+                        0,
+                        0,
+                        null
                 );
 
                 entry.appendAd(ad);

@@ -810,7 +810,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 );
                 double absoluteStartOffset = absoluteTime;
                 for (Advert advert : adBreak.getAdverts()) {
-                    AdData adData = new AdData(YospaceUtil.getAdMimeType(advert));
+                    AdData adData = new AdData(YospaceUtil.getAdMimeType(advert), 0, 0, 0);
                     boolean isTruex = YospaceUtil.isAdTruex(advert);
                     Ad ad = new Ad(
                             advert.getId(),
@@ -868,7 +868,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             } else {
                 String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
                 boolean isTruex = YospaceUtil.isAdTruex(advert);
-                AdData adData = new AdData(YospaceUtil.getAdMimeType(advert));
+                AdData adData = new AdData(YospaceUtil.getAdMimeType(advert), 0, 0, 0);
                 activeAd = new Ad(
                         advert.getId(),
                         absoluteTime,

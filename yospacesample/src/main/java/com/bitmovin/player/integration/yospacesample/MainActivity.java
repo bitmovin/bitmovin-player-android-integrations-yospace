@@ -39,9 +39,9 @@ import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer;
 import com.bitmovin.player.integration.yospace.YospaceAssetType;
+import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType;
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
-import com.bitmovin.player.integration.yospace.config.YospaceConfigurationBuilder;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
 import com.bitmovin.player.model.advertising.Ad;
 import com.bitmovin.player.model.advertising.AdBreak;
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekButton.setOnClickListener(this);
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
-        YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
+        YospaceConfiguration yospaceConfiguration = new YospaceConfiguration("", 25000, 25000, 25000, YospaceLiveInitialisationType.DIRECT, true);
         trueXConfiguration = new TruexConfiguration(bitmovinPlayerView, null, null);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);

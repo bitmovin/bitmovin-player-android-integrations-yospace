@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekButton.setOnClickListener(this);
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
-        YospaceConfiguration yospaceConfiguration = new YospaceConfiguration("", 25000, 25000, 25000, YospaceLiveInitialisationType.DIRECT, true);
+        YospaceConfiguration yospaceConfiguration = new YospaceConfiguration(null, 25_000, 25_000, 25_000, YospaceLiveInitialisationType.DIRECT, true);
         trueXConfiguration = new TruexConfiguration(bitmovinPlayerView, null, null);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);

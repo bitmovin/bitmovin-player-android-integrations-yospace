@@ -5,13 +5,13 @@ import com.bitmovin.player.api.event.listener.*
 import com.bitmovin.player.api.event.listener.EventListener
 
 class YospaceEventEmitter {
-    private val eventListeners = emptyMap<Class<*>, MutableList<EventListener<*>>>()
+    private val eventListeners = mutableMapOf<Class<*>, MutableList<EventListener<*>>>()
 
     @Synchronized
     fun addEventListener(listener: EventListener<*>) {
-        val listenerClass = listenerClass(listener)
+        val listenerClass: Class<*>? = listenerClass(listener)
         listenerClass?.let {
-            eventListeners[listenerClass].orEmpty().toMutableList().add(listener)
+            eventListeners[it]?.add(listener) ?: eventListeners.put(it, mutableListOf(listener))
         }
     }
 
@@ -25,94 +25,76 @@ class YospaceEventEmitter {
 
     @Synchronized
     fun emit(event: BitmovinPlayerEvent) {
-        BitLog.d("Emitting ${event.javaClass.simpleName}")
         when (event) {
             is AdBreakStartedEvent -> {
+                BitLog.d("Emitting AdBreakStartedEvent")
                 val listeners = eventListeners[OnAdBreakStartedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdBreakStartedListener>().forEach {
-                        it.onAdBreakStarted(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdBreakStartedListener).onAdBreakStarted(event)
                 }
             }
             is AdBreakFinishedEvent -> {
+                BitLog.d("Emitting AdBreakFinishedEvent")
                 val listeners = eventListeners[OnAdBreakFinishedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdBreakFinishedListener>().forEach {
-                        it.onAdBreakFinished(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdBreakFinishedListener).onAdBreakFinished(event)
                 }
             }
             is AdStartedEvent -> {
+                BitLog.d("Emitting AdStartedEvent")
                 val listeners = eventListeners[OnAdStartedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdStartedListener>().forEach {
-                        it.onAdStarted(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdStartedListener).onAdStarted(event)
                 }
             }
             is AdFinishedEvent -> {
+                BitLog.d("Emitting AdFinishedEvent")
                 val listeners = eventListeners[OnAdFinishedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdFinishedListener>().forEach {
-                        it.onAdFinished(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdFinishedListener).onAdFinished(event)
                 }
             }
             is AdClickedEvent -> {
                 val listeners = eventListeners[OnAdClickedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdClickedListener>().forEach {
-                        it.onAdClicked(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdClickedListener).onAdClicked(event)
                 }
             }
             is AdErrorEvent -> {
                 val listeners = eventListeners[OnAdErrorListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdErrorListener>().forEach {
-                        it.onAdError(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdErrorListener).onAdError(event)
                 }
             }
             is AdSkippedEvent -> {
                 val listeners = eventListeners[OnAdSkippedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnAdSkippedListener>().forEach {
-                        it.onAdSkipped(event)
-                    }
+                listeners?.forEach {
+                    (it as OnAdSkippedListener).onAdSkipped(event)
                 }
             }
             is ErrorEvent -> {
                 val listeners = eventListeners[OnErrorListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnErrorListener>().forEach {
-                        it.onError(event)
-                    }
+                listeners?.forEach {
+                    (it as OnErrorListener).onError(event)
                 }
             }
             is WarningEvent -> {
                 val listeners = eventListeners[OnWarningListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnWarningListener>().forEach {
-                        it.onWarning(event)
-                    }
+                listeners?.forEach {
+                    (it as OnWarningListener).onWarning(event)
                 }
             }
             is TimeChangedEvent -> {
                 val listeners = eventListeners[OnTimeChangedListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnTimeChangedListener>().forEach {
-                        it.onTimeChanged(event)
-                    }
+                listeners?.forEach {
+                    (it as OnTimeChangedListener).onTimeChanged(event)
                 }
             }
             is TruexAdFreeEvent -> {
+                BitLog.d("Emitting TruexAdFreeEvent")
                 val listeners = eventListeners[OnTruexAdFreeListener::class.java]
-                listeners?.let {
-                    listeners.filterIsInstance<OnTruexAdFreeListener>().forEach {
-                        it.onTruexAdFree(event)
-                    }
+                listeners?.forEach {
+                    (it as OnTruexAdFreeListener).onTruexAdFree(event)
                 }
             }
         }

@@ -28,7 +28,7 @@ public class AdTimeline {
             for (Advert advert : adBreak.getAdverts()) {
                 boolean isTruex = YospaceUtil.isAdTruex(advert);
                 String mimeType = YospaceUtil.getAdMimeType(advert);
-                AdData adData = new AdData(mimeType, 0, 0, 0);
+                AdData adData = new AdData(mimeType, -1, -1, -1);
 
                 Ad ad = new Ad(
                         advert.getIdentifier(),

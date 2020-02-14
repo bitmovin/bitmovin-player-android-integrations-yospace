@@ -40,8 +40,8 @@ public class AdTimeline {
                         !isTruex,
                         YospaceUtil.getAdClickThroughUrl(advert),
                         adData,
-                        0,
-                        0,
+                        -1,
+                        -1,
                         null
                 );
 

@@ -822,8 +822,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             !isTruex,
                             YospaceUtil.getAdClickThroughUrl(advert),
                             adData,
-                            0,
-                            0,
+                            -1,
+                            -1,
                             null
                     );
                     activeAdBreak.appendAd(ad);
@@ -879,8 +879,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         !isTruex,
                         clickThroughUrl,
                         adData,
-                        0,
-                        0,
+                        -1,
+                        -1,
                         null
                 );
                 if (!isTruexRendering) {

@@ -14,7 +14,7 @@ data class Ad(
     override val isLinear: Boolean,
     override var clickThroughUrl: String?,
     override var data: AdData?,
-    override var width: Int = 0,
-    override var height: Int = 0,
+    override var width: Int = -1,
+    override var height: Int = -1,
     override var mediaFileUrl: String? = null
 ) : com.bitmovin.player.model.advertising.Ad

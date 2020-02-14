@@ -12,8 +12,8 @@ data class Ad(
     val isHasInteractiveUnit: Boolean,
     val isTruex: Boolean,
     override val isLinear: Boolean,
-    override var clickThroughUrl: String?,
-    override var data: AdData?,
+    override var clickThroughUrl: String? = "",
+    override var data: AdData? = null,
     override var width: Int = 0,
     override var height: Int = 0,
     override var mediaFileUrl: String? = null

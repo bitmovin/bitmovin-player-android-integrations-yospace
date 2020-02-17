@@ -3,9 +3,10 @@ package com.bitmovin.player.integration.yospace
 import com.bitmovin.player.api.event.data.*
 import com.bitmovin.player.api.event.listener.*
 import com.bitmovin.player.api.event.listener.EventListener
+import java.util.concurrent.ConcurrentHashMap
 
 class YospaceEventEmitter {
-    private val eventListeners = mutableMapOf<Class<*>, MutableList<EventListener<*>>>()
+    private val eventListeners = ConcurrentHashMap<Class<*>, MutableList<EventListener<*>>>()
 
     @Synchronized
     fun addEventListener(listener: EventListener<*>) {
@@ -19,7 +20,7 @@ class YospaceEventEmitter {
     fun removeEventListener(listener: EventListener<*>) {
         val listenerClass = listenerClass(listener)
         listenerClass?.let {
-            eventListeners[listenerClass]?.remove(listener)
+            eventListeners[it]?.remove(listener)
         }
     }
 

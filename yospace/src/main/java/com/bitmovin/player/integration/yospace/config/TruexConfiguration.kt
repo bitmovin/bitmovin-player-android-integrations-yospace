@@ -3,7 +3,7 @@ package com.bitmovin.player.integration.yospace.config
 import android.view.ViewGroup
 
 data class TruexConfiguration(
-    var viewGroup: ViewGroup,
-    val userId: String?,
-    val vastConfigUrl: String?
+    val viewGroup: ViewGroup,
+    val userId: String? = null,
+    val vastConfigUrl: String? = null
 )

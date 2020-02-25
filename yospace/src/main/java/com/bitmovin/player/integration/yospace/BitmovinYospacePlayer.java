@@ -45,6 +45,8 @@ import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
+import com.bitmovin.player.integration.yospace.util.AdvertUtil;
+import com.bitmovin.player.integration.yospace.util.MetadataUtil;
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
@@ -653,7 +655,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
-                TimedMetadata timedMetadata = YospaceUtil.createTimedMetadata(metadataEvent);
+                TimedMetadata timedMetadata = MetadataUtil.INSTANCE.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
                     timedMetadataEvents.add(timedMetadata);
                     // Only send metadata events if play event has been sent
@@ -772,7 +774,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (truexConfiguration != null) {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
-                        if (YospaceUtil.isAdTruex(advert)) {
+                        if (AdvertUtil.INSTANCE.isTruex(advert)) {
                             LinearCreative linearCreative = advert.getLinearCreative();
                             if (linearCreative != null) {
                                 InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
@@ -802,8 +804,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 );
                 double absoluteStartOffset = absoluteTime;
                 for (Advert advert : adBreak.getAdverts()) {
-                    AdData adData = new AdData(YospaceUtil.getAdMimeType(advert), 0, 0, 0);
-                    boolean isTruex = YospaceUtil.isAdTruex(advert);
+                    AdData adData = new AdData(AdvertUtil.INSTANCE.adMimeType(advert), 0, 0, 0);
+                    boolean isTruex = AdvertUtil.INSTANCE.isTruex(advert);
                     Ad ad = new Ad(
                             advert.getId(),
                             absoluteTime,
@@ -814,7 +816,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             advert.hasLinearInteractiveUnit(),
                             isTruex,
                             !isTruex,
-                            YospaceUtil.getAdClickThroughUrl(advert),
+                            AdvertUtil.INSTANCE.adClickThroughUrl(advert),
                             adData,
                             0,
                             0,
@@ -858,9 +860,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 BitLog.INSTANCE.d("Skipping Ad Break due to TrueX ad free experience");
                 forceSeek(activeAdAbsoluteEnd);
             } else {
-                String clickThroughUrl = YospaceUtil.getAdClickThroughUrl(advert);
-                boolean isTruex = YospaceUtil.isAdTruex(advert);
-                AdData adData = new AdData(YospaceUtil.getAdMimeType(advert), 0, 0, 0);
+                String clickThroughUrl = AdvertUtil.INSTANCE.adClickThroughUrl(advert);
+                boolean isTruex = AdvertUtil.INSTANCE.isTruex(advert);
+                AdData adData = new AdData(AdvertUtil.INSTANCE.adMimeType(advert), 0, 0, 0);
                 activeAd = new Ad(
                         advert.getId(),
                         absoluteTime,

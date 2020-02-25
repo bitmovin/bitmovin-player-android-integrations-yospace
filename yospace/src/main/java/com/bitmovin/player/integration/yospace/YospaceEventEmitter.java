@@ -59,7 +59,7 @@ public class YospaceEventEmitter {
 
     public synchronized void emit(BitmovinPlayerEvent event) {
         if (event instanceof AdBreakStartedEvent) {
-            BitLog.d("Emitting AdBreakStartedEvent");
+            BitLog.INSTANCE.d("Emitting AdBreakStartedEvent");
             List<EventListener> listeners = eventListeners.get(OnAdBreakStartedListener.class);
             if (listeners != null) {
                 for (EventListener listener : eventListeners.get(OnAdBreakStartedListener.class)) {
@@ -67,7 +67,7 @@ public class YospaceEventEmitter {
                 }
             }
         } else if (event instanceof AdBreakFinishedEvent) {
-            BitLog.d("Emitting AdBreakFinishedEvent");
+            BitLog.INSTANCE.d("Emitting AdBreakFinishedEvent");
             List<EventListener> listeners = eventListeners.get(OnAdBreakFinishedListener.class);
             if (listeners != null) {
                 for (EventListener listener : eventListeners.get(OnAdBreakFinishedListener.class)) {
@@ -75,7 +75,7 @@ public class YospaceEventEmitter {
                 }
             }
         } else if (event instanceof AdStartedEvent) {
-            BitLog.d("Emitting AdStartedEvent");
+            BitLog.INSTANCE.d("Emitting AdStartedEvent");
             List<EventListener> listeners = eventListeners.get(OnAdStartedListener.class);
             if (listeners != null) {
                 for (EventListener listener : eventListeners.get(OnAdStartedListener.class)) {
@@ -83,7 +83,7 @@ public class YospaceEventEmitter {
                 }
             }
         } else if (event instanceof AdFinishedEvent) {
-            BitLog.d("Emitting AdFinishedEvent");
+            BitLog.INSTANCE.d("Emitting AdFinishedEvent");
             List<EventListener> listeners = eventListeners.get(OnAdFinishedListener.class);
             if (listeners != null) {
                 for (EventListener listener : eventListeners.get(OnAdFinishedListener.class)) {
@@ -105,7 +105,7 @@ public class YospaceEventEmitter {
                 }
             }
         } else if (event instanceof AdSkippedEvent) {
-            BitLog.d("Emitting AdSkippedEvent");
+            BitLog.INSTANCE.d("Emitting AdSkippedEvent");
             List<EventListener> listeners = eventListeners.get(OnAdSkippedListener.class);
             if (listeners != null) {
                 for (EventListener listener : eventListeners.get(OnAdSkippedListener.class)) {
@@ -134,7 +134,7 @@ public class YospaceEventEmitter {
                 }
             }
         } else if (event instanceof TruexAdFreeEvent) {
-            BitLog.d("Emitting TruexAdFreeEvent");
+            BitLog.INSTANCE.d("Emitting TruexAdFreeEvent");
             List<EventListener> listeners = eventListeners.get(OnTruexAdFreeListener.class);
             if (listeners != null) {
                 for (EventListener listener : listeners) {

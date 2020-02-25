@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration();
         YospaceConfiguration yospaceConfiguration = new YospaceConfigurationBuilder().setConnectTimeout(25000).setReadTimeout(25000).setRequestTimeout(25000).setDebug(true).build();
-        trueXConfiguration = new TruexConfiguration(bitmovinPlayerView);
+        trueXConfiguration = new TruexConfiguration(bitmovinPlayerView, null, null);
 
         bitmovinYospacePlayer = new BitmovinYospacePlayer(getApplicationContext(), playerConfiguration, yospaceConfiguration);
         bitmovinYospacePlayer.getConfig().getPlaybackConfiguration().setAutoplayEnabled(true);

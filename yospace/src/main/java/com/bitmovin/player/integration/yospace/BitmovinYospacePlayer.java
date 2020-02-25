@@ -804,7 +804,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         adBreak.getDuration() / 1000.0,
                         absoluteTime,
                         adBreakAbsoluteEnd,
-                        0
+                        0,
+                        0,
+                        new ArrayList<>()
                 );
                 double absoluteStartOffset = absoluteTime;
                 for (Advert advert : adBreak.getAdverts()) {
@@ -826,7 +828,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             -1,
                             null
                     );
-                    activeAdBreak.appendAd(ad);
+                    activeAdBreak.getAds().add(ad);
                     absoluteStartOffset += advert.getDuration() / 1000.0;
                 }
                 if (!isTruexRendering) {

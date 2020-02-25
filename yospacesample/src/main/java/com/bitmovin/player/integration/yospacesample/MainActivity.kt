@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadLiveTBSE() {
         val drmConfiguration = WidevineConfiguration("https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128")
-        val hlsSource = HLSSource("https://live-media-aka-qa.warnermediacdn.com/csmp/cmaf/live/2011916/tbseast-cenc-stage/master_wv.m3u8?yo.pdt=true&_fw_ae=53da17a30bd0d3c946a41c86cb5873f1&_fw_ar=1&afid=180483280&conf_csid=tbs.com_desktop_live_east&nw=42448&prof=48804:tbs_web_live&yo.vp=true&yo.ad=true")
+        val hlsSource = HLSSource("https://live-media-aka-qa.warnermediacdn.com/csmp/cmaf/live/2011916/tbseast-cenc-stage/master_wv.m3u8?yo.pdt=true&_fw_ae=53da17a30bd0d3c946a41c86cb5873f1&_fw_ar=1&afid=180483280&conf_csid=tbs.com_desktop_live_east&nw=42448&prof=48804:tbs_web_live&yo.vp=true&yo.ad=true&yo.av=2")
         val sourceItem = SourceItem(hlsSource).apply { addDRMConfiguration(drmConfiguration) }
         val sourceConfig = SourceConfiguration().apply { addSourceItem(sourceItem) }
         val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
@@ -183,21 +183,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadLiveCNN() {
-        val sourceItem = SourceItem(HLSSource("https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8"))
+        val sourceItem = SourceItem(HLSSource("https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear-novpaid/master.m3u8?yo.av=2"))
         val sourceConfig = SourceConfiguration().apply { addSourceItem(sourceItem) }
         val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration)
     }
 
     private fun loadVod() {
-        val sourceItem = SourceItem(HLSSource("https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=false"))
+        val sourceItem = SourceItem(HLSSource("https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=false&yo.av=2"))
         val sourceConfig = SourceConfiguration().apply { addSourceItem(sourceItem) }
         val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.VOD)
         bitmovinYospacePlayer.load(sourceConfig, yospaceSourceConfiguration)
     }
 
     private fun loadTruex() {
-        val sourceItem = SourceItem(HLSSource("https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?_fw_nielsen_app_id=P923E8EA9-9B1B-4F15-A180-F5A4FD01FE38&afid=222591187&caid=2100555&conf_csid=tbs.com_mobile_androidphone&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true"))
+        val sourceItem = SourceItem(HLSSource("https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?_fw_nielsen_app_id=P923E8EA9-9B1B-4F15-A180-F5A4FD01FE38&afid=222591187&caid=2100555&conf_csid=tbs.com_mobile_androidphone&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true&yo.av=2"))
         val sourceConfig = SourceConfiguration().apply { addSourceItem(sourceItem) }
         val yospaceSourceConfiguration = YospaceSourceConfiguration(YospaceAssetType.VOD)
         val truexConfiguration = TruexConfiguration(player_view)

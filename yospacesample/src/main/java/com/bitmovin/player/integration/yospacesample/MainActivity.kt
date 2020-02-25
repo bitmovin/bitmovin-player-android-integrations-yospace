@@ -41,8 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        bitmovinYospacePlayer = initBitmovinYospacePlayer()
-
+        initBitmovinYospacePlayer()
         initListUI()
         setUIListeners()
         addEventListeners()
@@ -67,16 +66,10 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun initBitmovinYospacePlayer(): BitmovinYospacePlayer {
+    private fun initBitmovinYospacePlayer() {
         val playerConfiguration = PlayerConfiguration()
-        val yospaceConfiguration = YospaceConfiguration(
-            readTimeout = 25_000,
-            connectTimeout = 25_000,
-            requestTimeout = 25_000,
-            liveInitialisationType = YospaceLiveInitialisationType.DIRECT,
-            isDebug = true
-        )
-        return BitmovinYospacePlayer(this, playerConfiguration, yospaceConfiguration).apply {
+        val yospaceConfiguration = YospaceConfiguration(isDebug = true)
+        bitmovinYospacePlayer = BitmovinYospacePlayer(this, playerConfiguration, yospaceConfiguration).apply {
             config.playbackConfiguration.isAutoplayEnabled = true
             setPlayerPolicy(BitmovinYospacePolicy(this))
         }
@@ -111,71 +104,73 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addEventListeners() {
-        bitmovinYospacePlayer.addEventListener(OnSourceLoadedListener {
-            load_unload_button.text = getString(R.string.unload)
-        })
+        with(bitmovinYospacePlayer) {
+            addEventListener(OnSourceLoadedListener {
+                load_unload_button.text = getString(R.string.unload)
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnSourceUnloadedListener {
-            load_unload_button.text = getString(R.string.load)
-        })
+            addEventListener(OnSourceUnloadedListener {
+                load_unload_button.text = getString(R.string.load)
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnReadyListener {
-            logMessage("Ad Breaks: ${bitmovinYospacePlayer.adTimeline}")
-            showListAdBreaks()
-        })
+            addEventListener(OnReadyListener {
+                logMessage("Ad Breaks: ${bitmovinYospacePlayer.adTimeline}")
+                showListAdBreaks()
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnTimeChangedListener {
-            updateBufferUI()
-            updateAdCounterUI()
-        })
+            addEventListener(OnTimeChangedListener {
+                updateBufferUI()
+                updateAdCounterUI()
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdBreakStartedListener {
-            listAdapter.clear()
-            ad_counter_text_view.visibility = View.VISIBLE
-            abs_text_view.text = String.format(Locale.US, "ABS: %d", ++adBreakStartedCount)
-            val adBreak = it.adBreak as AdBreak?
-            showListAds(adBreak?.ads ?: emptyList())
-            logMessage("Ad Break Started: id=${adBreak?.id}, duration=${adBreak?.duration}")
-        })
+            addEventListener(OnAdBreakStartedListener {
+                listAdapter.clear()
+                ad_counter_text_view.visibility = View.VISIBLE
+                abs_text_view.text = String.format(Locale.US, "ABS: %d", ++adBreakStartedCount)
+                val adBreak = it.adBreak as AdBreak?
+                showListAds(adBreak?.ads ?: emptyList())
+                logMessage("Ad Break Started: id=${adBreak?.id}, duration=${adBreak?.duration}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdBreakFinishedListener {
-            listAdapter.clear()
-            ad_counter_text_view.visibility = View.GONE
-            abf_text_view.text = String.format(Locale.US, "ABF: %d", ++adBreakFinishedCount)
-            val adBreak = it.adBreak as AdBreak?
-            showListAdBreaks()
-            logMessage("Ad Break Finished: id=${adBreak?.id}, duration=${adBreak?.duration}")
-        })
+            addEventListener(OnAdBreakFinishedListener {
+                listAdapter.clear()
+                ad_counter_text_view.visibility = View.GONE
+                abf_text_view.text = String.format(Locale.US, "ABF: %d", ++adBreakFinishedCount)
+                val adBreak = it.adBreak as AdBreak?
+                showListAdBreaks()
+                logMessage("Ad Break Finished: id=${adBreak?.id}, duration=${adBreak?.duration}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdStartedListener {
-            as_text_view.text = String.format(Locale.US, "AS: %d", ++adStartedCount)
-            val ad = it.ad as Ad?
-            logMessage("Ad Started: id=${ad?.id}, duration=${ad?.duration}")
-        })
+            addEventListener(OnAdStartedListener {
+                as_text_view.text = String.format(Locale.US, "AS: %d", ++adStartedCount)
+                val ad = it.ad as Ad?
+                logMessage("Ad Started: id=${ad?.id}, duration=${ad?.duration}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdFinishedListener {
-            af_text_view.text = String.format(Locale.US, "AF: %d", ++adFinishedCount)
-            val ad = it.ad as Ad?
-            logMessage("Ad Finished: id=${ad?.id}, duration=${ad?.duration}")
-        })
+            addEventListener(OnAdFinishedListener {
+                af_text_view.text = String.format(Locale.US, "AF: %d", ++adFinishedCount)
+                val ad = it.ad as Ad?
+                logMessage("Ad Finished: id=${ad?.id}, duration=${ad?.duration}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdClickedListener {
-            logMessage("Ad Clicked: clickThroughUrl=${it.clickThroughUrl}")
-        })
+            addEventListener(OnAdClickedListener {
+                logMessage("Ad Clicked: clickThroughUrl=${it.clickThroughUrl}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdErrorListener {
-            logMessage("Ad Error: code=${it.code}")
-        })
+            addEventListener(OnAdErrorListener {
+                logMessage("Ad Error: code=${it.code}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnAdSkippedListener {
-            val ad = it.ad as Ad?
-            logMessage("Ad Skipped: id=${ad?.id}, duration=${ad?.duration}")
-        })
+            addEventListener(OnAdSkippedListener {
+                val ad = it.ad as Ad?
+                logMessage("Ad Skipped: id=${ad?.id}, duration=${ad?.duration}")
+            })
 
-        bitmovinYospacePlayer.addEventListener(OnErrorListener {
-            resetUI()
-            logMessage("Error: code=${it.code}, message=${it.message}")
-        })
+            addEventListener(OnErrorListener {
+                resetUI()
+                logMessage("Error: code=${it.code}, message=${it.message}")
+            })
+        }
     }
 
     private fun loadLiveTBSE() {

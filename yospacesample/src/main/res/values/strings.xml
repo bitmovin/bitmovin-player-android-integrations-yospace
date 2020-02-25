@@ -12,7 +12,7 @@
     <string-array name="streams">
         <item>CNN Clear</item>
         <item>TBSE-WV</item>
-        <item>VoD</item>
+        <item>VOD</item>
         <item>TrueX</item>
         <item>Non-Yospace</item>
     </string-array>

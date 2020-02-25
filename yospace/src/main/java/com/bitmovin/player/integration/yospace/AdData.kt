@@ -1,6 +1,6 @@
 package com.bitmovin.player.integration.yospace
 
-class AdData(
+data class AdData(
     override val mimeType: String,
     override val bitrate: Int = -1,
     override val minBitrate: Int = -1,

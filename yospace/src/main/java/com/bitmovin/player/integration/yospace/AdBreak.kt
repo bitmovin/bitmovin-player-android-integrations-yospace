@@ -4,7 +4,7 @@ import com.bitmovin.player.model.advertising.Ad
 
 import java.util.ArrayList
 
-class AdBreak(
+data class AdBreak(
     override var id: String = "unknown",
     val relativeStart: Double,
     val duration: Double,

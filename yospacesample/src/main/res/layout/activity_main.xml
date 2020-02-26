@@ -1,127 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:keepScreenOn="true"
-    tools:context=".MainActivity">
+    android:keepScreenOn="true">
 
-    <EditText
-        android:id="@+id/url_edit_text"
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/stream_spinner"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:maxLines="2"
-        android:text="http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&amp;format=vmap"
-        app:layout_constraintBottom_toTopOf="@id/vod_button"
-        app:layout_constraintEnd_toStartOf="@id/asset_type_spinner"
+        android:layout_height="40dp"
+        android:entries="@array/streams"
+        app:layout_constraintBottom_toTopOf="@id/player_view"
+        app:layout_constraintEnd_toStartOf="@id/load_unload_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/asset_type_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:entries="@array/asset_types"
-        android:prompt="@string/asset_prompt"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/url_edit_text"
-        app:layout_constraintTop_toTopOf="@id/url_edit_text" />
-
     <Button
-        android:id="@+id/vod_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:id="@+id/load_unload_button"
+        android:layout_width="75dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="1dp"
         android:background="@drawable/button_background"
-        android:text="@string/vod"
-        app:layout_constraintEnd_toStartOf="@id/live_button"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
-
-    <Button
-        android:id="@+id/live_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/live"
-        app:layout_constraintEnd_toStartOf="@id/truex_button"
-        app:layout_constraintStart_toEndOf="@id/vod_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
-
-    <Button
-        android:id="@+id/truex_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/truex"
-        app:layout_constraintEnd_toStartOf="@id/custom_button"
-        app:layout_constraintStart_toEndOf="@id/live_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
-
-    <Button
-        android:id="@+id/custom_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/custom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/truex_button"
-        app:layout_constraintTop_toBottomOf="@id/url_edit_text" />
-
-    <Button
-        android:id="@+id/click_through_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/click_through"
-        app:layout_constraintEnd_toStartOf="@id/live_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
-
-    <Button
-        android:id="@+id/unload_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
-        android:text="@string/unload"
-        app:layout_constraintEnd_toEndOf="@id/live_button"
-        app:layout_constraintStart_toEndOf="@id/click_through_button"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+        android:text="@string/load"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/stream_spinner"
+        app:layout_constraintEnd_toStartOf="@id/seek_button"
+        app:layout_constraintStart_toEndOf="@id/stream_spinner"
+        app:layout_constraintTop_toTopOf="@id/stream_spinner" />
 
     <Button
         android:id="@+id/seek_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
         android:background="@drawable/button_background"
         android:text="@string/seek"
-        app:layout_constraintEnd_toEndOf="@id/truex_button"
-        app:layout_constraintStart_toEndOf="@id/live_button"
-        app:layout_constraintTop_toBottomOf="@id/vod_button" />
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/load_unload_button"
+        app:layout_constraintEnd_toStartOf="@id/seek_edit_text"
+        app:layout_constraintStart_toEndOf="@id/load_unload_button"
+        app:layout_constraintTop_toTopOf="@id/load_unload_button" />
 
     <EditText
         android:id="@+id/seek_edit_text"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:gravity="center"
+        android:text="208"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/seek_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/seek_button"
+        app:layout_constraintTop_toTopOf="@id/seek_button" />
+
+    <com.bitmovin.player.BitmovinPlayerView
+        android:id="@+id/player_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toTopOf="@id/abs_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stream_spinner" />
+
+    <TextView
+        android:id="@+id/abs_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:maxLines="2"
-        android:layout_margin="8dp"
-        android:text="205"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/seek_button"
-        app:layout_constraintTop_toBottomOf="@id/custom_button" />
+        android:padding="8dp"
+        android:text="ABS: 0"
+        app:layout_constraintBottom_toTopOf="@id/recycler_view"
+        app:layout_constraintEnd_toStartOf="@id/as_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/player_view" />
 
-    <com.bitmovin.player.BitmovinPlayerView
-        android:id="@+id/bitmovinPlayerView"
+    <TextView
+        android:id="@+id/as_text_view"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="AS: 0"
+        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
+        app:layout_constraintEnd_toStartOf="@id/af_text_view"
+        app:layout_constraintStart_toEndOf="@id/abs_text_view"
+        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
+
+    <TextView
+        android:id="@+id/af_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="AF: 0"
+        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
+        app:layout_constraintEnd_toStartOf="@id/abf_text_view"
+        app:layout_constraintStart_toEndOf="@id/as_text_view"
+        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
+
+    <TextView
+        android:id="@+id/abf_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="ABF: 0"
+        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/af_text_view"
+        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
+
+    <TextView
+        android:id="@+id/buffer_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="@string/zero_buffer"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="@id/player_view"
+        app:layout_constraintTop_toTopOf="@id/player_view" />
+
+    <TextView
+        android:id="@+id/ad_counter_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/player_view"
+        app:layout_constraintStart_toStartOf="@id/player_view" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/click_through_button" />
+        app:layout_constraintTop_toBottomOf="@id/abs_text_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

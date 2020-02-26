@@ -27,7 +27,7 @@ class AdTimeline(ysAdBreaks: List<YsAdBreak>) {
      */
     fun absoluteToRelative(time: Double): Double {
         val currentAdBreak = currentAdBreak(time)
-        val passedAdBreakDurations = adBreaks.filter { it.absoluteEnd < time }.sumByDouble { it.duration }
+        val passedAdBreakDurations = totalPassedAdBreakDurations(time)
         return currentAdBreak?.let { it.absoluteStart - passedAdBreakDurations } ?: time - passedAdBreakDurations
     }
 
@@ -46,5 +46,13 @@ class AdTimeline(ysAdBreaks: List<YsAdBreak>) {
      * @return total ad break durations
      */
     fun totalAdBreakDurations(): Double = adBreaks.sumByDouble { it.duration }
+
+    /**
+     * Returns the sum of all of the ad break durations that have been watched
+     *
+     * @param time - current absolute time
+     * @return total ad break durations
+     */
+    fun totalPassedAdBreakDurations(time: Double) = adBreaks.filter { it.absoluteEnd < time }.sumByDouble { it.duration }
 
 }

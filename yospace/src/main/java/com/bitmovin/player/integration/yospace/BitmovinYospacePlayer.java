@@ -138,7 +138,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         super.addEventListener(onFullscreenExitListener);
         super.addEventListener(onReadyListener);
 
-        BitLog.INSTANCE.d("Version 1.0.7");
+        BitLog.INSTANCE.d("Version 1.0.8");
     }
 
     public void load(SourceConfiguration sourceConfiguration, YospaceSourceConfiguration yospaceSourceConfiguration) {

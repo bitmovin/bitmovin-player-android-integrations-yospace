@@ -8,8 +8,8 @@ android {
         applicationId "com.bitmovin.player.integration.yospacesample"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 34
-        versionName "1.0.8"
+        versionCode libraryCode
+        versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

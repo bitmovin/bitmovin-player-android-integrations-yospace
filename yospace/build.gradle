@@ -1,9 +1,10 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
-def libraryVersion = '1.0.8'
 
 android {
     compileSdkVersion 28
@@ -11,8 +12,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 34
-        versionName "1.0.8"
+        versionCode libraryCode
+        versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -27,6 +28,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -36,13 +43,15 @@ dependencies {
     releaseImplementation files('libs/yoAdManagement-release.aar')
     releaseImplementation files('libs/yoUtil-release.aar')
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.3.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.3.2"
 
     implementation 'androidx.appcompat:appcompat:1.0.0'
 
-    implementation 'com.bitmovin.player:playercore:2.39+'
+    implementation 'com.bitmovin.player:playercore:2.40+'
     implementation('com.truex:TruexAdRenderer:1.0.8') {
         exclude group: 'com.android.support'
         exclude module: 'appcompat-v7'

@@ -657,14 +657,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
                         if (AdvertUtilKt.isTruex(advert)) {
-                            LinearCreative linearCreative = advert.getLinearCreative();
-                            if (linearCreative != null) {
-                                InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
-                                if (interactiveUnit != null) {
-                                    pause();
-                                    bitmovinTruexRenderer.renderAd(advert, adBreak.getStartMillis() == 0);
-                                }
-                            }
+                            bitmovinTruexRenderer.renderAd(advert, adBreak.getStartMillis() == 0);
+                            pause();
                             break;
                         }
                     }

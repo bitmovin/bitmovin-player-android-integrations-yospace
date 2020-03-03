@@ -5,7 +5,6 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
-def libraryVersion = '1.0.8'
 
 android {
     compileSdkVersion 28
@@ -13,8 +12,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 34
-        versionName "1.0.8"
+        versionCode libraryCode
+        versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -650,7 +650,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             if (bitmovinTruexRenderer != null) {
                 // Render TrueX ad if found in ad break
                 for (Advert advert : adBreak.getAdverts()) {
-                    if (AdvertUtilKt.isTruex(advert)) {
+                    if (AdvertExtKt.isTruex(advert)) {
                         bitmovinTruexRenderer.renderAd(advert, adBreak.getStartMillis() == 0);
                         pause();
                         break;
@@ -669,8 +669,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             );
             double absoluteStartOffset = absoluteTime;
             for (Advert advert : adBreak.getAdverts()) {
-                AdData adData = new AdData(AdvertUtilKt.adMimeType(advert), -1, -1, -1);
-                boolean isTruex = AdvertUtilKt.isTruex(advert);
+                AdData adData = new AdData(AdvertExtKt.adMimeType(advert), -1, -1, -1);
+                boolean isTruex = AdvertExtKt.isTruex(advert);
                 Ad ad = new Ad(
                         advert.getId(),
                         absoluteTime,
@@ -681,7 +681,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         advert.hasLinearInteractiveUnit(),
                         isTruex,
                         !isTruex,
-                        AdvertUtilKt.adClickThroughUrl(advert),
+                        AdvertExtKt.adClickThroughUrl(advert),
                         adData,
                         -1,
                         -1,
@@ -715,12 +715,12 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onAdvertStart(Advert advert) {
             double absoluteTime = currentTimeWithAds();
             double activeAdAbsoluteEnd = absoluteTime + advert.getDuration() / 1000.0;
-            boolean isTruex = AdvertUtilKt.isTruex(advert);
+            boolean isTruex = AdvertExtKt.isTruex(advert);
             if (isTruex) {
                 session.suppressAnalytics(true);
             }
-            String clickThroughUrl = AdvertUtilKt.adClickThroughUrl(advert);
-            AdData adData = new AdData(AdvertUtilKt.adMimeType(advert), 0, 0, 0);
+            String clickThroughUrl = AdvertExtKt.adClickThroughUrl(advert);
+            AdData adData = new AdData(AdvertExtKt.adMimeType(advert), 0, 0, 0);
             activeAd = new Ad(
                     advert.getId(),
                     absoluteTime,
@@ -758,7 +758,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertEnd(Advert advert) {
-            if (AdvertUtilKt.isTruex(advert)) {
+            if (AdvertExtKt.isTruex(advert)) {
                 session.suppressAnalytics(false);
             }
             AdFinishedEvent adFinishedEvent = new AdFinishedEvent(activeAd);

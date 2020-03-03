@@ -45,11 +45,11 @@ import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
-import com.bitmovin.player.integration.yospace.util.AdvertUtilKt;
+import com.bitmovin.player.integration.yospace.util.AdvertExtKt;
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
-import com.bitmovin.player.integration.yospace.util.MetadataUtilKt;
+import com.bitmovin.player.integration.yospace.util.MetadataExtKt;
 import com.truex.adrenderer.IEventHandler;
 import com.truex.adrenderer.TruexAdRenderer;
 import com.truex.adrenderer.TruexAdRendererConstants;
@@ -655,7 +655,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
-                TimedMetadata timedMetadata = MetadataUtilKt.createTimedMetadata(metadataEvent);
+                TimedMetadata timedMetadata = MetadataExtKt.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
                     timedMetadataEvents.add(timedMetadata);
                     // Only send metadata events if play event has been sent
@@ -774,7 +774,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 if (truexConfiguration != null) {
                     // Render TrueX ad if found in ad break
                     for (Advert advert : adBreak.getAdverts()) {
-                        if (AdvertUtilKt.isTruex(advert)) {
+                        if (AdvertExtKt.isTruex(advert)) {
                             LinearCreative linearCreative = advert.getLinearCreative();
                             if (linearCreative != null) {
                                 InteractiveUnit interactiveUnit = linearCreative.getInteractiveUnit();
@@ -804,8 +804,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 );
                 double absoluteStartOffset = absoluteTime;
                 for (Advert advert : adBreak.getAdverts()) {
-                    AdData adData = new AdData(AdvertUtilKt.adMimeType(advert), -1, -1, -1);
-                    boolean isTruex = AdvertUtilKt.isTruex(advert);
+                    AdData adData = new AdData(AdvertExtKt.adMimeType(advert), -1, -1, -1);
+                    boolean isTruex = AdvertExtKt.isTruex(advert);
                     Ad ad = new Ad(
                             advert.getId(),
                             absoluteTime,
@@ -816,7 +816,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                             advert.hasLinearInteractiveUnit(),
                             isTruex,
                             !isTruex,
-                            AdvertUtilKt.adClickThroughUrl(advert),
+                            AdvertExtKt.adClickThroughUrl(advert),
                             adData,
                             -1,
                             -1,
@@ -860,9 +860,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 BitLog.INSTANCE.d("Skipping Ad Break due to TrueX ad free experience");
                 forceSeek(activeAdAbsoluteEnd);
             } else {
-                String clickThroughUrl = AdvertUtilKt.adClickThroughUrl(advert);
-                boolean isTruex = AdvertUtilKt.isTruex(advert);
-                AdData adData = new AdData(AdvertUtilKt.adMimeType(advert), 0, 0, 0);
+                String clickThroughUrl = AdvertExtKt.adClickThroughUrl(advert);
+                boolean isTruex = AdvertExtKt.isTruex(advert);
+                AdData adData = new AdData(AdvertExtKt.adMimeType(advert), 0, 0, 0);
                 activeAd = new Ad(
                         advert.getId(),
                         absoluteTime,

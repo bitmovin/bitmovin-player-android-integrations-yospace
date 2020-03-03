@@ -632,6 +632,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private BitmovinTruexRendererListener truexRendererListener = new BitmovinTruexRendererListener() {
         @Override
         public void onTruexAdFree() {
+            isSessionAdFree = true;
             yospaceEventEmitter.emit(new TruexAdFreeEvent());
         }
 

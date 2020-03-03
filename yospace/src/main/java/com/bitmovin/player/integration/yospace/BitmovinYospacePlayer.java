@@ -45,11 +45,11 @@ import com.bitmovin.player.config.drm.DRMSystems;
 import com.bitmovin.player.config.media.HLSSource;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.media.SourceItem;
-import com.bitmovin.player.integration.yospace.util.AdvertUtilKt;
+import com.bitmovin.player.integration.yospace.util.AdvertExtKt;
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration;
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration;
-import com.bitmovin.player.integration.yospace.util.MetadataUtilKt;
+import com.bitmovin.player.integration.yospace.util.MetadataExtKt;
 import com.yospace.android.hls.analytic.AnalyticEventListener;
 import com.yospace.android.hls.analytic.Session;
 import com.yospace.android.hls.analytic.SessionFactory;
@@ -608,7 +608,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         @Override
         public void onMetadata(MetadataEvent metadataEvent) {
             if (yospaceSourceConfiguration.getAssetType() == YospaceAssetType.LINEAR) {
-                TimedMetadata timedMetadata = MetadataUtilKt.createTimedMetadata(metadataEvent);
+                TimedMetadata timedMetadata = MetadataExtKt.createTimedMetadata(metadataEvent);
                 if (timedMetadata != null) {
                     timedMetadataEvents.add(timedMetadata);
                     // Only send metadata events if play event has been sent

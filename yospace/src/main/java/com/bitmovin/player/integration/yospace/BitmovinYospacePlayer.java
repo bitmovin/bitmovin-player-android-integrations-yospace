@@ -727,8 +727,11 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 BitLog.INSTANCE.d("Skipping Ad Break due to TrueX ad free experience");
                 forceSeek(activeAdAbsoluteEnd);
             } else {
-                String clickThroughUrl = AdvertUtilKt.adClickThroughUrl(advert);
                 boolean isTruex = AdvertUtilKt.isTruex(advert);
+                if (isTruex) {
+                    session.suppressAnalytics(true);
+                }
+                String clickThroughUrl = AdvertUtilKt.adClickThroughUrl(advert);
                 AdData adData = new AdData(AdvertUtilKt.adMimeType(advert), 0, 0, 0);
                 activeAd = new Ad(
                         advert.getId(),
@@ -768,6 +771,9 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertEnd(Advert advert) {
+            if (AdvertUtilKt.isTruex(advert)) {
+                session.suppressAnalytics(false);
+            }
             AdFinishedEvent adFinishedEvent = new AdFinishedEvent(activeAd);
             handler.post(new Runnable() {
                 @Override

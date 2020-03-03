@@ -52,7 +52,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
 
     private fun addEventListeners(renderer: TruexAdRenderer) = with(renderer) {
         addEventListener(TruexAdRendererConstants.AD_STARTED) {
-            BitLog.d("TrueX - ad started: campaign_name=${it?.get("campaignName") ?: "N/A"}")
+            BitLog.d("TrueX - ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
             interactiveUnit?.notifyAdStarted()
             interactiveUnit?.notifyAdVideoStart()
         }
@@ -64,7 +64,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
-            BitLog.d("TrueX - ad error: error_message=${it?.get("message") ?: "N/A"}")
+            BitLog.d("TrueX - ad error: ${it?.get("message")?.toString().orEmpty()}")
             interactiveUnit?.notifyAdStopped()
             stop()
         }
@@ -74,14 +74,14 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
-            BitLog.d("TrueX - ad free: time_spent_on_engagement=${it?.get("timeSpentOnEngagement") ?: "N/A"}")
+            BitLog.d("TrueX - ad free: ${it?.get("timeSpentOnEngagement") ?: "0"} seconds spent on engagement")
             rendererListener?.onTruexAdFree()
         }
         addEventListener(TruexAdRendererConstants.SKIP_CARD_SHOWN) {
             BitLog.d("TrueX - skip card shown")
         }
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
-            BitLog.d("TrueX - user cancelled")
+            BitLog.d("TrueX - user cancel")
         }
     }
 }

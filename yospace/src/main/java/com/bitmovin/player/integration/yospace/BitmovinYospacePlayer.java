@@ -95,6 +95,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private UI_LOADING_STATE uiLoadingState;
     private boolean isPlayingEventSent;
     private List<TimedMetadata> timedMetadataEvents = new ArrayList<>();
+    private boolean isAdFree = false;
 
     private enum UI_LOADING_STATE {
         LOADING,
@@ -630,11 +631,31 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
     private BitmovinTruexRendererListener truexRendererListener = new BitmovinTruexRendererListener() {
         @Override
         public void onTruexAdFree() {
-            yospaceEventEmitter.emit(new TruexAdFreeEvent());
+            isAdFree = true;
         }
 
         @Override
         public void onTruexAdCompleted() {
+            session.suppressAnalytics(false);
+            if (isAdFree) {
+                yospaceEventEmitter.emit(new TruexAdFreeEvent());
+                isAdFree = false;
+            } else {
+                if (activeAd != null) {
+                    // Seek to end of filler
+                    forceSeek(activeAd.getAbsoluteEnd());
+                }
+                play();
+            }
+        }
+
+        @Override
+        public void onTruexAdError() {
+            play();
+        }
+
+        @Override
+        public void onTruexNoAds() {
             play();
         }
     };
@@ -647,16 +668,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         public void onAdvertBreakStart(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
             double absoluteTime = currentTimeWithAds();
             double adBreakAbsoluteEnd = absoluteTime + adBreak.getDuration() / 1000.0;
-            if (bitmovinTruexRenderer != null) {
-                // Render TrueX ad if found in ad break
-                for (Advert advert : adBreak.getAdverts()) {
-                    if (AdvertExtKt.isTruex(advert)) {
-                        bitmovinTruexRenderer.renderAd(advert, adBreak.getStartMillis() == 0);
-                        pause();
-                        break;
-                    }
-                }
-            }
             activeAdBreak = new AdBreak(
                     "unknown",
                     absoluteTime,
@@ -670,7 +681,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
             double absoluteStartOffset = absoluteTime;
             for (Advert advert : adBreak.getAdverts()) {
                 AdData adData = new AdData(AdvertExtKt.adMimeType(advert), -1, -1, -1);
-                boolean isTruex = AdvertExtKt.isTruex(advert);
                 Ad ad = new Ad(
                         advert.getId(),
                         absoluteTime,
@@ -679,8 +689,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                         absoluteStartOffset + advert.getDuration() / 1000.0,
                         advert.getSequence(),
                         advert.hasLinearInteractiveUnit(),
-                        isTruex,
-                        !isTruex,
+                        advert.hasLinearInteractiveUnit(),
+                        !advert.hasLinearInteractiveUnit(),
                         AdvertExtKt.adClickThroughUrl(advert),
                         adData,
                         -1,
@@ -700,25 +710,16 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
         }
 
         @Override
-        public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
-            AdBreakFinishedEvent adBreakFinishedEvent = new AdBreakFinishedEvent(activeAdBreak);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    yospaceEventEmitter.emit(adBreakFinishedEvent);
-                }
-            });
-            activeAdBreak = null;
-        }
-
-        @Override
         public void onAdvertStart(Advert advert) {
+            if (bitmovinTruexRenderer != null) {
+                if (advert.hasLinearInteractiveUnit()) {
+                    session.suppressAnalytics(true);
+                    pause();
+                    bitmovinTruexRenderer.renderAd(advert);
+                }
+            }
             double absoluteTime = currentTimeWithAds();
             double activeAdAbsoluteEnd = absoluteTime + advert.getDuration() / 1000.0;
-            boolean isTruex = AdvertExtKt.isTruex(advert);
-            if (isTruex) {
-                session.suppressAnalytics(true);
-            }
             String clickThroughUrl = AdvertExtKt.adClickThroughUrl(advert);
             AdData adData = new AdData(AdvertExtKt.adMimeType(advert), 0, 0, 0);
             activeAd = new Ad(
@@ -729,8 +730,8 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     activeAdAbsoluteEnd,
                     advert.getSequence(),
                     advert.hasLinearInteractiveUnit(),
-                    isTruex,
-                    !isTruex,
+                    advert.hasLinearInteractiveUnit(),
+                    !advert.hasLinearInteractiveUnit(),
                     clickThroughUrl,
                     adData,
                     -1,
@@ -745,7 +746,7 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                     advert.getStartMillis() / 1000.0,
                     "position",
                     0,
-                    isTruex,
+                    advert.hasLinearInteractiveUnit(),
                     activeAd
             );
             handler.post(new Runnable() {
@@ -758,9 +759,6 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
 
         @Override
         public void onAdvertEnd(Advert advert) {
-            if (AdvertExtKt.isTruex(advert)) {
-                session.suppressAnalytics(false);
-            }
             AdFinishedEvent adFinishedEvent = new AdFinishedEvent(activeAd);
             handler.post(new Runnable() {
                 @Override
@@ -769,6 +767,18 @@ public class BitmovinYospacePlayer extends BitmovinPlayer {
                 }
             });
             activeAd = null;
+        }
+
+        @Override
+        public void onAdvertBreakEnd(com.yospace.android.hls.analytic.advert.AdBreak adBreak) {
+            AdBreakFinishedEvent adBreakFinishedEvent = new AdBreakFinishedEvent(activeAdBreak);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    yospaceEventEmitter.emit(adBreakFinishedEvent);
+                }
+            });
+            activeAdBreak = null;
         }
 
         @Override

@@ -8,9 +8,9 @@ fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
 
 fun InteractiveUnit.notifyAdSkipped() = onTrackingEvent("skip")
 
-fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("start")
+fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
 
-fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("createView")
+fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
 
 fun InteractiveUnit.notifyAdVideoFirstQuartile() = onTrackingEvent("firstQuartile")
 

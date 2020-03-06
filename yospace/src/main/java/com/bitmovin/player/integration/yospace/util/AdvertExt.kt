@@ -18,7 +18,7 @@ fun YsAd.toAd(adBreakRelativeStart: Double): Ad = Ad(
     absoluteEnd = (startMillis + duration) / 1000.0,
     sequence = sequence,
     isHasInteractiveUnit = hasLinearInteractiveUnit(),
-    isTruex = isTruex(),
-    isLinear = !isTruex(),
+    isTruex = hasLinearInteractiveUnit(),
+    isLinear = !hasLinearInteractiveUnit(),
     clickThroughUrl = adClickThroughUrl()
 )

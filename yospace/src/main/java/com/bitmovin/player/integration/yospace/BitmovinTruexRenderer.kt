@@ -2,10 +2,7 @@ package com.bitmovin.player.integration.yospace
 
 import android.content.Context
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
-import com.bitmovin.player.integration.yospace.util.notifyAdStarted
-import com.bitmovin.player.integration.yospace.util.notifyAdStopped
-import com.bitmovin.player.integration.yospace.util.notifyAdVideoComplete
-import com.bitmovin.player.integration.yospace.util.notifyAdVideoStart
+import com.bitmovin.player.integration.yospace.util.*
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
 import com.yospace.android.hls.analytic.advert.Advert
@@ -18,7 +15,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
 
-    fun renderAd(ad: Advert, isPreroll: Boolean) {
+    fun renderAd(ad: Advert) {
         interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
             let {
                 BitLog.d("TrueX - ad found: $source")
@@ -28,10 +25,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
                         putOpt("user_id", configuration.userId)
                         putOpt("vast_config_url", configuration.vastConfigUrl)
                     }
-                    val slotType = when {
-                        isPreroll -> TruexAdRendererConstants.PREROLL
-                        else -> TruexAdRendererConstants.MIDROLL
-                    }
+                    val slotType = TruexAdRendererConstants.MIDROLL
                     renderer = TruexAdRenderer(context).apply {
                         addEventListeners(this)
                         init(source, adParams, slotType)
@@ -55,22 +49,26 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
             BitLog.d("TrueX - ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
             interactiveUnit?.notifyAdStarted()
             interactiveUnit?.notifyAdVideoStart()
+            interactiveUnit?.notifyAdImpression()
         }
         addEventListener(TruexAdRendererConstants.AD_COMPLETED) {
             BitLog.d("TrueX - ad completed")
             interactiveUnit?.notifyAdVideoComplete()
             interactiveUnit?.notifyAdStopped()
+            interactiveUnit?.notifyAdUserClose()
             rendererListener?.onTruexAdCompleted()
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
             BitLog.d("TrueX - ad error: ${it?.get("message")?.toString().orEmpty()}")
             interactiveUnit?.notifyAdStopped()
+            rendererListener?.onTruexAdError()
             stop()
         }
         addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
             BitLog.d("TrueX - no ads available")
             interactiveUnit?.notifyAdStopped()
+            rendererListener?.onTruexNoAds()
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {

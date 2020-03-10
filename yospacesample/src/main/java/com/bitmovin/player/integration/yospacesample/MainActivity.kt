@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         val yospaceConfiguration = YospaceConfiguration(isDebug = true)
         bitmovinYospacePlayer = BitmovinYospacePlayer(this, playerConfiguration, yospaceConfiguration).apply {
             config.playbackConfiguration.isAutoplayEnabled = true
-            setPlayerPolicy(BitmovinYospacePolicy(this))
+            playerPolicy = BitmovinYospacePolicy(this)
         }
     }
 

@@ -12,5 +12,5 @@ data class AdBreak(
     val absoluteEnd: Double,
     override val replaceContentDuration: Double = 0.0,
     override var scheduleTime: Double = 0.0,
-    override var ads: List<Ad> = emptyList()
+    override var ads: MutableList<Ad> = mutableListOf()
 ) : com.bitmovin.player.model.advertising.AdBreak

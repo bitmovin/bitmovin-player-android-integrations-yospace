@@ -14,6 +14,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
+    private var isAdFree: Boolean = false
 
     fun renderAd(ad: Advert) {
         interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
@@ -56,24 +57,25 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var r
             interactiveUnit?.notifyAdVideoComplete()
             interactiveUnit?.notifyAdStopped()
             interactiveUnit?.notifyAdUserClose()
-            rendererListener?.onTruexAdCompleted()
+            rendererListener?.onAdFinished(isAdFree)
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
             BitLog.d("TrueX - ad error: ${it?.get("message")?.toString().orEmpty()}")
             interactiveUnit?.notifyAdStopped()
-            rendererListener?.onTruexAdError()
+            rendererListener?.onAdError()
             stop()
         }
         addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
             BitLog.d("TrueX - no ads available")
             interactiveUnit?.notifyAdStopped()
-            rendererListener?.onTruexNoAds()
+            rendererListener?.onAdError()
             stop()
         }
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
-            BitLog.d("TrueX - ad free: ${it?.get("timeSpentOnEngagement") ?: "0"} seconds spent on engagement")
-            rendererListener?.onTruexAdFree()
+            BitLog.d("TrueX - ad free: ${it?.get("timeSpentOnEngagement")
+                ?: "0"} seconds spent on engagement")
+            isAdFree = true
         }
         addEventListener(TruexAdRendererConstants.SKIP_CARD_SHOWN) {
             BitLog.d("TrueX - skip card shown")

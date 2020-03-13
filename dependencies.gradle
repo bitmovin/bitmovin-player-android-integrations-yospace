@@ -1,0 +1,28 @@
+ext {
+    // Versions
+    supportLibraryVersion = '1.1.0'
+    bitmovinPlayerVersion = '2.40.0'
+    truexRendererVersion = '1.0.8'
+    junitVersion = '5.3.2'
+
+    // Library dependencies
+    supportDependencies = [
+            appCompat: "androidx.appcompat:appcompat:$supportLibraryVersion",
+            constraintLayout: "androidx.constraintlayout:constraintlayout:$supportLibraryVersion",
+            recyclerView: "androidx.recyclerview:recyclerview:$supportLibraryVersion"
+    ]
+
+    bitmovinPlayerDependencies = [
+            bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
+    ]
+
+    truexDependencies = [
+            truexRenderer: "com.truex:TruexAdRenderer:$truexRendererVersion",
+    ]
+
+    testDependencies = [
+            junitAPI: "org.junit.jupiter:junit-jupiter-api:$junitVersion",
+            junitEngine: "org.junit.jupiter:junit-jupiter-engine:$junitVersion",
+            junitParams: "org.junit.jupiter:junit-jupiter-params:$junitVersion",
+    ]
+}

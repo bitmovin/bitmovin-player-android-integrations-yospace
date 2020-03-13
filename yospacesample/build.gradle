@@ -27,19 +27,13 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':yospace')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
+    implementation project(path: ':yospace')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-
-    implementation 'com.bitmovin.player:playercore:2.40+'
-    implementation ('com.truex:TruexAdRenderer:1.0.8') {
-        exclude group: 'com.android.support'
-        exclude module: 'appcompat-v7'
-        exclude module: 'support-v4'
-    }
+    implementation supportDependencies.appCompat
+    implementation supportDependencies.constraintLayout
+    implementation supportDependencies.recyclerView
+    implementation bitmovinPlayerDependencies.bitmovinPlayer
+    implementation truexDependencies.truexRenderer
 }

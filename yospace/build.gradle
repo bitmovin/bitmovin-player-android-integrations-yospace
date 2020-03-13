@@ -42,21 +42,15 @@ dependencies {
     debugImplementation files('libs/yoUtil-debug.aar')
     releaseImplementation files('libs/yoAdManagement-release.aar')
     releaseImplementation files('libs/yoUtil-release.aar')
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.3.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.2"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:5.3.2"
+    testImplementation testDependencies.junitAPI
+    testRuntimeOnly testDependencies.junitEngine
+    testImplementation testDependencies.junitParams
 
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-
-    implementation 'com.bitmovin.player:playercore:2.40+'
-    implementation('com.truex:TruexAdRenderer:1.0.8') {
-        exclude group: 'com.android.support'
-        exclude module: 'appcompat-v7'
-        exclude module: 'support-v4'
-    }
+    implementation supportDependencies.appCompat
+    implementation bitmovinPlayerDependencies.bitmovinPlayer
+    implementation truexDependencies.truexRenderer
 }
 
 publishing {

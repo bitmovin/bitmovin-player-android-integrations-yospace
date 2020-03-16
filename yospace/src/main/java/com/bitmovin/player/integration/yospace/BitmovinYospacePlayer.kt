@@ -32,6 +32,7 @@ import com.yospace.util.YoLog
 import com.yospace.util.event.EventListener as YospaceEventListener
 import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
 import com.bitmovin.player.api.event.listener.EventListener as BitmovinEventListener
 
 open class BitmovinYospacePlayer(
@@ -64,11 +65,9 @@ open class BitmovinYospacePlayer(
     var activeAdBreak: AdBreak? = null
         private set
 
-    var playerPolicy: BitmovinYospacePlayerPolicy? = null
-        set(value) {
-            yospacePlayerPolicy.playerPolicy = field
-            field = value
-        }
+    var playerPolicy: BitmovinYospacePlayerPolicy? by Delegates.observable<BitmovinYospacePlayerPolicy?>(null) { _, _, new ->
+        yospacePlayerPolicy.playerPolicy = new
+    }
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug

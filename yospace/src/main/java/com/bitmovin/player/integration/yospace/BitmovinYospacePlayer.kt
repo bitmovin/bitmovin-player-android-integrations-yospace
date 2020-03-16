@@ -34,7 +34,7 @@ import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
 import com.bitmovin.player.api.event.listener.EventListener as BitmovinEventListener
 
-class BitmovinYospacePlayer(
+open class BitmovinYospacePlayer(
     private val context: Context,
     playerConfig: PlayerConfiguration?,
     private val yospaceConfig: YospaceConfiguration
@@ -52,7 +52,7 @@ class BitmovinYospacePlayer(
     private var isLiveAdPaused = false
     private val handler = Handler(Looper.getMainLooper())
     private var loadState: LoadState = LoadState.UNKNOWN
-    private val timedMetadataEvents: MutableList<TimedMetadata> = ArrayList()
+    private val timedMetadataEvents: MutableList<TimedMetadata> = mutableListOf()
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfiguration? = null
     private var bitmovinTruexRenderer: BitmovinTruexRenderer? = null
@@ -72,7 +72,7 @@ class BitmovinYospacePlayer(
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
-        BitLog.d("Version 1.1.0")
+        BitLog.d("Version 1.1.1")
         addEventListeners()
     }
 

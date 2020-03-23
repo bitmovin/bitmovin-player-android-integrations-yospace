@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Incorrect Ad id for timeline ads
 
+### Changed
+- Bitmovin Player version to 2.41.2
+
 ## [1.1.1]
 
 ### Changed

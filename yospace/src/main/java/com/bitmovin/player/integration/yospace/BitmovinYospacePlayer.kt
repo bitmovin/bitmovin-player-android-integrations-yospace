@@ -276,7 +276,7 @@ open class BitmovinYospacePlayer(
         ?: 0.0)
 
     override fun getCurrentTime(): Double = when {
-        isAd -> super.getCurrentTime() - (activeAd?.relativeStart ?: 0.0)
+        isAd -> super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
         adTimeline != null -> adTimeline!!.absoluteToRelative(super.getCurrentTime())
         else -> super.getCurrentTime()
     }

@@ -10,78 +10,123 @@ import com.yospace.android.hls.analytic.advert.InteractiveUnit
 import org.json.JSONException
 import org.json.JSONObject
 
-class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var rendererListener: BitmovinTruexRendererListener? = null, private val context: Context) {
+class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var eventListener: TruexAdRendererEventListener? = null, private val context: Context) {
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
+    private var slotType: TruexSlotType = TruexSlotType.PREROLL
     private var isAdFree: Boolean = false
+    private var isSessionAdFree: Boolean = false
 
-    fun renderAd(ad: Advert) {
+    fun renderAd(ad: Advert, slotType: TruexSlotType) {
+        this.slotType = slotType
         interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
             let {
-                BitLog.d("TrueX - ad found: $source")
-                BitLog.d("TrueX - rendering ad: $ad")
+                BitLog.d("Rendering TrueX ad: $source")
                 try {
                     val adParams = JSONObject(adParameters).apply {
                         putOpt("user_id", configuration.userId)
                         putOpt("vast_config_url", configuration.vastConfigUrl)
                     }
-                    val slotType = TruexAdRendererConstants.MIDROLL
                     renderer = TruexAdRenderer(context).apply {
                         addEventListeners(this)
-                        init(source, adParams, slotType)
+                        init(source, adParams, slotType.type)
                         start(configuration.viewGroup)
                     }
-                    BitLog.d("TrueX - ad rendering completed")
+                    BitLog.d("TrueX rendering completed")
                 } catch (e: JSONException) {
-                    BitLog.d("TrueX - ad rendering failed")
+                    BitLog.e("TrueX rendering failed $e")
                 }
             }
         }
     }
 
     fun stop() {
+        // Reset state
         renderer?.stop()
         interactiveUnit = null
+        slotType = TruexSlotType.PREROLL
+        isAdFree = false
+        isSessionAdFree = false
     }
 
     private fun addEventListeners(renderer: TruexAdRenderer) = with(renderer) {
         addEventListener(TruexAdRendererConstants.AD_STARTED) {
-            BitLog.d("TrueX - ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
+            BitLog.d("TrueX ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
+
+            // Reset ad free state
+            isAdFree = false
+
+            // Notify YoSpace for ad tracking
             interactiveUnit?.notifyAdStarted()
             interactiveUnit?.notifyAdVideoStart()
             interactiveUnit?.notifyAdImpression()
         }
+
         addEventListener(TruexAdRendererConstants.AD_COMPLETED) {
-            BitLog.d("TrueX - ad completed")
+            BitLog.d("TrueX ad completed")
+
+            // Notify YoSpace for ad tracking
             interactiveUnit?.notifyAdVideoComplete()
             interactiveUnit?.notifyAdStopped()
             interactiveUnit?.notifyAdUserClose()
-            rendererListener?.onAdFinished(isAdFree)
-            stop()
+
+            // Skip current ad break if:
+            //   1. Pre-roll ad free has been satisfied
+            //   2. Mid-roll ad free has been satisfied
+            if (isSessionAdFree || isAdFree) {
+                eventListener?.skipAdBreak()
+            } else {
+                eventListener?.skipTruexAd()
+            }
+
+            // Reset interactive unit
+            interactiveUnit = null
         }
+
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
-            BitLog.d("TrueX - ad error: ${it?.get("message")?.toString().orEmpty()}")
-            interactiveUnit?.notifyAdStopped()
-            rendererListener?.onAdError()
-            stop()
+            BitLog.d("TrueX ad error: ${it?.get("message")?.toString().orEmpty()}")
+            handleError()
         }
+
         addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
-            BitLog.d("TrueX - no ads available")
-            interactiveUnit?.notifyAdStopped()
-            rendererListener?.onAdError()
-            stop()
+            BitLog.d("No TrueX ads available")
+            handleError()
         }
+
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
-            BitLog.d("TrueX - ad free: ${it?.get("timeSpentOnEngagement")
+            BitLog.d("TrueX ad free: ${it?.get("timeSpentOnEngagement")
                 ?: "0"} seconds spent on engagement")
+
             isAdFree = true
+
+            // We are session ad free if ad free is fired on a pre-roll
+            if (!isSessionAdFree) {
+                isSessionAdFree = (slotType == TruexSlotType.PREROLL)
+            }
         }
+
         addEventListener(TruexAdRendererConstants.SKIP_CARD_SHOWN) {
-            BitLog.d("TrueX - skip card shown")
+            BitLog.d("TrueX skip card shown")
         }
+
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
-            BitLog.d("TrueX - user cancel")
+            BitLog.d("TrueX user cancelled")
         }
+    }
+
+    private fun handleError() {
+        BitLog.d("Handing TrueX ad error...")
+        // Treat error state like complete state
+        if (isSessionAdFree) {
+            // Skip ad break as pre-roll ad free has been satisfied
+            eventListener?.skipAdBreak()
+        } else {
+            // Skip TrueX ad filler and show linear ads
+            eventListener?.skipTruexAd()
+        }
+
+        // Reset interactive unit
+        interactiveUnit = null
     }
 }

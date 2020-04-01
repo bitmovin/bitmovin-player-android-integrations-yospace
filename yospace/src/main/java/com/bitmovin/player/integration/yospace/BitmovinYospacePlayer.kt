@@ -16,10 +16,7 @@ import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
-import com.bitmovin.player.integration.yospace.util.adClickThroughUrl
-import com.bitmovin.player.integration.yospace.util.adMimeType
-import com.bitmovin.player.integration.yospace.util.createTimedMetadata
-import com.bitmovin.player.integration.yospace.util.isTruex
+import com.bitmovin.player.integration.yospace.util.*
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
@@ -351,20 +348,31 @@ open class BitmovinYospacePlayer(
     // TrueX
     ///////////////////////////////////////////////////////////////
 
-    private val truexRendererListener: BitmovinTruexRendererListener = object : BitmovinTruexRendererListener {
+    private val truexRendererListener: TruexAdRendererEventListener = object : TruexAdRendererEventListener {
 
-        override fun onAdFinished(isAdFree: Boolean) {
-            yospaceSession?.suppressAnalytics(false)
-            if (isAdFree) {
-                yospaceEventEmitter.emit(TruexAdFreeEvent())
-            } else {
-                // Seek to end of filler
-                activeAd?.absoluteEnd?.let { forceSeek(it) }
-                play()
+        override fun skipTruexAd() {
+            BitLog.d("Skipping TrueX ad filler ad midroll ad free conditions have been satisfied")
+
+            // Seek to end of TrueX ad
+            activeAd?.let {
+                BitLog.d("Seeking to ${it.absoluteEnd}")
+                forceSeek(it.absoluteEnd)
             }
+
+            play()
         }
 
-        override fun onAdError() = play()
+        override fun skipAdBreak() {
+            BitLog.d("Skipping ad break as preroll ad free conditions have been satisfied")
+
+            // Seek to end of ad break
+            activeAdBreak?.let {
+                BitLog.d("Seeking to ${it.absoluteEnd}")
+                forceSeek(it.absoluteEnd)
+            }
+
+            play()
+        }
     }
 
     ///////////////////////////////////////////////////////////////
@@ -481,9 +489,11 @@ open class BitmovinYospacePlayer(
 
             // Render TrueX ad
             if (advert?.isTruex() == true) {
+                BitLog.d("TrueX ad found: $advert")
                 yospaceSession?.suppressAnalytics(true)
                 pause()
-                bitmovinTruexRenderer?.renderAd(advert)
+                val slotType = activeAdBreak?.slotType() ?: TruexSlotType.PREROLL
+                bitmovinTruexRenderer?.renderAd(advert, slotType)
             }
 
             val absoluteTime = currentTimeWithAds()

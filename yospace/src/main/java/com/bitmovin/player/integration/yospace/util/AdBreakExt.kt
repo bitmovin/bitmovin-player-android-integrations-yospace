@@ -11,13 +11,13 @@ fun List<YsAdBreak>.toAdBreaks(): List<AdBreak> {
         val adBreak = ysAdBreak.toAdBreak(relativeOffset)
         // Convert YSAds to Ads
         adBreak.ads = ysAdBreak.adverts.map { it.toAd(adBreak.relativeStart) }.toMutableList()
-        relativeOffset += ysAdBreak.duration.toDouble()
+        relativeOffset += ysAdBreak.duration
         adBreak
     }
 }
 
 fun YsAdBreak.toAdBreak(relativeOffset: Double): AdBreak = AdBreak(
-    relativeStart = (startMillis - relativeOffset),
+    relativeStart = (startMillis - relativeOffset) / 1000.0,
     duration = duration / 1000.0,
     absoluteStart = startMillis / 1000.0,
     absoluteEnd = (startMillis + duration) / 1000.0

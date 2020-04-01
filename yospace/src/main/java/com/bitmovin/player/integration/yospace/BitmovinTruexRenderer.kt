@@ -14,11 +14,11 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
-    private var slotType: TruexSlotType = TruexSlotType.PREROLL
+    private var slotType: SlotType = SlotType.PREROLL
     private var isAdFree: Boolean = false
     private var isSessionAdFree: Boolean = false
 
-    fun renderAd(ad: Advert, slotType: TruexSlotType) {
+    fun renderAd(ad: Advert, slotType: SlotType) {
         this.slotType = slotType
         interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
             let {
@@ -36,16 +36,19 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
                     BitLog.d("TrueX rendering completed")
                 } catch (e: JSONException) {
                     BitLog.e("TrueX rendering failed $e")
+
+                    // Treat as normal error
+                    handleError()
                 }
             }
         }
     }
 
-    fun stop() {
+    fun stopRenderer() {
         // Reset state
         renderer?.stop()
         interactiveUnit = null
-        slotType = TruexSlotType.PREROLL
+        slotType = SlotType.PREROLL
         isAdFree = false
         isSessionAdFree = false
     }
@@ -80,8 +83,8 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
                 eventListener?.skipTruexAd()
             }
 
-            // Reset interactive unit
-            interactiveUnit = null
+            // Reset state
+            finishRendering()
         }
 
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
@@ -102,7 +105,10 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
 
             // We are session ad free if ad free is fired on a pre-roll
             if (!isSessionAdFree) {
-                isSessionAdFree = (slotType == TruexSlotType.PREROLL)
+                isSessionAdFree = (slotType == SlotType.PREROLL)
+                if (isSessionAdFree) {
+                    BitLog.d("Session ad free")
+                }
             }
         }
 
@@ -117,6 +123,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
 
     private fun handleError() {
         BitLog.d("Handing TrueX ad error...")
+
         // Treat error state like complete state
         if (isSessionAdFree) {
             // Skip ad break as pre-roll ad free has been satisfied
@@ -126,7 +133,12 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
             eventListener?.skipTruexAd()
         }
 
-        // Reset interactive unit
+        // Reset state
+        finishRendering()
+    }
+
+    private fun finishRendering() {
+        renderer?.stop()
         interactiveUnit = null
     }
 }

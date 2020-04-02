@@ -67,7 +67,8 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         }
 
         addEventListener(TruexAdRendererConstants.AD_COMPLETED) {
-            BitLog.d("TrueX ad completed")
+            BitLog.d("TrueX ad completed with ${it?.get("timeSpentOnEngagement")
+                ?: "0"} seconds spent on engagement")
 
             // Notify YoSpace for ad tracking
             interactiveUnit?.notifyAdVideoComplete()
@@ -87,19 +88,8 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
             finishRendering()
         }
 
-        addEventListener(TruexAdRendererConstants.AD_ERROR) {
-            BitLog.d("TrueX ad error: ${it?.get("message")?.toString().orEmpty()}")
-            handleError()
-        }
-
-        addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
-            BitLog.d("No TrueX ads available")
-            handleError()
-        }
-
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
-            BitLog.d("TrueX ad free: ${it?.get("timeSpentOnEngagement")
-                ?: "0"} seconds spent on engagement")
+            BitLog.d("TrueX ad free")
 
             isAdFree = true
 
@@ -110,6 +100,24 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
                     eventListener?.onSessionAdFree()
                 }
             }
+        }
+
+        addEventListener(TruexAdRendererConstants.OPT_IN) {
+            BitLog.d("TrueX user opt in: campaignName=${it?.get("campaignName")}, creativeID=${it?.get("creativeID")}")
+        }
+
+        addEventListener(TruexAdRendererConstants.OPT_OUT) {
+            BitLog.d("TrueX user opt out")
+        }
+
+        addEventListener(TruexAdRendererConstants.AD_ERROR) {
+            BitLog.d("TrueX ad error: ${it?.get("message")?.toString().orEmpty()}")
+            handleError()
+        }
+
+        addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
+            BitLog.d("No TrueX ads available")
+            handleError()
         }
 
         addEventListener(TruexAdRendererConstants.SKIP_CARD_SHOWN) {

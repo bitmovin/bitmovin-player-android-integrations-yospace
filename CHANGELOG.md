@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.4]
+
+### Changed
+- TrueX prerolls that meet ad free conditions now yield an ad free experience for entire session
+- TrueX midrolls that meet ad free conditions now yield an ad free experience for current ad break only
+
+### Fixed
+- Pause and mute suppressed for non-YoSpace content
+
 ## [1.1.3]
 
 ### Changed

@@ -267,7 +267,7 @@ open class BitmovinYospacePlayer(
     ///////////////////////////////////////////////////////////////
 
     override fun pause() {
-        if (yospaceSession?.canPause() ?: yospaceSession == null) {
+        if (yospaceSession?.canPause() == true || yospaceSession == null) {
             super.pause()
         }
     }
@@ -308,7 +308,7 @@ open class BitmovinYospacePlayer(
     }
 
     override fun mute() {
-        if (yospaceSession?.canMute() ?: yospaceSession == null) {
+        if (yospaceSession?.canMute() == true || yospaceSession == null) {
             super.mute()
         }
     }

@@ -103,7 +103,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         }
 
         addEventListener(TruexAdRendererConstants.OPT_IN) {
-            BitLog.d("TrueX user opt in: campaignName=${it?.get("campaignName")}, creativeID=${it?.get("creativeID")}")
+            BitLog.d("TrueX user opt in: ${it?.get("campaignName")?.toString().orEmpty()}, creativeId=${it?.get("creativeID")}")
         }
 
         addEventListener(TruexAdRendererConstants.OPT_OUT) {

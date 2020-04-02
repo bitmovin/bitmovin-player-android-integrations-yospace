@@ -418,7 +418,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
-            // Seek to end of TrueX ad
+            // Seek to end of TrueX ad filler
             activeAd?.let {
                 BitLog.d("Seeking to ${it.absoluteEnd}")
                 forceSeek(it.absoluteEnd)

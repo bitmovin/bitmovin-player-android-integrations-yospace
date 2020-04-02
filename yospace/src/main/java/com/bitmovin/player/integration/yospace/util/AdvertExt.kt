@@ -12,7 +12,7 @@ fun YsAd.isTruex(): Boolean = adSystem?.adSystemType == "trueX"
 
 fun YsAd.toAd(adBreakRelativeStart: Double): Ad = Ad(
     id = id,
-    relativeStart = adBreakRelativeStart / 1000,
+    relativeStart = adBreakRelativeStart,
     duration = duration / 1000.0,
     absoluteStart = startMillis / 1000.0,
     absoluteEnd = (startMillis + duration) / 1000.0,

@@ -22,12 +22,12 @@ private fun MetadataEvent.processId3(): TimedMetadata? {
     for (i in 0 until metadata.length()) {
         val entry = metadata.get(i)
         if (entry is BinaryFrame) {
-            when {
-                "YMID" == entry.id -> ymid = String(entry.data)
-                "YSEQ" == entry.id -> yseq = String(entry.data)
-                "YTYP" == entry.id -> ytyp = String(entry.data)
-                "YDUR" == entry.id -> ydur = String(entry.data)
-                "YPRG" == entry.id -> yprg = String(entry.data)
+            when (entry.id) {
+                "YMID" -> ymid = String(entry.data)
+                "YSEQ" -> yseq = String(entry.data)
+                "YTYP" -> ytyp = String(entry.data)
+                "YDUR" -> ydur = String(entry.data)
+                "YPRG" -> yprg = String(entry.data)
             }
         }
     }
@@ -50,7 +50,7 @@ private fun MetadataEvent.convertEmsgToId3(): TimedMetadata? {
             if (entry.size > 1) {
                 val key = entry[0]
                 val value = entry[1]
-                BitLog.d("Key: $key Value: $value")
+                BitLog.d("Key: $key, value: $value")
                 when (key) {
                     "YMID" -> ymid = value
                     "YSEQ" -> yseq = value

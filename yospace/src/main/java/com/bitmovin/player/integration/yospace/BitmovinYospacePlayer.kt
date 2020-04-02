@@ -345,7 +345,7 @@ open class BitmovinYospacePlayer(
     fun clickThroughPressed() = yospaceSession?.onLinearClickThrough()
 
     ///////////////////////////////////////////////////////////////
-    // Yospace session
+    // YoSpace session
     ///////////////////////////////////////////////////////////////
 
     private val sessionListener: YospaceEventListener<Session> = YospaceEventListener { event ->
@@ -419,10 +419,7 @@ open class BitmovinYospacePlayer(
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of TrueX ad filler
-            activeAd?.let {
-                BitLog.d("Seeking to ${it.absoluteEnd}")
-                forceSeek(it.absoluteEnd)
-            }
+            activeAd?.let { forceSeek(it.absoluteEnd) }
 
             BitLog.d("Resuming player")
             play()
@@ -435,10 +432,7 @@ open class BitmovinYospacePlayer(
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of ad break
-            activeAdBreak?.let {
-                BitLog.d("Seeking to ${it.absoluteEnd}")
-                forceSeek(it.absoluteEnd)
-            }
+            activeAdBreak?.let { forceSeek(it.absoluteEnd) }
 
             BitLog.d("Resuming player")
             play()
@@ -451,7 +445,7 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // Yospace analytics
+    // YoSpace analytics
     ///////////////////////////////////////////////////////////////
 
     private val analyticEventListener: AnalyticEventListener = object : AnalyticEventListener {

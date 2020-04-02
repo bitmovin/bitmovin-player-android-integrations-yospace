@@ -127,6 +127,10 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
             BitLog.d("TrueX user cancelled")
         }
+
+        addEventListener(TruexAdRendererConstants.POPUP_WEBSITE) {
+            BitLog.d("TrueX popup website")
+        }
     }
 
     private fun handleError() {

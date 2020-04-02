@@ -195,7 +195,7 @@ open class BitmovinYospacePlayer(
         BitLog.d("Load Yospace Source Configuration")
 
         loadState = LoadState.LOADING
-        truexRenderer = truexConfig?.let { BitmovinTruexRenderer(it, truexRendererListener, context) }
+        truexRenderer = truexConfig?.let { BitmovinTruexRenderer(context, it, truexRendererListener) }
         this.yospaceSourceConfig = yospaceSourceConfig
         this.sourceConfig = sourceConfig
 
@@ -414,7 +414,7 @@ open class BitmovinYospacePlayer(
 
     private val truexRendererListener: TruexAdRendererEventListener = object : TruexAdRendererEventListener {
 
-        override fun skipTruexAd() {
+        override fun onSkipTruexAd() {
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
@@ -428,7 +428,7 @@ open class BitmovinYospacePlayer(
             play()
         }
 
-        override fun skipAdBreak() {
+        override fun onSkipAdBreak() {
             BitLog.d("Skipping ad break")
 
             BitLog.d("YoSpace analytics unsuppressed")
@@ -442,6 +442,11 @@ open class BitmovinYospacePlayer(
 
             BitLog.d("Resuming player")
             play()
+        }
+
+        override fun onSessionAdFree() {
+            BitLog.d("Session ad free")
+            yospaceEventEmitter.emit(TruexAdFreeEvent())
         }
     }
 

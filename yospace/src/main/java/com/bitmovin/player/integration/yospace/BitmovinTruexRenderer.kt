@@ -10,7 +10,7 @@ import com.yospace.android.hls.analytic.advert.InteractiveUnit
 import org.json.JSONException
 import org.json.JSONObject
 
-class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var eventListener: TruexAdRendererEventListener? = null, private val context: Context) {
+class BitmovinTruexRenderer(private val context: Context, private val configuration: TruexConfiguration, var eventListener: TruexAdRendererEventListener? = null) {
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
@@ -78,9 +78,9 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
             //   1. Pre-roll ad free has been satisfied
             //   2. Mid-roll ad free has been satisfied
             if (isSessionAdFree || isAdFree) {
-                eventListener?.skipAdBreak()
+                eventListener?.onSkipAdBreak()
             } else {
-                eventListener?.skipTruexAd()
+                eventListener?.onSkipTruexAd()
             }
 
             // Reset state
@@ -107,7 +107,7 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
             if (!isSessionAdFree) {
                 isSessionAdFree = (slotType == SlotType.PREROLL)
                 if (isSessionAdFree) {
-                    BitLog.d("Session ad free")
+                    eventListener?.onSessionAdFree()
                 }
             }
         }
@@ -127,10 +127,10 @@ class BitmovinTruexRenderer(private val configuration: TruexConfiguration, var e
         // Treat error state like complete state
         if (isSessionAdFree) {
             // Skip ad break as pre-roll ad free has been satisfied
-            eventListener?.skipAdBreak()
+            eventListener?.onSkipAdBreak()
         } else {
             // Skip TrueX ad filler and show linear ads
-            eventListener?.skipTruexAd()
+            eventListener?.onSkipTruexAd()
         }
 
         // Reset state

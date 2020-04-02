@@ -122,7 +122,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
     }
 
     private fun handleError() {
-        BitLog.d("Handling TrueX ad error...")
+        BitLog.d("Handling TrueX error...")
 
         // Treat error state like complete state
         if (isSessionAdFree) {

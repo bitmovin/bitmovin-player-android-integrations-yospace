@@ -50,7 +50,7 @@ private fun MetadataEvent.convertEmsgToId3(): TimedMetadata? {
             if (entry.size > 1) {
                 val key = entry[0]
                 val value = entry[1]
-                BitLog.d("Key: $key Value: $value")
+                BitLog.d("Key: $key, value: $value")
                 when (key) {
                     "YMID" -> ymid = value
                     "YSEQ" -> yseq = value

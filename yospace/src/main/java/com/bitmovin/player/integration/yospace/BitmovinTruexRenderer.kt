@@ -73,7 +73,6 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
             // Notify YoSpace for ad tracking
             interactiveUnit?.notifyAdVideoComplete()
             interactiveUnit?.notifyAdStopped()
-            interactiveUnit?.notifyAdUserClose()
 
             // Skip current ad break if:
             //   1. Pre-roll ad free has been satisfied

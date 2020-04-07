@@ -2,7 +2,7 @@ package com.bitmovin.player.integration.yospace.util
 
 import com.yospace.android.hls.analytic.advert.InteractiveUnit
 
-fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("createView")
+fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
 
 fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
 

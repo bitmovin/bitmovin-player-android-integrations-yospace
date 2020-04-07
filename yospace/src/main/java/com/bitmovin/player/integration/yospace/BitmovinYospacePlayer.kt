@@ -419,20 +419,24 @@ open class BitmovinYospacePlayer(
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of TrueX ad filler
-            activeAd?.let { forceSeek(it.absoluteEnd) }
+            activeAd?.let {
+                BitLog.d("Skipping TrueX filler")
+                forceSeek(it.absoluteEnd)
+            }
 
             BitLog.d("Resuming player")
             play()
         }
 
         override fun onSkipAdBreak() {
-            BitLog.d("Skipping ad break")
-
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of ad break
-            activeAdBreak?.let { forceSeek(it.absoluteEnd) }
+            activeAdBreak?.let {
+                BitLog.d("Skipping ad break")
+                forceSeek(it.absoluteEnd)
+            }
 
             BitLog.d("Resuming player")
             play()

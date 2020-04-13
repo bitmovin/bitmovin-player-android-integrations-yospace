@@ -138,7 +138,8 @@ open class BitmovinYospacePlayer(
             }
         })
 
-        super.addEventListener(OnTimeChangedListener { timeChangedEvent ->
+        super.addEventListener(OnTimeChangedListener {
+            val timeChangedEvent = TimeChangedEvent(currentTime)
             if (yospaceSession as? SessionLive != null) {
                 // Live session
                 val adSkippedEvent = AdSkippedEvent(activeAd)
@@ -157,8 +158,7 @@ open class BitmovinYospacePlayer(
             } else {
                 // Non-live session
                 yospaceStateSource.notify(PlayerState(PlaybackState.PLAYHEAD_UPDATE, yospaceTime, false))
-                val event = TimeChangedEvent(currentTime)
-                handler.post { yospaceEventEmitter.emit(event) }
+                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
             }
         })
 

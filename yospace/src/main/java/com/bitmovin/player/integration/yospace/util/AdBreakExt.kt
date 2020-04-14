@@ -8,19 +8,18 @@ fun List<YsAdBreak>.toAdBreaks(): List<AdBreak> {
     var relativeOffset = 0.0
     return map { ysAdBreak ->
         // Convert YsAdBreak to AdBreak
-        val adBreak = ysAdBreak.toAdBreak(relativeOffset)
-        // Convert YSAds to Ads
-        adBreak.ads = ysAdBreak.adverts.map { it.toAd(adBreak.relativeStart) }.toMutableList()
-        relativeOffset += ysAdBreak.duration
+        val adBreak = ysAdBreak.toAdBreak(relativeStart = ysAdBreak.startMillis / 1000.0 - relativeOffset)
+        relativeOffset += ysAdBreak.duration / 1000.0
         adBreak
     }
 }
 
-fun YsAdBreak.toAdBreak(relativeOffset: Double): AdBreak = AdBreak(
-    relativeStart = (startMillis - relativeOffset) / 1000.0,
+fun YsAdBreak.toAdBreak(absoluteStart: Double = startMillis / 1000.0, relativeStart: Double): AdBreak = AdBreak(
+    relativeStart = relativeStart,
+    absoluteStart = absoluteStart,
     duration = duration / 1000.0,
-    absoluteStart = startMillis / 1000.0,
-    absoluteEnd = (startMillis + duration) / 1000.0
+    absoluteEnd = absoluteStart + (duration / 1000.0),
+    ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
 )
 
 fun AdBreak.slotType(): SlotType = when (relativeStart) {

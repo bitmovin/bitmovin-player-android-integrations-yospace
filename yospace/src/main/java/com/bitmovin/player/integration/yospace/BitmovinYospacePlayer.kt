@@ -138,7 +138,8 @@ open class BitmovinYospacePlayer(
             }
         })
 
-        super.addEventListener(OnTimeChangedListener { timeChangedEvent ->
+        super.addEventListener(OnTimeChangedListener {
+            val timeChangedEvent = TimeChangedEvent(currentTime)
             if (yospaceSession as? SessionLive != null) {
                 // Live session
                 val adSkippedEvent = AdSkippedEvent(activeAd)
@@ -157,8 +158,7 @@ open class BitmovinYospacePlayer(
             } else {
                 // Non-live session
                 yospaceStateSource.notify(PlayerState(PlaybackState.PLAYHEAD_UPDATE, yospaceTime, false))
-                val event = TimeChangedEvent(currentTime)
-                handler.post { yospaceEventEmitter.emit(event) }
+                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
             }
         })
 
@@ -276,9 +276,18 @@ open class BitmovinYospacePlayer(
         ?: 0.0)
 
     override fun getCurrentTime(): Double = when {
-        isAd -> super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
-        adTimeline != null -> adTimeline!!.absoluteToRelative(super.getCurrentTime())
-        else -> super.getCurrentTime()
+        isAd -> {
+            // Return ad time
+            super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
+        }
+        isLive -> {
+            // Return absolute time for LIVE
+            super.getCurrentTime()
+        }
+        else -> {
+            // Return relative time for VOD, or fallback to absolute time
+            adTimeline?.absoluteToRelative(super.getCurrentTime()) ?: super.getCurrentTime()
+        }
     }
 
     private fun yospaceTime(): Int {

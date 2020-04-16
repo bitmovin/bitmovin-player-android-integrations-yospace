@@ -251,8 +251,8 @@ class MainActivity : AppCompatActivity() {
             adBreaks.forEachIndexed { i, adBreak ->
                 val listItem = ListItem(
                     (i + 1).toString(),
-                    adBreak.absoluteStart.toString(),
-                    adBreak.duration.toString(),
+                    String.format("%.3f", adBreak.relativeStart),
+                    String.format("%.3f", adBreak.duration),
                     adBreak.ads.size.toString()
                 )
                 listAdapter.add(listItem)

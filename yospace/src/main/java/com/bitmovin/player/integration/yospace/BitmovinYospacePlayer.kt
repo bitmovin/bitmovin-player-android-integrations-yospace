@@ -26,11 +26,11 @@ import com.yospace.hls.TimedMetadata
 import com.yospace.hls.player.PlaybackState
 import com.yospace.hls.player.PlayerState
 import com.yospace.util.YoLog
-import com.yospace.util.event.EventListener as YospaceEventListener
 import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 import com.bitmovin.player.api.event.listener.EventListener as BitmovinEventListener
+import com.yospace.util.event.EventListener as YospaceEventListener
 
 open class BitmovinYospacePlayer(
     private val context: Context,
@@ -68,7 +68,7 @@ open class BitmovinYospacePlayer(
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
-        BitLog.d("Version 1.1.4")
+        BitLog.d("Version 1.1.5")
         addEventListeners()
     }
 
@@ -138,7 +138,8 @@ open class BitmovinYospacePlayer(
             }
         })
 
-        super.addEventListener(OnTimeChangedListener { timeChangedEvent ->
+        super.addEventListener(OnTimeChangedListener {
+            val timeChangedEvent = TimeChangedEvent(currentTime)
             if (yospaceSession as? SessionLive != null) {
                 // Live session
                 val adSkippedEvent = AdSkippedEvent(activeAd)
@@ -157,8 +158,7 @@ open class BitmovinYospacePlayer(
             } else {
                 // Non-live session
                 yospaceStateSource.notify(PlayerState(PlaybackState.PLAYHEAD_UPDATE, yospaceTime, false))
-                val event = TimeChangedEvent(currentTime)
-                handler.post { yospaceEventEmitter.emit(event) }
+                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
             }
         })
 
@@ -276,9 +276,18 @@ open class BitmovinYospacePlayer(
         ?: 0.0)
 
     override fun getCurrentTime(): Double = when {
-        isAd -> super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
-        adTimeline != null -> adTimeline!!.absoluteToRelative(super.getCurrentTime())
-        else -> super.getCurrentTime()
+        isAd -> {
+            // Return ad time
+            super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
+        }
+        isLive -> {
+            // Return absolute time for LIVE
+            super.getCurrentTime()
+        }
+        else -> {
+            // Return relative time for VOD, or fallback to absolute time
+            adTimeline?.absoluteToRelative(super.getCurrentTime()) ?: super.getCurrentTime()
+        }
     }
 
     private fun yospaceTime(): Int {
@@ -419,20 +428,24 @@ open class BitmovinYospacePlayer(
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of TrueX ad filler
-            activeAd?.let { forceSeek(it.absoluteEnd) }
+            activeAd?.let {
+                BitLog.d("Skipping TrueX filler")
+                forceSeek(it.absoluteEnd)
+            }
 
             BitLog.d("Resuming player")
             play()
         }
 
         override fun onSkipAdBreak() {
-            BitLog.d("Skipping ad break")
-
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
             // Seek to end of ad break
-            activeAdBreak?.let { forceSeek(it.absoluteEnd) }
+            activeAdBreak?.let {
+                BitLog.d("Skipping ad break")
+                forceSeek(it.absoluteEnd)
+            }
 
             BitLog.d("Resuming player")
             play()
@@ -454,36 +467,19 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onAdvertBreakStart")
 
             val absoluteTime = currentTimeWithAds()
-            val relativeTime = adTimeline?.absoluteToRelative(absoluteTime) ?: absoluteTime
-            val adBreakAbsoluteEnd = absoluteTime + (adBreak?.duration?.div(1000.0) ?: 0.0)
+            val adBreakAbsoluteStart: Double
+            val adBreakRelativeStart: Double
 
-            // Store active ad break
-            activeAdBreak = AdBreak(
-                relativeStart = relativeTime,
-                duration = adBreak?.duration?.div(1000.0) ?: 0.0,
-                absoluteStart = absoluteTime,
-                absoluteEnd = adBreakAbsoluteEnd
-            )
-
-            // Append active ads to active ad break
-            var adAbsoluteStart = absoluteTime
-            val activeAds = adBreak?.adverts?.map {
-                val ad = Ad(
-                    it.id,
-                    relativeTime,
-                    it.duration / 1000.0,
-                    adAbsoluteStart,
-                    adAbsoluteStart + it.duration / 1000.0,
-                    it.sequence,
-                    it.hasLinearInteractiveUnit(),
-                    it.isTruex(),
-                    !it.isTruex(),
-                    it.adClickThroughUrl()
-                )
-                adAbsoluteStart += it.duration / 1000.0
-                ad
+            if (isLive) {
+                adBreakAbsoluteStart = absoluteTime
+                adBreakRelativeStart = absoluteTime
+            } else /* VOD */ {
+                adBreakAbsoluteStart = adBreak?.startMillis?.div(1000.0) ?: absoluteTime
+                adBreakRelativeStart = adTimeline?.absoluteToRelative(adBreakAbsoluteStart)
+                    ?: adBreakAbsoluteStart
             }
-            activeAdBreak?.ads?.addAll(activeAds ?: emptyList())
+
+            activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = AdBreakStartedEvent(activeAdBreak)
@@ -507,24 +503,29 @@ open class BitmovinYospacePlayer(
                 truexRenderer?.renderAd(advert, slotType)
             }
 
-            val absoluteTime = currentTimeWithAds()
-            val relativeTime = adTimeline?.absoluteToRelative(absoluteTime) ?: absoluteTime
-            val activeAdAbsoluteEnd = absoluteTime + (advert?.duration?.div(1000.0) ?: 0.0)
+            // Use ad from activeAdBreak if matching id is found
+            activeAd = activeAdBreak
+                ?.ads
+                ?.filterIsInstance<Ad>()
+                ?.first { it.id == advert?.id }
 
-            // Store active ad
-            activeAd = Ad(
-                advert?.id,
-                relativeTime,
-                advert?.duration?.div(1000.0) ?: 0.0,
-                absoluteTime,
-                activeAdAbsoluteEnd,
-                advert?.sequence ?: 0,
-                advert?.hasLinearInteractiveUnit() ?: false,
-                advert?.isTruex() ?: false,
-                advert?.isTruex()?.not() ?: false,
-                advert?.adClickThroughUrl(),
-                AdData(advert?.adMimeType().orEmpty())
-            )
+                // Else create ad manually
+                ?: run {
+                    val absoluteTime = currentTimeWithAds()
+                    val adAbsoluteStart: Double
+                    val adRelativeStart: Double
+
+                    if (isLive) {
+                        adAbsoluteStart = absoluteTime
+                        adRelativeStart = activeAdBreak?.relativeStart ?: absoluteTime
+                    } else /* VOD */ {
+                        adAbsoluteStart = advert?.startMillis?.div(1000.0) ?: absoluteTime
+                        adRelativeStart = adTimeline?.absoluteToRelative(adAbsoluteStart)
+                            ?: adAbsoluteStart
+                    }
+
+                    advert?.toAd(adAbsoluteStart, adRelativeStart)
+                }
 
             // Notify listeners of AS event
             handler.post {

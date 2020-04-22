@@ -68,7 +68,7 @@ open class BitmovinYospacePlayer(
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
-        BitLog.d("Version 1.1.5")
+        BitLog.d("Version 1.2.0")
         addEventListeners()
     }
 

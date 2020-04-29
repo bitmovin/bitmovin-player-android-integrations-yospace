@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.2.0]
 
+### Fixed
+- Player getting stuck after attempting to seek over midroll TrueX ad break
+
+## [1.2.0]
+
 ### Changed
 - Bitmovin Player version to 2.43.0
 

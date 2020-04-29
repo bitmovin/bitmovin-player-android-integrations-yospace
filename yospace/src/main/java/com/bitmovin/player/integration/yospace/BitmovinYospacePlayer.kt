@@ -444,7 +444,7 @@ open class BitmovinYospacePlayer(
             // Seek to end of ad break
             activeAdBreak?.let {
                 BitLog.d("Skipping ad break")
-                forceSeek(it.absoluteEnd)
+                forceSeek(it.absoluteEnd + 0.5)
             }
 
             BitLog.d("Resuming player")

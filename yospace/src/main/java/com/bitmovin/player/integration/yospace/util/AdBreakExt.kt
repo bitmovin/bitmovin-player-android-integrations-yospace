@@ -2,7 +2,6 @@ package com.bitmovin.player.integration.yospace.util
 
 import com.bitmovin.player.integration.yospace.AdBreak
 import com.bitmovin.player.integration.yospace.AdBreakPosition
-import com.bitmovin.player.integration.yospace.SlotType
 import com.yospace.android.hls.analytic.advert.AdBreak as YsAdBreak
 
 fun List<YsAdBreak>.toAdBreaks(): List<AdBreak> {
@@ -21,17 +20,5 @@ fun YsAdBreak.toAdBreak(absoluteStart: Double = startMillis / 1000.0, relativeSt
     duration = duration / 1000.0,
     absoluteEnd = absoluteStart + (duration / 1000.0),
     ads = adverts.toAds(absoluteStart, relativeStart).toMutableList(),
-    position = getAdBreakPosition(position)
+    position = AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN
 )
-
-fun AdBreak.slotType(): SlotType = when (relativeStart) {
-    0.0 -> SlotType.PREROLL
-    else -> SlotType.MIDROLL
-}
-
-fun getAdBreakPosition(position: String): AdBreakPosition = when (position) {
-        "preroll" -> AdBreakPosition.PREROLL
-        "midroll" -> AdBreakPosition.MIDROLL
-        "postroll" -> AdBreakPosition.POSTROLL
-        else -> AdBreakPosition.UNKNOWN
-    }

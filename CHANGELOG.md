@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- AdBreak position property (Pre/mid/post roll or unknown)
+- AdBreak position property (pre/mid/post roll or unknown)
 
 ## [1.2.2]
 

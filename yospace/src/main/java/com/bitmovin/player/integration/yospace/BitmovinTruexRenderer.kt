@@ -14,12 +14,12 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
-    private var slotType: SlotType = SlotType.PREROLL
+    private var adBreakPosition: AdBreakPosition = AdBreakPosition.PREROLL
     private var isAdFree: Boolean = false
     private var isSessionAdFree: Boolean = false
 
-    fun renderAd(ad: Advert, slotType: SlotType) {
-        this.slotType = slotType
+    fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
+        this.adBreakPosition = adBreakPosition
         interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
             let {
                 BitLog.d("Rendering TrueX ad: $source")
@@ -30,7 +30,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
                     }
                     renderer = TruexAdRenderer(context).apply {
                         addEventListeners(this)
-                        init(source, adParams, slotType.type)
+                        init(source, adParams, adBreakPosition.value)
                         start(configuration.viewGroup)
                     }
                     BitLog.d("TrueX rendering completed")
@@ -48,7 +48,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         // Reset state
         renderer?.stop()
         interactiveUnit = null
-        slotType = SlotType.PREROLL
+        adBreakPosition = AdBreakPosition.PREROLL
         isAdFree = false
         isSessionAdFree = false
     }
@@ -94,7 +94,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
 
             // We are session ad free if ad free is fired on a pre-roll
             if (!isSessionAdFree) {
-                isSessionAdFree = (slotType == SlotType.PREROLL)
+                isSessionAdFree = (adBreakPosition == AdBreakPosition.PREROLL)
                 if (isSessionAdFree) {
                     eventListener?.onSessionAdFree()
                 }

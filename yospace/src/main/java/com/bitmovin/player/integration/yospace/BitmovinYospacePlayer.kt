@@ -499,8 +499,8 @@ open class BitmovinYospacePlayer(
                 BitLog.d("Pausing player")
                 super@BitmovinYospacePlayer.pause()
 
-                val slotType = activeAdBreak?.slotType() ?: SlotType.PREROLL
-                truexRenderer?.renderAd(advert, slotType)
+                val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
+                truexRenderer?.renderAd(advert, adBreakPosition)
             }
 
             // Use ad from activeAdBreak if matching id is found

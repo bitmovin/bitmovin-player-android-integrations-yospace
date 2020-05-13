@@ -10,6 +10,7 @@ data class AdBreak(
     val duration: Double,
     val absoluteStart: Double,
     val absoluteEnd: Double,
+    var position: AdBreakPosition = AdBreakPosition.UNKNOWN,
     override val replaceContentDuration: Double = 0.0,
     override var scheduleTime: Double = 0.0,
     override var ads: MutableList<Ad> = mutableListOf()

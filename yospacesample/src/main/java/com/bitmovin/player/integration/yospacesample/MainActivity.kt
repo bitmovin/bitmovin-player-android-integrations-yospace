@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                 abs_text_view.text = String.format(Locale.US, "ABS: %d", ++adBreakStartedCount)
                 val adBreak = it.adBreak as AdBreak?
                 showListAds(adBreak?.ads ?: emptyList())
-                logMessage("Ad Break Started: id=${adBreak?.id}, duration=${adBreak?.duration}")
+                logMessage("Ad Break Started: id=${adBreak?.id}, duration=${adBreak?.duration}, position=${adBreak?.position}")
             })
 
             addEventListener(OnAdBreakFinishedListener {

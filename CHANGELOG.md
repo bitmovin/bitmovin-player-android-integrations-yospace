@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - AdBreak position property (pre/mid/post roll or unknown)
 
+### Changed
+- Bitmovin Player version to 2.45.0+jason
+
 ## [1.2.2]
 
 ### Changed

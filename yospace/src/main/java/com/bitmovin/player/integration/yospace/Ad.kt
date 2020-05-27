@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.model.advertising.AdData
+import com.yospace.android.xml.XmlNode
 
 data class Ad(
     override var id: String?,
@@ -11,6 +12,7 @@ data class Ad(
     val sequence: Int,
     val hasInteractiveUnit: Boolean,
     val isTruex: Boolean,
+    val extensions: List<XmlNode>,
     override val isLinear: Boolean,
     override var clickThroughUrl: String? = null,
     override var data: AdData? = null,

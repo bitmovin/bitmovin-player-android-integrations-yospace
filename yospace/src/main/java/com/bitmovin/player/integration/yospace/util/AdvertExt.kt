@@ -22,6 +22,7 @@ fun List<YsAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double)
             it.sequence,
             it.hasLinearInteractiveUnit(),
             it.isTruex(),
+            it.extensions,
             !it.isTruex(),
             it.adClickThroughUrl()
         )
@@ -39,6 +40,7 @@ fun YsAd.toAd(absoluteStart: Double = startMillis / 1000.0, relativeStart: Doubl
     sequence = sequence,
     hasInteractiveUnit = hasLinearInteractiveUnit(),
     isTruex = hasLinearInteractiveUnit(),
+    extensions = extensions,
     isLinear = !hasLinearInteractiveUnit(),
     clickThroughUrl = adClickThroughUrl()
 )

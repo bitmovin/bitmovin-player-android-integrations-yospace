@@ -9,7 +9,7 @@ data class Ad(
     val absoluteStart: Double,
     val absoluteEnd: Double,
     val sequence: Int,
-    val isHasInteractiveUnit: Boolean,
+    val hasInteractiveUnit: Boolean,
     val isTruex: Boolean,
     override val isLinear: Boolean,
     override var clickThroughUrl: String? = null,

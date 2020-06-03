@@ -492,16 +492,18 @@ open class BitmovinYospacePlayer(
 
             // Render TrueX ad
             if (advert?.isTruex() == true) {
-                BitLog.d("TrueX ad found: $advert")
+                truexRenderer?.let {
+                    BitLog.d("TrueX ad found: $advert")
 
-                // Suppress analytics in order for YoSpace TrueX tracking to work
-                BitLog.d("YoSpace analytics suppressed")
-                yospaceSession?.suppressAnalytics(true)
-                BitLog.d("Pausing player")
-                super@BitmovinYospacePlayer.pause()
+                    // Suppress analytics in order for YoSpace TrueX tracking to work
+                    BitLog.d("YoSpace analytics suppressed")
+                    yospaceSession?.suppressAnalytics(true)
+                    BitLog.d("Pausing player")
+                    super@BitmovinYospacePlayer.pause()
 
-                val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
-                truexRenderer?.renderAd(advert, adBreakPosition)
+                    val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
+                    it.renderAd(advert, adBreakPosition)
+                }
             }
 
             // Use ad from activeAdBreak if matching id is found

@@ -147,6 +147,10 @@ class MainActivity : AppCompatActivity() {
                 logMessage("Ad Started: id=${ad?.id}, duration=${ad?.duration}")
             })
 
+            addEventListener(OnAdQuartileListener {
+                logMessage("Ad Quartile: ${it.quartile}")
+            })
+
             addEventListener(OnAdFinishedListener {
                 af_text_view.text = String.format(Locale.US, "AF: %d", ++adFinishedCount)
                 val ad = it.ad as Ad?

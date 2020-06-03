@@ -17,6 +17,7 @@ import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.bitmovin.player.integration.yospace.util.*
+import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
@@ -491,16 +492,18 @@ open class BitmovinYospacePlayer(
 
             // Render TrueX ad
             if (advert?.isTruex() == true) {
-                BitLog.d("TrueX ad found: $advert")
+                truexRenderer?.let {
+                    BitLog.d("TrueX ad found: $advert")
 
-                // Suppress analytics in order for YoSpace TrueX tracking to work
-                BitLog.d("YoSpace analytics suppressed")
-                yospaceSession?.suppressAnalytics(true)
-                BitLog.d("Pausing player")
-                super@BitmovinYospacePlayer.pause()
+                    // Suppress analytics in order for YoSpace TrueX tracking to work
+                    BitLog.d("YoSpace analytics suppressed")
+                    yospaceSession?.suppressAnalytics(true)
+                    BitLog.d("Pausing player")
+                    super@BitmovinYospacePlayer.pause()
 
-                val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
-                truexRenderer?.renderAd(advert, adBreakPosition)
+                    val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
+                    it.renderAd(advert, adBreakPosition)
+                }
             }
 
             // Use ad from activeAdBreak if matching id is found
@@ -563,6 +566,24 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingUrlCalled(advert: Advert, type: String, url: String) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
+
+            when (type) {
+                "firstQuartile" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.FIRST_QUARTILE))
+                    }
+                }
+                "midpoint" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.MIDPOINT))
+                    }
+                }
+                "thirdQuartile" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.THIRD_QUARTILE))
+                    }
+                }
+            }
         }
 
         override fun onVastReceived(vastPayload: VastPayload) {

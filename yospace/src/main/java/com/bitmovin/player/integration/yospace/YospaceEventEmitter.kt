@@ -73,6 +73,12 @@ class YospaceEventEmitter {
                     (it as OnAdSkippedListener).onAdSkipped(event)
                 }
             }
+            is AdQuartileEvent -> {
+                val listeners = eventListeners[OnAdQuartileListener::class.java]
+                listeners?.forEach {
+                    (it as OnAdQuartileListener).onAdQuartile(event)
+                }
+            }
             is ErrorEvent -> {
                 val listeners = eventListeners[OnErrorListener::class.java]
                 listeners?.forEach {
@@ -109,6 +115,7 @@ class YospaceEventEmitter {
         is OnAdFinishedListener -> OnAdFinishedListener::class.java
         is OnAdStartedListener -> OnAdStartedListener::class.java
         is OnAdSkippedListener -> OnAdSkippedListener::class.java
+        is OnAdQuartileListener -> OnAdQuartileListener::class.java
         is OnErrorListener -> OnErrorListener::class.java
         is OnWarningListener -> OnWarningListener::class.java
         is OnTimeChangedListener -> OnTimeChangedListener::class.java

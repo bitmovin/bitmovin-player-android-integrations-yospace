@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Exposed AdQuartile event
 
+### Fixed
+- Player pausing indefinitely when TruexConfiguration is null and a TrueX ad is found
+
 ## [1.5.0]
 
 ### Changed

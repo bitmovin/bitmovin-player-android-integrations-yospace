@@ -17,6 +17,7 @@ import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.bitmovin.player.integration.yospace.util.*
+import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
@@ -563,6 +564,24 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingUrlCalled(advert: Advert, type: String, url: String) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
+
+            when (type) {
+                "firstQuartile" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.FIRST_QUARTILE))
+                    }
+                }
+                "midpoint" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.MIDPOINT))
+                    }
+                }
+                "thirdQuartile" -> {
+                    handler.post {
+                        yospaceEventEmitter.emit(AdQuartileEvent(AdQuartile.THIRD_QUARTILE))
+                    }
+                }
+            }
         }
 
         override fun onVastReceived(vastPayload: VastPayload) {

@@ -5,8 +5,8 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
-def libraryVersion = '1.7.0'
-def libraryCode = 47
+def libraryVersion = '1.8.0'
+def libraryCode = 48
 
 android {
     compileSdkVersion 28

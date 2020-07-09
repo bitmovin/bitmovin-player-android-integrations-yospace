@@ -4,10 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.0]
+
+### Changed
+- Bitmovin Player version to 2.49.0+jason
+
 ## [1.8.0]
 
 ### Changed
-- Bitmovin Player version to 2.48.0
+- Bitmovin Player version to 2.48.0+jason
 
 ## [1.7.0]
 

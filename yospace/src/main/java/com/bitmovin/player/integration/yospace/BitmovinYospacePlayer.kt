@@ -176,23 +176,27 @@ open class BitmovinYospacePlayer(
         })
     }
 
-    override fun addEventListener(listener: BitmovinEventListener<*>) {
-        yospaceEventEmitter.addEventListener(listener)
-        if (listener !is OnTimeChangedListener) {
-            super.addEventListener(listener)
+    override fun addEventListener(listener: BitmovinEventListener<*>?) {
+        listener?.let {
+            yospaceEventEmitter.addEventListener(it)
+            if (it !is OnTimeChangedListener) {
+                super.addEventListener(it)
+            }
         }
     }
 
-    override fun removeEventListener(listener: BitmovinEventListener<*>) {
-        yospaceEventEmitter.removeEventListener(listener)
-        super.removeEventListener(listener)
+    override fun removeEventListener(listener: BitmovinEventListener<*>?) {
+        listener?.let {
+            yospaceEventEmitter.removeEventListener(it)
+            super.removeEventListener(it)
+        }
     }
 
     ///////////////////////////////////////////////////////////////
     // Playback
     ///////////////////////////////////////////////////////////////
 
-    fun load(sourceConfig: SourceConfiguration, yospaceSourceConfig: YospaceSourceConfiguration, truexConfig: TruexConfiguration? = null) {
+    fun load(sourceConfig: SourceConfiguration?, yospaceSourceConfig: YospaceSourceConfiguration, truexConfig: TruexConfiguration? = null) {
         BitLog.d("Load YoSpace Source Configuration")
 
         loadState = LoadState.LOADING
@@ -206,7 +210,7 @@ open class BitmovinYospacePlayer(
 
         resetYospaceSession()
 
-        val originalUrl = sourceConfig.firstSourceItem?.hlsSource?.url
+        val originalUrl = sourceConfig?.firstSourceItem?.hlsSource?.url
         if (originalUrl == null) {
             yospaceEventEmitter.emit(ErrorEvent(
                 YospaceErrorCodes.YOSPACE_INVALID_SOURCE,
@@ -343,7 +347,7 @@ open class BitmovinYospacePlayer(
         super.scheduleAd(adItem)
     }
 
-    override fun setAdViewGroup(adViewGroup: ViewGroup) = if (yospaceSourceConfig != null) {
+    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(WarningEvent(
             YospaceWarningCodes.UNSUPPORTED_API,
             "setAdViewGroup API is not available when playing back a YoSpace asset"
@@ -396,7 +400,7 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(WarningEvent(errorCode, message))
                 if (loadState != LoadState.UNLOADING) {
-                    load(sourceConfig)
+                    sourceConfig?.let { load(it) }
                 }
             }
         } else {

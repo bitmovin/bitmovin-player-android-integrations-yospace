@@ -1,7 +1,7 @@
 ext {
     // Versions
     supportLibraryVersion = '1.1.0'
-    bitmovinPlayerVersion = '2.49.0+jason'
+    bitmovinPlayerVersion = '2.50.0+jason'
     truexRendererVersion = '1.0.8'
     junitVersion = '5.3.2'
 

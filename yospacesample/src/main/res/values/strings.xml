@@ -1,19 +1,5 @@
 <resources>
     <string name="app_name">BitmovinYospace</string>
     <string name="unload">Unload</string>
-    <string name="seek">Seek</string>
-    <string name="buffer">Buffer:</string>
-    <string name="zero_buffer">Buffer: [0.00 0.00]</string>
     <string name="load">Load</string>
-    <string name="abs_default">ABS: 0</string>
-    <string name="as_default">AS: 0</string>
-    <string name="af_default">AF: 0</string>
-    <string name="abf_default">ABF: 0</string>
-    <string-array name="streams">
-        <item>CNN Clear</item>
-        <item>TBSE-WV</item>
-        <item>VOD</item>
-        <item>TrueX</item>
-        <item>Non-Yospace</item>
-    </string-array>
 </resources>

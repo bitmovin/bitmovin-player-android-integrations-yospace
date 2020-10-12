@@ -6,138 +6,34 @@
     android:keepScreenOn="true">
 
     <androidx.appcompat.widget.AppCompatSpinner
-        android:id="@+id/stream_spinner"
+        android:id="@+id/streamSpinner"
         android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:entries="@array/streams"
-        app:layout_constraintBottom_toTopOf="@id/player_view"
-        app:layout_constraintEnd_toStartOf="@id/load_unload_button"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/loadUnloadButton"
+        app:layout_constraintEnd_toStartOf="@id/loadUnloadButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/load_unload_button"
+        android:id="@+id/loadUnloadButton"
         android:layout_width="75dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="1dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/button_background"
         android:text="@string/load"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@id/stream_spinner"
-        app:layout_constraintEnd_toStartOf="@id/seek_button"
-        app:layout_constraintStart_toEndOf="@id/stream_spinner"
-        app:layout_constraintTop_toTopOf="@id/stream_spinner" />
-
-    <Button
-        android:id="@+id/seek_button"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:background="@drawable/button_background"
-        android:text="@string/seek"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@id/load_unload_button"
-        app:layout_constraintEnd_toStartOf="@id/seek_edit_text"
-        app:layout_constraintStart_toEndOf="@id/load_unload_button"
-        app:layout_constraintTop_toTopOf="@id/load_unload_button" />
-
-    <EditText
-        android:id="@+id/seek_edit_text"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:gravity="center"
-        android:text="208"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="@id/seek_button"
+        app:layout_constraintBottom_toBottomOf="@id/streamSpinner"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/seek_button"
-        app:layout_constraintTop_toTopOf="@id/seek_button" />
+        app:layout_constraintStart_toEndOf="@id/streamSpinner"
+        app:layout_constraintTop_toTopOf="@id/streamSpinner" />
 
     <com.bitmovin.player.BitmovinPlayerView
-        android:id="@+id/player_view"
+        android:id="@+id/playerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/black"
-        app:layout_constraintBottom_toTopOf="@id/abs_text_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/stream_spinner" />
-
-    <TextView
-        android:id="@+id/abs_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="ABS: 0"
-        app:layout_constraintBottom_toTopOf="@id/recycler_view"
-        app:layout_constraintEnd_toStartOf="@id/as_text_view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/player_view" />
-
-    <TextView
-        android:id="@+id/as_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="AS: 0"
-        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
-        app:layout_constraintEnd_toStartOf="@id/af_text_view"
-        app:layout_constraintStart_toEndOf="@id/abs_text_view"
-        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
-
-    <TextView
-        android:id="@+id/af_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="AF: 0"
-        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
-        app:layout_constraintEnd_toStartOf="@id/abf_text_view"
-        app:layout_constraintStart_toEndOf="@id/as_text_view"
-        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
-
-    <TextView
-        android:id="@+id/abf_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="ABF: 0"
-        app:layout_constraintBottom_toBottomOf="@id/abs_text_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/af_text_view"
-        app:layout_constraintTop_toTopOf="@id/abs_text_view" />
-
-    <TextView
-        android:id="@+id/buffer_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
-        android:text="@string/zero_buffer"
-        android:textColor="@android:color/white"
-        app:layout_constraintStart_toStartOf="@id/player_view"
-        app:layout_constraintTop_toTopOf="@id/player_view" />
-
-    <TextView
-        android:id="@+id/ad_counter_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@id/player_view"
-        app:layout_constraintStart_toStartOf="@id/player_view" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/abs_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/streamSpinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

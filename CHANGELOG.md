@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [-]
+
+### Added
+- Companion ads to `AdStartedEvent`
+
+### Removed
+- Duplicate `truexAd` property from `AdStartedEvent`
+
 ## [1.14.0]
 - Bitmovin Player version to 2.55.0+jason
     - Add `startTime` to metadata events

@@ -22,6 +22,7 @@ import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
 import com.yospace.android.hls.analytic.advert.Resource
+import com.yospace.android.hls.analytic.advert.Resource.*
 import com.yospace.android.xml.VastPayload
 import com.yospace.android.xml.VmapPayload
 import com.yospace.hls.TimedMetadata
@@ -357,7 +358,9 @@ open class BitmovinYospacePlayer(
         super.setAdViewGroup(adViewGroup)
     }
 
-    fun clickThroughPressed() = yospaceSession?.onLinearClickThrough()
+    fun linearClickThroughPressed() = yospaceSession?.onLinearClickThrough()
+
+    fun companionClickThroughPressed(identifier: String) = yospaceSession?.onCompanionClickThrough(identifier)
 
     ///////////////////////////////////////////////////////////////
     // YoSpace session
@@ -535,15 +538,18 @@ open class BitmovinYospacePlayer(
                     advert?.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
-            val companionAds = advert?.companionCreatives?.map {
-                val resource = it.getResource(Resource.ResourceType.HTML)
-                    ?: it.getResource(Resource.ResourceType.IFRAME)
-                    ?: it.getResource(Resource.ResourceType.STATIC)
+            val companionAds = advert?.companionCreatives?.map { creative ->
+                val resource = creative.getResource(ResourceType.HTML)?.let {
+                    CompanionAdResource(it.stringData, CompanionAdType.HTML)
+                } ?: creative.getResource(ResourceType.STATIC)?.let {
+                    CompanionAdResource(it.url, CompanionAdType.STATIC)
+                }
                 CompanionAd(
-                    it.adSlotId,
-                    it.width,
-                    it.height,
-                    resource.url
+                    creative.adSlotId,
+                    creative.width,
+                    creative.height,
+                    creative.videoClicks.clickThroughUrl,
+                    resource
                 )
             }.orEmpty()
 

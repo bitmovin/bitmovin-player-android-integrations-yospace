@@ -21,6 +21,8 @@ import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
+import com.yospace.android.hls.analytic.advert.Resource
+import com.yospace.android.hls.analytic.advert.Resource.*
 import com.yospace.android.xml.VastPayload
 import com.yospace.android.xml.VmapPayload
 import com.yospace.hls.TimedMetadata
@@ -356,7 +358,9 @@ open class BitmovinYospacePlayer(
         super.setAdViewGroup(adViewGroup)
     }
 
-    fun clickThroughPressed() = yospaceSession?.onLinearClickThrough()
+    fun linearClickThroughPressed() = yospaceSession?.onLinearClickThrough()
+
+    fun companionClickThroughPressed(identifier: String) = yospaceSession?.onCompanionClickThrough(identifier)
 
     ///////////////////////////////////////////////////////////////
     // YoSpace session
@@ -495,7 +499,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onAdvertStart")
 
             // Render TrueX ad
-            if (advert?.isTruex() == true) {
+            if (advert?.hasLinearInteractiveUnit() == true) {
                 truexRenderer?.let {
                     BitLog.d("TrueX ad found: $advert")
 
@@ -534,16 +538,33 @@ open class BitmovinYospacePlayer(
                     advert?.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
+            val companionAds = advert?.companionCreatives?.map { creative ->
+                val resource = creative.getResource(ResourceType.HTML)?.let {
+                    CompanionAdResource(it.stringData, CompanionAdType.HTML)
+                } ?: creative.getResource(ResourceType.STATIC)?.let {
+                    CompanionAdResource(it.url, CompanionAdType.STATIC)
+                }
+                CompanionAd(
+                    creative.adSlotId,
+                    creative.width,
+                    creative.height,
+                    creative.videoClicks.clickThroughUrl,
+                    resource
+                )
+            }.orEmpty()
+
             // Notify listeners of AS event
             handler.post {
-                yospaceEventEmitter.emit(YospaceAdStartedEvent(
-                    clickThroughUrl = advert?.adClickThroughUrl().orEmpty(),
-                    indexInQueue = advert?.sequence ?: 0,
-                    duration = advert?.duration?.div(1000.0) ?: 0.0,
-                    timeOffset = advert?.startMillis?.div(1000.0) ?: 0.0,
-                    isTruex = advert?.isTruex() ?: false,
-                    ad = activeAd
-                ))
+                yospaceEventEmitter.emit(
+                    YospaceAdStartedEvent(
+                        clickThroughUrl = advert?.adClickThroughUrl().orEmpty(),
+                        indexInQueue = advert?.sequence ?: 0,
+                        duration = advert?.duration?.div(1000.0) ?: 0.0,
+                        timeOffset = advert?.startMillis?.div(1000.0) ?: 0.0,
+                        ad = activeAd,
+                        companionAds = companionAds
+                    )
+                )
             }
         }
 

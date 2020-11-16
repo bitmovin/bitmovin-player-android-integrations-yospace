@@ -8,8 +8,6 @@ fun YsAd.adClickThroughUrl(): String = linearCreative?.videoClicks?.clickThrough
 
 fun YsAd.adMimeType(): String = linearCreative?.interactiveUnit?.mimeType ?: ""
 
-fun YsAd.isTruex(): Boolean = adSystem?.adSystemType == "trueX"
-
 fun List<YsAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
     var adAbsoluteStart = adBreakAbsoluteStart
     return map {
@@ -21,9 +19,9 @@ fun List<YsAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double)
             adAbsoluteStart + it.duration / 1000.0,
             it.sequence,
             it.hasLinearInteractiveUnit(),
-            it.isTruex(),
+            it.hasLinearInteractiveUnit(),
             it.extensions,
-            !it.isTruex(),
+            !it.hasLinearInteractiveUnit(),
             it.adClickThroughUrl()
         )
         adAbsoluteStart += it.duration / 1000.0

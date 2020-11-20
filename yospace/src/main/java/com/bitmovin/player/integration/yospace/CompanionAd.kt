@@ -11,6 +11,7 @@ data class CompanionAdResource(
 
 data class CompanionAd(
     val id: String?,
+    val adSlotId: String?,
     val width: Int,
     val height: Int,
     val clickThroughUrl: String?,

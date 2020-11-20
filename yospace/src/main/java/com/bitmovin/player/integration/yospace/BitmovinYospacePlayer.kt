@@ -358,9 +358,11 @@ open class BitmovinYospacePlayer(
         super.setAdViewGroup(adViewGroup)
     }
 
-    fun linearClickThroughPressed() = yospaceSession?.onLinearClickThrough()
+    fun onLinearClickThrough() = yospaceSession?.onLinearClickThrough()
 
-    fun companionClickThroughPressed(identifier: String) = yospaceSession?.onCompanionClickThrough(identifier)
+    fun onCompanionClickThrough(companionId: String) = yospaceSession?.onCompanionClickThrough(companionId)
+
+    fun fireCompanionEvent(eventName: String, companionId: String) = yospaceSession?.onCompanionEvent(eventName, companionId)
 
     ///////////////////////////////////////////////////////////////
     // YoSpace session
@@ -545,6 +547,7 @@ open class BitmovinYospacePlayer(
                     CompanionAdResource(it.url, CompanionAdType.STATIC)
                 }
                 CompanionAd(
+                    creative.companionIdentifier,
                     creative.adSlotId,
                     creative.width,
                     creative.height,

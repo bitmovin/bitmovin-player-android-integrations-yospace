@@ -4,10 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.15.3]
+
+### Changed
+- Fix typo in `onCompanionRendered`
+
 ## [1.15.2]
 
 ### Changed
-- `fireCompanionEvent` to `onCompanionRendered`
+- `fireCompanionEvent` to `onCompanionRenderd`
 
 ## [1.15.1]
 

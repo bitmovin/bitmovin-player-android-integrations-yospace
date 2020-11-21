@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.15.1]
+## [1.15.2]
+
+### Changed
+- `fireCompanionEvent` to `onCompanionRendered`
+
+## [1.15.1]
 
 ### Added
 - `fireCompanionEvent` API to send companion tracking events

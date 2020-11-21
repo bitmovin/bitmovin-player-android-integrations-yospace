@@ -362,7 +362,7 @@ open class BitmovinYospacePlayer(
 
     fun onCompanionClickThrough(companionId: String) = yospaceSession?.onCompanionClickThrough(companionId)
 
-    fun onCompanionRenderd(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
+    fun onCompanionRendered(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
 
     ///////////////////////////////////////////////////////////////
     // YoSpace session

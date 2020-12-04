@@ -7,94 +7,88 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.15.3]
 
 ### Changed
-- Fix typo in `onCompanionRendered`
-
-## [1.15.2]
-
-### Changed
-- `fireCompanionEvent` to `onCompanionRenderd`
+- `fireCompanionEvent()` in `BitmovinYospacePlayer` to `onCompanionRendered()`
 
 ## [1.15.1]
 
 ### Added
-- `fireCompanionEvent` API to send companion tracking events
-- `id` to `CompanionAd`
+- `fireCompanionEvent()` to `BitmovinYospacePlayer`, which sends companion tracking events
+- `id` property to `CompanionAd`
 
 ## [1.15.0]
 
 ### Added
-- Companion ads to `AdStartedEvent`
+- Creative companion ad list `AdStartedEvent`
 
 ### Removed
-- Duplicate `truexAd` property from `AdStartedEvent`
+- Duplicate `truexAd` in from `AdStartedEvent`
 
 ## [1.14.0]
-- Bitmovin Player version to 2.55.0+jason
-    - Add `startTime` to metadata events
+- Bitmovin player to `2.55.0+jason`
 
 ## [1.13.0]
-- Bitmovin Player version to 2.53.0+jason
+- Bitmovin player to `2.53.0+jason`
 
 ## [1.12.0]
 
 ### Changed
-- Bitmovin Player version to 2.52.0+jason
+- Bitmovin player to `2.52.0+jason`
 
 ## [1.11.0]
 
 ### Changed
-- Bitmovin Player version to 2.51.0+jason
+- Bitmovin player to `2.51.0+jason`
 
 ## [1.10.0]
 
 ### Changed
-- Bitmovin Player version to 2.50.0+jason
+- Bitmovin player to `2.50.0+jason`
 
 ## [1.9.0]
 
 ### Changed
-- Bitmovin Player version to 2.49.0+jason
+- Bitmovin player to `2.49.0+jason`
 
 ## [1.8.0]
 
 ### Changed
-- Bitmovin Player version to 2.48.0+jason
+- Bitmovin player to `2.48.0+jason`
 
 ## [1.7.0]
 
 ### Changed
-- Bitmovin Player version to 2.47.0+jason
+- Bitmovin player to `2.47.0+jason`
 
 ## [1.6.0]
 
 ### Added
-- Exposed AdQuartile event
+- Emit `AdQuartileEvent`
 
 ### Fixed
-- Player pausing indefinitely when TruexConfiguration is null and a TrueX ad is found
+- Player pausing indefinitely when `TruexConfiguration` is null and a TrueX ad is found
 
 ## [1.5.0]
 
 ### Changed
-- Bitmovin Player version to 2.46.0+jason
+- Bitmovin player to `2.46.0+jason`
 
 ## [1.4.0]
 
 ### Added
-- Ad VAST extensions property
+- Ad VAST extensions property to `Ad`
 
 ## [1.3.0]
 
 ### Added
-- AdBreak position property (pre/mid/post roll or unknown)
+- `position` property (pre/mid/post roll or unknown) to `AdBreak`
 
 ### Changed
-- Bitmovin Player version to 2.45.0+jason
+- Bitmovin player `2.45.0+jason`
 
 ## [1.2.2]
 
 ### Changed
-- Bitmovin Player version to 2.44.0
+- Bitmovin player to `2.44.0`
 
 ## [1.2.1]
 
@@ -104,7 +98,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.2.0]
 
 ### Changed
-- Bitmovin Player version to 2.43.0
+- Bitmovin player to `2.43.0`
 
 ## [1.1.5]
 
@@ -119,22 +113,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - TrueX midrolls that meet ad free conditions now yield an ad free experience for current ad break only
 
 ### Fixed
-- Pause and mute suppressed for non-YoSpace content
+- Pause and mute suppressed for non-Yospace content
 
 ## [1.1.3]
 
 ### Changed
-- Bitmovin Player version to 2.41.2
+- Bitmovin player to `2.41.2`
 
 ### Fixed
-- Incorrect Ad id for timeline ads
+- Incorrect `Ad` id for timeline ads
 
 ## [1.1.2]
 
 ### Fixed
-- BitmovinYospacePlayerPolicy not being respected
-
-## [1.1.1]
-
-### Changed
-- Remaining classes to Kotlin
+- `BitmovinYospacePlayerPolicy` not being respected

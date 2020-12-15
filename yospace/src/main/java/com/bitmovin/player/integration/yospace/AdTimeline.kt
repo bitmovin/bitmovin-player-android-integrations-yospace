@@ -1,11 +1,6 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.integration.yospace.util.toAdBreaks
-import com.yospace.android.hls.analytic.advert.AdBreak as YsAdBreak
-
-class AdTimeline(ysAdBreaks: List<YsAdBreak>) {
-
-    val adBreaks: List<AdBreak> = ysAdBreaks.toAdBreaks()
+class AdTimeline(val adBreaks: List<AdBreak>) {
 
     override fun toString(): String =
         "${adBreaks.size} ad breaks: ${adBreaks.joinToString { "[${it.relativeStart} - ${it.duration}]" }}"

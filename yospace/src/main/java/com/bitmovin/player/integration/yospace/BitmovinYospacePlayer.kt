@@ -101,7 +101,8 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionNonLinear)?.let {
-                adTimeline = AdTimeline(it.adBreaks)
+                val adBreaks = it.adBreaks.toAdBreaks()
+                adTimeline = AdTimeline(adBreaks)
                 BitLog.d("Ad breaks: ${it.adBreaks}")
                 BitLog.d(adTimeline.toString())
             }

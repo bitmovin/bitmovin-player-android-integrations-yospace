@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `nextAdBreak()` to `AdTimeline`
 - `previousAdBreak()` to `AdTimeline`
 
+### Changed
+- Bitmovin player to `2.58.0+jason`
+
 ## [1.15.3]
 
 ### Changed

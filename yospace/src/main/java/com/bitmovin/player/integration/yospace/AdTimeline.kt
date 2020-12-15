@@ -2,8 +2,7 @@ package com.bitmovin.player.integration.yospace
 
 class AdTimeline(val adBreaks: List<AdBreak>) {
 
-    override fun toString(): String =
-        "${adBreaks.size} ad breaks: ${adBreaks.joinToString { "[${it.relativeStart} - ${it.duration}]" }}"
+    override fun toString() = "${adBreaks.size} ad breaks: ${adBreaks.joinToString { "[${it.relativeStart} - ${it.duration}]" }}"
 
     /**
      * Returns the current ad break the player is in
@@ -11,8 +10,28 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      * @param time - absolute time of the player
      * @return current ad break
      */
-    fun currentAdBreak(time: Double): AdBreak? =
-        adBreaks.find { it.absoluteStart < time && it.absoluteStart + it.duration > time }
+    fun currentAdBreak(time: Double) = adBreaks
+        .find { it.absoluteStart <= time && it.absoluteStart + it.duration >= time }
+
+    /**
+     * Returns the next ad break in the timeline
+     *
+     * @param time - absolute time of the player
+     * @return next ad break
+     */
+    fun nextAdBreak(time: Double) = adBreaks
+        .filter { it.relativeStart > time }
+        .minBy { it.relativeStart }
+
+    /**
+     * Returns the previous ad break in the timeline
+     *
+     * @param time - absolute time of the player
+     * @return previous ad break
+     */
+    fun previousAdBreak(time: Double) = adBreaks
+        .filter { it.relativeStart < time }
+        .maxBy { it.relativeStart }
 
     /**
      * Converts the time from absolute to relative
@@ -23,7 +42,8 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
     fun absoluteToRelative(time: Double): Double {
         val currentAdBreak = currentAdBreak(time)
         val passedAdBreakDurations = totalPassedAdBreakDurations(time)
-        return currentAdBreak?.let { it.absoluteStart - passedAdBreakDurations } ?: time - passedAdBreakDurations
+        return currentAdBreak?.let { it.absoluteStart - passedAdBreakDurations }
+            ?: time - passedAdBreakDurations
     }
 
     /**
@@ -32,8 +52,9 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      * @param time - current relative time
      * @return
      */
-    fun relativeToAbsolute(time: Double): Double =
-        time + adBreaks.filter { it.relativeStart < time }.sumByDouble { it.duration }
+    fun relativeToAbsolute(time: Double): Double = time + adBreaks
+        .filter { it.relativeStart < time }
+        .sumByDouble { it.duration }
 
     /**
      * Returns the sum of all of the ad break durations
@@ -48,6 +69,8 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      * @param time - current absolute time
      * @return total ad break durations
      */
-    fun totalPassedAdBreakDurations(time: Double) = adBreaks.filter { it.absoluteEnd < time }.sumByDouble { it.duration }
+    fun totalPassedAdBreakDurations(time: Double) = adBreaks
+        .filter { it.absoluteEnd < time }
+        .sumByDouble { it.duration }
 
 }

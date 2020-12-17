@@ -21,7 +21,6 @@ import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert
-import com.yospace.android.hls.analytic.advert.Resource
 import com.yospace.android.hls.analytic.advert.Resource.*
 import com.yospace.android.xml.VastPayload
 import com.yospace.android.xml.VmapPayload
@@ -56,7 +55,7 @@ open class BitmovinYospacePlayer(
     private val timedMetadataEvents: MutableList<TimedMetadata> = mutableListOf()
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfiguration? = null
-    private var truexRenderer: BitmovinTruexRenderer? = null
+    private var truexRenderer: BitmovinTruexAdRenderer? = null
 
     var adTimeline: AdTimeline? = null
         private set
@@ -203,7 +202,7 @@ open class BitmovinYospacePlayer(
         BitLog.d("Load YoSpace Source Configuration")
 
         loadState = LoadState.LOADING
-        truexRenderer = truexConfig?.let { BitmovinTruexRenderer(context, it, truexRendererListener) }
+        truexRenderer = truexConfig?.let { BitmovinTruexAdRenderer(context, it, truexAdRendererListener) }
         this.yospaceSourceConfig = yospaceSourceConfig
         this.sourceConfig = sourceConfig
 
@@ -433,9 +432,9 @@ open class BitmovinYospacePlayer(
     // TrueX
     ///////////////////////////////////////////////////////////////
 
-    private val truexRendererListener: TruexAdRendererEventListener = object : TruexAdRendererEventListener {
+    private val truexAdRendererListener = object : BitmovinTruexAdRendererListener {
 
-        override fun onSkipTruexAd() {
+        override fun onAdCompleted() {
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
@@ -449,7 +448,7 @@ open class BitmovinYospacePlayer(
             play()
         }
 
-        override fun onSkipAdBreak() {
+        override fun onAdFree() {
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
@@ -468,6 +467,7 @@ open class BitmovinYospacePlayer(
             yospaceEventEmitter.emit(TruexAdFreeEvent())
         }
     }
+
 
     ///////////////////////////////////////////////////////////////
     // YoSpace analytics

@@ -1,61 +1,47 @@
 package com.bitmovin.player.integration.yospace
 
 import android.content.Context
+import com.bitmovin.player.integration.yospace.AdBreakPosition.*
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
-import com.bitmovin.player.integration.yospace.util.*
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
 import com.yospace.android.hls.analytic.advert.Advert
 import com.yospace.android.hls.analytic.advert.InteractiveUnit
-import org.json.JSONException
 import org.json.JSONObject
 
-class BitmovinTruexRenderer(private val context: Context, private val configuration: TruexConfiguration, var eventListener: TruexAdRendererEventListener? = null) {
+class BitmovinTruexAdRenderer(
+    private val context: Context,
+    private val configuration: TruexConfiguration,
+    var listener: BitmovinTruexAdRendererListener? = null
+) {
 
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
-    private var adBreakPosition: AdBreakPosition = AdBreakPosition.PREROLL
+    private var adBreakPosition: AdBreakPosition = PREROLL
     private var isAdFree: Boolean = false
     private var isSessionAdFree: Boolean = false
 
     fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
         this.adBreakPosition = adBreakPosition
-        interactiveUnit = ad.linearCreative?.interactiveUnit?.apply {
-            let {
-                BitLog.d("Rendering TrueX ad: $source")
-                try {
-                    val adParams = JSONObject(adParameters).apply {
-                        putOpt("user_id", configuration.userId)
-                        putOpt("vast_config_url", configuration.vastConfigUrl)
-                    }
-                    renderer = TruexAdRenderer(context).apply {
-                        addEventListeners(this)
-                        init(source, adParams, adBreakPosition.value)
-                        start(configuration.viewGroup)
-                    }
-                    BitLog.d("TrueX rendering completed")
-                } catch (e: JSONException) {
-                    BitLog.e("TrueX rendering failed $e")
+        this.interactiveUnit = ad.linearCreative?.interactiveUnit
 
-                    // Treat as normal error
-                    handleError()
-                }
+        interactiveUnit?.let { interactiveUnit ->
+            BitLog.d("Rendering ad: ${interactiveUnit.source}")
+            val adParams = JSONObject(interactiveUnit.adParameters).apply {
+                putOpt("user_id", configuration.userId)
+                putOpt("vast_config_url", configuration.vastConfigUrl)
+            }
+            renderer = TruexAdRenderer(context).apply {
+                addEventListeners(this)
+                init(interactiveUnit.source, adParams, adBreakPosition.value)
+                start(configuration.viewGroup)
             }
         }
     }
 
-    fun stopRenderer() {
-        // Reset state
-        renderer?.stop()
-        interactiveUnit = null
-        adBreakPosition = AdBreakPosition.PREROLL
-        isAdFree = false
-        isSessionAdFree = false
-    }
-
     private fun addEventListeners(renderer: TruexAdRenderer) = with(renderer) {
         addEventListener(TruexAdRendererConstants.AD_STARTED) {
-            BitLog.d("TrueX ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
+            BitLog.d("Ad started: ${it?.get("campaignName")?.toString().orEmpty()}")
 
             // Reset ad free state
             isAdFree = false
@@ -67,8 +53,7 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         }
 
         addEventListener(TruexAdRendererConstants.AD_COMPLETED) {
-            BitLog.d("TrueX ad completed with ${it?.get("timeSpentOnEngagement")
-                ?: "0"} seconds spent on engagement")
+            BitLog.d("Ad completed with ${it?.get("timeSpentOnEngagement") ?: "0"} seconds spent on engagement")
 
             // Notify YoSpace for ad tracking
             interactiveUnit?.notifyAdVideoComplete()
@@ -78,9 +63,9 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
             //   1. Pre-roll ad free has been satisfied
             //   2. Mid-roll ad free has been satisfied
             if (isSessionAdFree || isAdFree) {
-                eventListener?.onSkipAdBreak()
+                listener?.onAdFree()
             } else {
-                eventListener?.onSkipTruexAd()
+                listener?.onAdCompleted()
             }
 
             // Reset state
@@ -88,60 +73,58 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         }
 
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
-            BitLog.d("TrueX ad free")
+            BitLog.d("Ad free")
 
             isAdFree = true
 
             // We are session ad free if ad free is fired on a pre-roll
             if (!isSessionAdFree) {
-                isSessionAdFree = (adBreakPosition == AdBreakPosition.PREROLL)
+                isSessionAdFree = (adBreakPosition == PREROLL)
                 if (isSessionAdFree) {
-                    eventListener?.onSessionAdFree()
+                    listener?.onSessionAdFree()
                 }
             }
         }
 
         addEventListener(TruexAdRendererConstants.OPT_IN) {
-            BitLog.d("TrueX user opt in: ${it?.get("campaignName")?.toString().orEmpty()}, creativeId=${it?.get("creativeID")}")
+            BitLog.d("User opt in: ${it?.get("campaignName")?.toString().orEmpty()}, creativeId=${it?.get("creativeID")}")
         }
 
         addEventListener(TruexAdRendererConstants.OPT_OUT) {
-            BitLog.d("TrueX user opt out")
+            BitLog.d("User opt out")
         }
 
         addEventListener(TruexAdRendererConstants.AD_ERROR) {
-            BitLog.d("TrueX ad error: ${it?.get("message")?.toString().orEmpty()}")
+            BitLog.d("Ad error: ${it?.get("message")?.toString().orEmpty()}")
             handleError()
         }
 
         addEventListener(TruexAdRendererConstants.NO_ADS_AVAILABLE) {
-            BitLog.d("No TrueX ads available")
+            BitLog.d("No ads available")
             handleError()
         }
 
         addEventListener(TruexAdRendererConstants.SKIP_CARD_SHOWN) {
-            BitLog.d("TrueX skip card shown")
+            BitLog.d("Skip card shown")
         }
 
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
-            BitLog.d("TrueX user cancelled")
+            BitLog.d("Ad cancelled")
         }
 
         addEventListener(TruexAdRendererConstants.POPUP_WEBSITE) {
-            BitLog.d("TrueX popup website")
+            BitLog.d("Popup website")
         }
     }
 
     private fun handleError() {
-        BitLog.d("Handling TrueX error...")
-
         // Treat error state like complete state
         if (isSessionAdFree) {
             // Skip ad break as pre-roll ad free has been satisfied
-            eventListener?.onSkipAdBreak()
+            listener?.onAdFree()
         } else {
             // Skip TrueX ad filler and show linear ads
-            eventListener?.onSkipTruexAd()
+            listener?.onAdCompleted()
         }
 
         // Reset state
@@ -152,4 +135,27 @@ class BitmovinTruexRenderer(private val context: Context, private val configurat
         renderer?.stop()
         interactiveUnit = null
     }
+
+    fun stopRenderer() {
+        // Reset state
+        renderer?.stop()
+        interactiveUnit = null
+        adBreakPosition = PREROLL
+        isAdFree = false
+        isSessionAdFree = false
+    }
 }
+
+///////////////////////////////////////////////////////////////////////////
+// Extensions
+///////////////////////////////////////////////////////////////////////////
+
+fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
+
+fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
+
+fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
+
+fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
+
+fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")

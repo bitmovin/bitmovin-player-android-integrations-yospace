@@ -7,6 +7,7 @@ import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
 import com.yospace.android.hls.analytic.advert.Advert
 import com.yospace.android.hls.analytic.advert.InteractiveUnit
+import org.json.JSONException
 import org.json.JSONObject
 
 interface BitmovinTruexAdRendererListener {
@@ -33,14 +34,21 @@ class BitmovinTruexAdRenderer(
 
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")
-            val adParams = JSONObject(interactiveUnit.adParameters).apply {
-                putOpt("user_id", configuration.userId)
-                putOpt("vast_config_url", configuration.vastConfigUrl)
-            }
-            renderer = TruexAdRenderer(context).apply {
-                addEventListeners(this)
-                init(interactiveUnit.source, adParams, adBreakPosition.value)
-                start(configuration.viewGroup)
+            try {
+                val adParams = JSONObject(interactiveUnit.adParameters).apply {
+                    putOpt("user_id", configuration.userId)
+                    putOpt("vast_config_url", configuration.vastConfigUrl)
+                }
+                renderer = TruexAdRenderer(context).apply {
+                    addEventListeners(this)
+                    init(interactiveUnit.source, adParams, adBreakPosition.value)
+                    start(configuration.viewGroup)
+                }
+            } catch (e: JSONException) {
+                BitLog.e("TrueX rendering failed $e")
+
+                // Treat as normal error
+                handleError()
             }
         }
     }

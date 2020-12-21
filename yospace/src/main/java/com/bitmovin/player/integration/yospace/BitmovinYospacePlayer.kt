@@ -438,10 +438,13 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace analytics unsuppressed")
             yospaceSession?.suppressAnalytics(false)
 
-            // Seek to end of TrueX ad filler
             activeAd?.let {
-                BitLog.d("Skipping TrueX filler")
-                forceSeek(it.absoluteEnd)
+                // Only seek over filler if there is at least one second remaining
+                // This prevents the player from getting stuck indefinitely in filler
+                if (it.absoluteEnd - currentTimeWithAds() >= 1) {
+                    BitLog.d("Skipping TrueX filler")
+                    forceSeek(it.absoluteEnd)
+                }
             }
 
             BitLog.d("Resuming player")

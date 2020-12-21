@@ -156,12 +156,12 @@ class BitmovinTruexAdRenderer(
 // Extensions
 ///////////////////////////////////////////////////////////////////////////
 
-fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
+private fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
 
-fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
+private fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
 
-fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
+private fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
 
-fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
+private fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
 
-fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")
+private fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")

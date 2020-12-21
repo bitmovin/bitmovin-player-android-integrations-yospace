@@ -45,7 +45,7 @@ class BitmovinTruexAdRenderer(
                     start(configuration.viewGroup)
                 }
             } catch (e: JSONException) {
-                BitLog.e("TrueX rendering failed $e")
+                BitLog.e("Failed to render ad: $e")
 
                 // Treat as normal error
                 handleError()

@@ -24,9 +24,9 @@ class BitmovinTruexAdRenderer(
     var listener: BitmovinTruexAdRendererListener? = null
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
-    private var adBreakPosition: AdBreakPosition = PREROLL
-    private var isAdFree: Boolean = false
-    private var isSessionAdFree: Boolean = false
+    private var adBreakPosition = PREROLL
+    private var isAdFree = false
+    private var isSessionAdFree = false
 
     fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
         this.adBreakPosition = adBreakPosition

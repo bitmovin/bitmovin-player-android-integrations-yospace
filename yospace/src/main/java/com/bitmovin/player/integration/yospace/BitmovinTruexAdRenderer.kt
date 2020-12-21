@@ -9,12 +9,18 @@ import com.yospace.android.hls.analytic.advert.Advert
 import com.yospace.android.hls.analytic.advert.InteractiveUnit
 import org.json.JSONObject
 
+interface BitmovinTruexAdRendererListener {
+    fun onAdCompleted()
+    fun onAdFree()
+    fun onSessionAdFree()
+}
+
 class BitmovinTruexAdRenderer(
     private val context: Context,
-    private val configuration: TruexConfiguration,
-    var listener: BitmovinTruexAdRendererListener? = null
+    private val configuration: TruexConfiguration
 ) {
 
+    var listener: BitmovinTruexAdRendererListener? = null
     private var renderer: TruexAdRenderer? = null
     private var interactiveUnit: InteractiveUnit? = null
     private var adBreakPosition: AdBreakPosition = PREROLL

@@ -202,7 +202,7 @@ open class BitmovinYospacePlayer(
         BitLog.d("Load YoSpace Source Configuration")
 
         loadState = LoadState.LOADING
-        truexRenderer = truexConfig?.let { BitmovinTruexAdRenderer(context, it, truexAdRendererListener) }
+        truexRenderer = truexConfig?.let { BitmovinTruexAdRenderer(context, it).apply { listener = truexAdRendererListener } }
         this.yospaceSourceConfig = yospaceSourceConfig
         this.sourceConfig = sourceConfig
 

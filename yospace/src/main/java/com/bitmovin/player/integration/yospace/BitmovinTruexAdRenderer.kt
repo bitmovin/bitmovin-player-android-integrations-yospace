@@ -75,7 +75,7 @@ class BitmovinTruexAdRenderer(
             }
 
             // Reset state
-            finishRendering()
+            finish()
         }
 
         addEventListener(TruexAdRendererConstants.AD_FREE_POD) {
@@ -134,15 +134,15 @@ class BitmovinTruexAdRenderer(
         }
 
         // Reset state
-        finishRendering()
+        finish()
     }
 
-    private fun finishRendering() {
+    private fun finish() {
         renderer?.stop()
         interactiveUnit = null
     }
 
-    fun stopRenderer() {
+    fun stop() {
         // Reset state
         renderer?.stop()
         interactiveUnit = null

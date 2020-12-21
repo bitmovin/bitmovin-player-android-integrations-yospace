@@ -252,7 +252,7 @@ open class BitmovinYospacePlayer(
 
     override fun unload() {
         loadState = LoadState.UNLOADING
-        truexRenderer?.stopRenderer()
+        truexRenderer?.stop()
         super.unload()
     }
 
@@ -424,7 +424,7 @@ open class BitmovinYospacePlayer(
         activeAd = null
         activeAdBreak = null
         adTimeline = null
-        truexRenderer?.stopRenderer()
+        truexRenderer?.stop()
         timedMetadataEvents.clear()
     }
 

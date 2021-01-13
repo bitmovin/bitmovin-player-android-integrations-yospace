@@ -23,5 +23,5 @@ data class AdBreak(
         "position=${position.name}, " +
         "replaceContentDuration=$replaceContentDuration, " +
         "scheduleTime=$scheduleTime, " +
-        "ads=${ads.size} ads"
+        "ads=${ads.size}"
 }

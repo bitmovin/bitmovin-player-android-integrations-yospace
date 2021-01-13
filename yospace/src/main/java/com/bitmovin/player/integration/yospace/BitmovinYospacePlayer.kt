@@ -267,7 +267,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionNonLinear)?.let {
-                val adBreaks = it.adBreaks.toBitmovinAdBreaks()
+                val adBreaks = it.adBreaks.toAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
                 BitLog.d("Ad breaks: ${it.adBreaks}")
                 BitLog.d(adTimeline.toString())
@@ -490,7 +490,7 @@ open class BitmovinYospacePlayer(
                     ?: adBreakAbsoluteStart
             }
 
-            activeAdBreak = adBreak?.toBitmovinAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
+            activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = AdBreakStartedEvent(activeAdBreak)
@@ -537,7 +537,7 @@ open class BitmovinYospacePlayer(
                             ?: adAbsoluteStart
                     }
 
-                    ad?.toBitmovinAd(adAbsoluteStart, adRelativeStart)
+                    ad?.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
             val companionAds = ad?.companionCreatives?.map { creative ->
@@ -623,37 +623,37 @@ open class BitmovinYospacePlayer(
     // AdBreak Transformation
     ///////////////////////////////////////////////////////////////////////////
 
-    fun List<YospaceAdBreak>.toBitmovinAdBreaks(): List<AdBreak> {
+    fun List<YospaceAdBreak>.toAdBreaks(): List<AdBreak> {
         var adBreakDurations = 0.0
         return map {
-            it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0)
+            it.toAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0)
                 .apply { adBreakDurations += it.duration }
         }
     }
 
-    fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
+    fun YospaceAdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
         breakId ?: "unknown",
         absoluteStart,
         relativeStart,
         duration / 1000.0,
         absoluteStart + duration / 1000.0,
         AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN,
-        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList()
+        ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
     )
 
     ///////////////////////////////////////////////////////////////////////////
     // Ad Transformation
     ///////////////////////////////////////////////////////////////////////////
 
-    fun List<YospaceAd>.toBitmovinAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
+    fun List<YospaceAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
         var absoluteStart = adBreakAbsoluteStart
         return map {
-            it.toBitmovinAd(absoluteStart, adBreakRelativeStart)
+            it.toAd(absoluteStart, adBreakRelativeStart)
                 .apply { absoluteStart += it.duration / 1000.0 }
         }
     }
 
-    fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(
+    fun YospaceAd.toAd(absoluteStart: Double, relativeStart: Double) = Ad(
         identifier,
         linearCreative?.id,
         sequence,

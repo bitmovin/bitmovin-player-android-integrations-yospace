@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `mediaFileUrl` property from `Ad` now returns the asset URI
  
  ### Removed
- - `isTruex` property from `Ad` (use `hasInteractiveUnit)
+ - `isTruex` property from `Ad` (use `hasInteractiveUnit`)
  
 ### Fixed
 - Player stuck in TrueX filler asset

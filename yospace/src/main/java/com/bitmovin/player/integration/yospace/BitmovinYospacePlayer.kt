@@ -76,126 +76,6 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // Player Listeners
-    ///////////////////////////////////////////////////////////////
-
-    private fun addEventListeners() {
-        super.addEventListener(OnPausedListener {
-            BitLog.d("Sending PAUSED event: $yospaceTime")
-            isLiveAdPaused = isLive && isAd
-            yospaceStateSource.notify(PlayerState(PlaybackState.PAUSED, yospaceTime, false))
-        })
-
-        super.addEventListener(OnPlayingListener {
-            BitLog.d("Sending PLAYING event: $yospaceTime")
-            yospaceStateSource.notify(PlayerState(PlaybackState.PLAYING, yospaceTime, false))
-            isPlayingEventSent = true
-        })
-
-        super.addEventListener(OnPlaybackFinishedListener {
-            BitLog.d("Sending STOPPED event: $yospaceTime")
-            yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
-        })
-
-        super.addEventListener(OnSourceLoadedListener {
-            BitLog.d("Sending INITIALISING event: $yospaceTime")
-            yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
-            (yospaceSession as? SessionNonLinear)?.let {
-                val adBreaks = it.adBreaks.toBitmovinAdBreaks()
-                adTimeline = AdTimeline(adBreaks)
-                BitLog.d("Ad breaks: ${it.adBreaks}")
-                BitLog.d(adTimeline.toString())
-            }
-        })
-
-        super.addEventListener(OnSourceUnloadedListener {
-            if (yospaceSessionStatus !== YospaceSesssionStatus.NOT_INITIALIZED) {
-                BitLog.d("Sending STOPPED event: $yospaceTime")
-                yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
-                resetYospaceSession()
-            }
-        })
-
-        super.addEventListener(OnStallEndedListener {
-            BitLog.d("Sending BUFFERING_END event: $yospaceTime")
-            yospaceStateSource.notify(PlayerState(PlaybackState.BUFFERING_END, yospaceTime, false))
-        })
-
-        super.addEventListener(OnStallStartedListener {
-            BitLog.d("Sending BUFFERING_START event: $yospaceTime")
-            yospaceStateSource.notify(PlayerState(PlaybackState.BUFFERING_START, yospaceTime, false))
-        })
-
-        super.addEventListener(OnMetadataListener { metadataEvent ->
-            if (yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
-                metadataEvent.createTimedMetadata()?.let {
-                    timedMetadataEvents.add(it)
-                    // Only send metadata events if play event has been sent
-                    if (isPlayingEventSent) {
-                        for (metadata in timedMetadataEvents) {
-                            BitLog.d("Sending METADATA event: $metadata")
-                            yospaceMetadataSource.notify(metadata)
-                        }
-                        timedMetadataEvents.clear()
-                    }
-                }
-            }
-        })
-
-        super.addEventListener(OnTimeChangedListener {
-            val timeChangedEvent = TimeChangedEvent(currentTime)
-            if (yospaceSession as? SessionLive != null) {
-                // Live session
-                val adSkippedEvent = AdSkippedEvent(activeAd)
-                handler.post {
-                    yospaceEventEmitter.emit(timeChangedEvent)
-                    if (isLiveAdPaused) {
-                        activeAdBreak?.let {
-                            // Send skip event if live window has moved beyond paused ad
-                            if (timeChangedEvent.time > it.absoluteEnd) {
-                                yospaceEventEmitter.emit(adSkippedEvent)
-                            }
-                        }
-                    }
-                    isLiveAdPaused = false
-                }
-            } else {
-                // Non-live session
-                yospaceStateSource.notify(PlayerState(PlaybackState.PLAYHEAD_UPDATE, yospaceTime, false))
-                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
-            }
-        })
-
-        super.addEventListener(OnFullscreenEnterListener {
-            yospaceSession?.onFullScreenModeChange(true)
-        })
-
-        super.addEventListener(OnFullscreenExitListener {
-            yospaceSession?.onFullScreenModeChange(false)
-        })
-
-        super.addEventListener(OnReadyListener {
-            yospaceSessionStatus = YospaceSesssionStatus.INITIALIZED
-        })
-    }
-
-    override fun addEventListener(listener: BitmovinEventListener<*>?) {
-        listener?.let {
-            yospaceEventEmitter.addEventListener(it)
-            if (it !is OnTimeChangedListener) {
-                super.addEventListener(it)
-            }
-        }
-    }
-
-    override fun removeEventListener(listener: BitmovinEventListener<*>?) {
-        listener?.let {
-            yospaceEventEmitter.removeEventListener(it)
-            super.removeEventListener(it)
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////
     // Playback
     ///////////////////////////////////////////////////////////////
 
@@ -362,7 +242,170 @@ open class BitmovinYospacePlayer(
     fun onCompanionRendered(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
 
     ///////////////////////////////////////////////////////////////
-    // Yospace session
+    // Player Event Listeners
+    ///////////////////////////////////////////////////////////////
+
+    private fun addEventListeners() {
+        super.addEventListener(OnPausedListener {
+            BitLog.d("Sending PAUSED event: $yospaceTime")
+            isLiveAdPaused = isLive && isAd
+            yospaceStateSource.notify(PlayerState(PlaybackState.PAUSED, yospaceTime, false))
+        })
+
+        super.addEventListener(OnPlayingListener {
+            BitLog.d("Sending PLAYING event: $yospaceTime")
+            yospaceStateSource.notify(PlayerState(PlaybackState.PLAYING, yospaceTime, false))
+            isPlayingEventSent = true
+        })
+
+        super.addEventListener(OnPlaybackFinishedListener {
+            BitLog.d("Sending STOPPED event: $yospaceTime")
+            yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
+        })
+
+        super.addEventListener(OnSourceLoadedListener {
+            BitLog.d("Sending INITIALISING event: $yospaceTime")
+            yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
+            (yospaceSession as? SessionNonLinear)?.let {
+                val adBreaks = it.adBreaks.toBitmovinAdBreaks()
+                adTimeline = AdTimeline(adBreaks)
+                BitLog.d("Ad breaks: ${it.adBreaks}")
+                BitLog.d(adTimeline.toString())
+            }
+        })
+
+        super.addEventListener(OnSourceUnloadedListener {
+            if (yospaceSessionStatus !== YospaceSesssionStatus.NOT_INITIALIZED) {
+                BitLog.d("Sending STOPPED event: $yospaceTime")
+                yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
+                resetYospaceSession()
+            }
+        })
+
+        super.addEventListener(OnStallEndedListener {
+            BitLog.d("Sending BUFFERING_END event: $yospaceTime")
+            yospaceStateSource.notify(PlayerState(PlaybackState.BUFFERING_END, yospaceTime, false))
+        })
+
+        super.addEventListener(OnStallStartedListener {
+            BitLog.d("Sending BUFFERING_START event: $yospaceTime")
+            yospaceStateSource.notify(PlayerState(PlaybackState.BUFFERING_START, yospaceTime, false))
+        })
+
+        super.addEventListener(OnMetadataListener { metadataEvent ->
+            if (yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
+                metadataEvent.createTimedMetadata()?.let {
+                    timedMetadataEvents.add(it)
+                    // Only send metadata events if play event has been sent
+                    if (isPlayingEventSent) {
+                        for (metadata in timedMetadataEvents) {
+                            BitLog.d("Sending METADATA event: $metadata")
+                            yospaceMetadataSource.notify(metadata)
+                        }
+                        timedMetadataEvents.clear()
+                    }
+                }
+            }
+        })
+
+        super.addEventListener(OnTimeChangedListener {
+            val timeChangedEvent = TimeChangedEvent(currentTime)
+            if (yospaceSession as? SessionLive != null) {
+                // Live session
+                val adSkippedEvent = AdSkippedEvent(activeAd)
+                handler.post {
+                    yospaceEventEmitter.emit(timeChangedEvent)
+                    if (isLiveAdPaused) {
+                        activeAdBreak?.let {
+                            // Send skip event if live window has moved beyond paused ad
+                            if (timeChangedEvent.time > it.absoluteEnd) {
+                                yospaceEventEmitter.emit(adSkippedEvent)
+                            }
+                        }
+                    }
+                    isLiveAdPaused = false
+                }
+            } else {
+                // Non-live session
+                yospaceStateSource.notify(PlayerState(PlaybackState.PLAYHEAD_UPDATE, yospaceTime, false))
+                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
+            }
+        })
+
+        super.addEventListener(OnFullscreenEnterListener {
+            yospaceSession?.onFullScreenModeChange(true)
+        })
+
+        super.addEventListener(OnFullscreenExitListener {
+            yospaceSession?.onFullScreenModeChange(false)
+        })
+
+        super.addEventListener(OnReadyListener {
+            yospaceSessionStatus = YospaceSesssionStatus.INITIALIZED
+        })
+    }
+
+    override fun addEventListener(listener: BitmovinEventListener<*>?) {
+        listener?.let {
+            yospaceEventEmitter.addEventListener(it)
+            if (it !is OnTimeChangedListener) {
+                super.addEventListener(it)
+            }
+        }
+    }
+
+    override fun removeEventListener(listener: BitmovinEventListener<*>?) {
+        listener?.let {
+            yospaceEventEmitter.removeEventListener(it)
+            super.removeEventListener(it)
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // TrueX
+    ///////////////////////////////////////////////////////////////
+
+    private val truexAdRendererListener = object : BitmovinTruexAdRendererListener {
+
+        override fun onAdCompleted() {
+            BitLog.d("YoSpace analytics unsuppressed")
+            yospaceSession?.suppressAnalytics(false)
+
+            activeAd?.let {
+                // Only seek over filler if there is at least one second remaining
+                // This prevents the player from getting stuck indefinitely in filler
+                if (it.absoluteEnd - currentTimeWithAds() >= 1) {
+                    BitLog.d("Skipping TrueX filler")
+                    forceSeek(it.absoluteEnd)
+                }
+            }
+
+            BitLog.d("Resuming player")
+            play()
+        }
+
+        override fun onAdFree() {
+            BitLog.d("YoSpace analytics unsuppressed")
+            yospaceSession?.suppressAnalytics(false)
+
+            // Seek to end of ad break
+            activeAdBreak?.let {
+                BitLog.d("Skipping ad break")
+                forceSeek(it.absoluteEnd + 0.5)
+            }
+
+            BitLog.d("Resuming player")
+            play()
+        }
+
+        override fun onSessionAdFree() {
+            BitLog.d("Session ad free")
+            yospaceEventEmitter.emit(TruexAdFreeEvent())
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // Yospace Session
     ///////////////////////////////////////////////////////////////
 
     private val sessionListener: YospaceEventListener<Session> = YospaceEventListener { event ->
@@ -424,90 +467,6 @@ open class BitmovinYospacePlayer(
         truexRenderer?.stop()
         timedMetadataEvents.clear()
     }
-
-    ///////////////////////////////////////////////////////////////
-    // TrueX
-    ///////////////////////////////////////////////////////////////
-
-    private val truexAdRendererListener = object : BitmovinTruexAdRendererListener {
-
-        override fun onAdCompleted() {
-            BitLog.d("YoSpace analytics unsuppressed")
-            yospaceSession?.suppressAnalytics(false)
-
-            activeAd?.let {
-                // Only seek over filler if there is at least one second remaining
-                // This prevents the player from getting stuck indefinitely in filler
-                if (it.absoluteEnd - currentTimeWithAds() >= 1) {
-                    BitLog.d("Skipping TrueX filler")
-                    forceSeek(it.absoluteEnd)
-                }
-            }
-
-            BitLog.d("Resuming player")
-            play()
-        }
-
-        override fun onAdFree() {
-            BitLog.d("YoSpace analytics unsuppressed")
-            yospaceSession?.suppressAnalytics(false)
-
-            // Seek to end of ad break
-            activeAdBreak?.let {
-                BitLog.d("Skipping ad break")
-                forceSeek(it.absoluteEnd + 0.5)
-            }
-
-            BitLog.d("Resuming player")
-            play()
-        }
-
-        override fun onSessionAdFree() {
-            BitLog.d("Session ad free")
-            yospaceEventEmitter.emit(TruexAdFreeEvent())
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // AdBreak Transformation
-    ///////////////////////////////////////////////////////////////////////////
-
-    fun List<YospaceAdBreak>.toBitmovinAdBreaks(): List<AdBreak> {
-        var adBreakDurations = 0.0
-        return map { it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0).apply { adBreakDurations += it.duration } }
-    }
-
-    fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        relativeStart = relativeStart,
-        absoluteStart = absoluteStart,
-        duration = duration / 1000.0,
-        absoluteEnd = absoluteStart + (duration / 1000.0),
-        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList(),
-        position = AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN
-    )
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Ad Transformation
-    ///////////////////////////////////////////////////////////////////////////
-
-    fun List<YospaceAd>.toBitmovinAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
-        var absoluteStart = adBreakAbsoluteStart
-        return map { it.toBitmovinAd(absoluteStart, adBreakRelativeStart).apply { absoluteStart += it.duration / 1000.0 } }
-    }
-
-    fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(
-        id = id,
-        relativeStart = relativeStart,
-        duration = duration / 1000.0,
-        absoluteStart = absoluteStart,
-        absoluteEnd = absoluteStart + (duration / 1000.0),
-        sequence = sequence,
-        hasInteractiveUnit = hasLinearInteractiveUnit(),
-        isTruex = hasLinearInteractiveUnit(),
-        extensions = extensions,
-        isLinear = !hasLinearInteractiveUnit(),
-        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty()
-    )
 
     ///////////////////////////////////////////////////////////////
     // Yospace Analytics
@@ -659,4 +618,45 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onVastReceived: " + vastPayload.raw)
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AdBreak Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAdBreak>.toBitmovinAdBreaks(): List<AdBreak> {
+        var adBreakDurations = 0.0
+        return map { it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0).apply { adBreakDurations += it.duration } }
+    }
+
+    fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
+        relativeStart = relativeStart,
+        absoluteStart = absoluteStart,
+        duration = duration / 1000.0,
+        absoluteEnd = absoluteStart + (duration / 1000.0),
+        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList(),
+        position = AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN
+    )
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Ad Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAd>.toBitmovinAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
+        var absoluteStart = adBreakAbsoluteStart
+        return map { it.toBitmovinAd(absoluteStart, adBreakRelativeStart).apply { absoluteStart += it.duration / 1000.0 } }
+    }
+
+    fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(
+        id = id,
+        relativeStart = relativeStart,
+        duration = duration / 1000.0,
+        absoluteStart = absoluteStart,
+        absoluteEnd = absoluteStart + (duration / 1000.0),
+        sequence = sequence,
+        hasInteractiveUnit = hasLinearInteractiveUnit(),
+        isTruex = hasLinearInteractiveUnit(),
+        extensions = extensions,
+        isLinear = !hasLinearInteractiveUnit(),
+        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty()
+    )
 }

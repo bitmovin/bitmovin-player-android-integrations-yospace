@@ -16,11 +16,12 @@ import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
+import com.yospace.android.hls.analytic.advert.AdBreak as YospaceAdBreak
 import com.bitmovin.player.integration.yospace.util.*
 import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
-import com.yospace.android.hls.analytic.advert.Advert
+import com.yospace.android.hls.analytic.advert.Advert as YospaceAd
 import com.yospace.android.hls.analytic.advert.Resource.*
 import com.yospace.android.xml.VastPayload
 import com.yospace.android.xml.VmapPayload
@@ -75,7 +76,7 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // Player event listeners
+    // Player Listeners
     ///////////////////////////////////////////////////////////////
 
     private fun addEventListeners() {
@@ -100,7 +101,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionNonLinear)?.let {
-                val adBreaks = it.adBreaks.toAdBreaks()
+                val adBreaks = it.adBreaks.toBitmovinAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
                 BitLog.d("Ad breaks: ${it.adBreaks}")
                 BitLog.d(adTimeline.toString())
@@ -269,10 +270,6 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    ///////////////////////////////////////////////////////////////
-    // Playback parameters
-    ///////////////////////////////////////////////////////////////
-
     override fun pause() {
         if (yospaceSession?.canPause() == true || yospaceSession == null) {
             super.pause()
@@ -365,7 +362,7 @@ open class BitmovinYospacePlayer(
     fun onCompanionRendered(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
 
     ///////////////////////////////////////////////////////////////
-    // YoSpace session
+    // Yospace session
     ///////////////////////////////////////////////////////////////
 
     private val sessionListener: YospaceEventListener<Session> = YospaceEventListener { event ->
@@ -471,14 +468,54 @@ open class BitmovinYospacePlayer(
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // AdBreak Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAdBreak>.toBitmovinAdBreaks(): List<AdBreak> {
+        var adBreakDurations = 0.0
+        return map { it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0).apply { adBreakDurations += it.duration } }
+    }
+
+    fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
+        relativeStart = relativeStart,
+        absoluteStart = absoluteStart,
+        duration = duration / 1000.0,
+        absoluteEnd = absoluteStart + (duration / 1000.0),
+        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList(),
+        position = AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN
+    )
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Ad Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAd>.toBitmovinAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
+        var absoluteStart = adBreakAbsoluteStart
+        return map { it.toBitmovinAd(absoluteStart, adBreakRelativeStart).apply { absoluteStart += it.duration / 1000.0 } }
+    }
+
+    fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(
+        id = id,
+        relativeStart = relativeStart,
+        duration = duration / 1000.0,
+        absoluteStart = absoluteStart,
+        absoluteEnd = absoluteStart + (duration / 1000.0),
+        sequence = sequence,
+        hasInteractiveUnit = hasLinearInteractiveUnit(),
+        isTruex = hasLinearInteractiveUnit(),
+        extensions = extensions,
+        isLinear = !hasLinearInteractiveUnit(),
+        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty()
+    )
 
     ///////////////////////////////////////////////////////////////
-    // YoSpace analytics
+    // Yospace Analytics
     ///////////////////////////////////////////////////////////////
 
     private val analyticEventListener: AnalyticEventListener = object : AnalyticEventListener {
 
-        override fun onAdvertBreakStart(adBreak: com.yospace.android.hls.analytic.advert.AdBreak?) {
+        override fun onAdvertBreakStart(adBreak: YospaceAdBreak?) {
             BitLog.d("YoSpace onAdvertBreakStart")
 
             val absoluteTime = currentTimeWithAds()
@@ -494,20 +531,20 @@ open class BitmovinYospacePlayer(
                     ?: adBreakAbsoluteStart
             }
 
-            activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
+            activeAdBreak = adBreak?.toBitmovinAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = AdBreakStartedEvent(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakStartedEvent) }
         }
 
-        override fun onAdvertStart(advert: Advert?) {
+        override fun onAdvertStart(ad: YospaceAd?) {
             BitLog.d("YoSpace onAdvertStart")
 
             // Render TrueX ad
-            if (advert?.hasLinearInteractiveUnit() == true) {
+            if (ad?.hasLinearInteractiveUnit() == true) {
                 truexRenderer?.let {
-                    BitLog.d("TrueX ad found: $advert")
+                    BitLog.d("TrueX ad found: $ad")
 
                     // Suppress analytics in order for YoSpace TrueX tracking to work
                     BitLog.d("YoSpace analytics suppressed")
@@ -516,7 +553,7 @@ open class BitmovinYospacePlayer(
                     super@BitmovinYospacePlayer.pause()
 
                     val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
-                    it.renderAd(advert, adBreakPosition)
+                    it.renderAd(ad, adBreakPosition)
                 }
             }
 
@@ -524,7 +561,7 @@ open class BitmovinYospacePlayer(
             activeAd = activeAdBreak
                 ?.ads
                 ?.filterIsInstance<Ad>()
-                ?.first { it.id == advert?.id }
+                ?.first { it.id == ad?.id }
 
                 // Else create ad manually
                 ?: run {
@@ -536,15 +573,15 @@ open class BitmovinYospacePlayer(
                         adAbsoluteStart = absoluteTime
                         adRelativeStart = activeAdBreak?.relativeStart ?: absoluteTime
                     } else /* VOD */ {
-                        adAbsoluteStart = advert?.startMillis?.div(1000.0) ?: absoluteTime
+                        adAbsoluteStart = ad?.startMillis?.div(1000.0) ?: absoluteTime
                         adRelativeStart = adTimeline?.absoluteToRelative(adAbsoluteStart)
                             ?: adAbsoluteStart
                     }
 
-                    advert?.toAd(adAbsoluteStart, adRelativeStart)
+                    ad?.toBitmovinAd(adAbsoluteStart, adRelativeStart)
                 }
 
-            val companionAds = advert?.companionCreatives?.map { creative ->
+            val companionAds = ad?.companionCreatives?.map { creative ->
                 val resource = creative.getResource(ResourceType.HTML)?.let {
                     CompanionAdResource(it.stringData, CompanionAdType.HTML)
                 } ?: creative.getResource(ResourceType.STATIC)?.let {
@@ -564,10 +601,10 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     YospaceAdStartedEvent(
-                        clickThroughUrl = advert?.adClickThroughUrl().orEmpty(),
-                        indexInQueue = advert?.sequence ?: 0,
-                        duration = advert?.duration?.div(1000.0) ?: 0.0,
-                        timeOffset = advert?.startMillis?.div(1000.0) ?: 0.0,
+                        clickThroughUrl = ad?.linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
+                        indexInQueue = ad?.sequence ?: 0,
+                        duration = ad?.duration?.div(1000.0) ?: 0.0,
+                        timeOffset = ad?.startMillis?.div(1000.0) ?: 0.0,
                         ad = activeAd,
                         companionAds = companionAds
                     )
@@ -575,7 +612,7 @@ open class BitmovinYospacePlayer(
             }
         }
 
-        override fun onAdvertEnd(advert: Advert?) {
+        override fun onAdvertEnd(advert: YospaceAd?) {
             BitLog.d("YoSpace onAdvertEnd")
 
             val adFinishedEvent = AdFinishedEvent(activeAd)
@@ -584,7 +621,7 @@ open class BitmovinYospacePlayer(
             activeAd = null
         }
 
-        override fun onAdvertBreakEnd(adBreak: com.yospace.android.hls.analytic.advert.AdBreak?) {
+        override fun onAdvertBreakEnd(adBreak: YospaceAdBreak?) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
             val adBreakFinishedEvent = AdBreakFinishedEvent(activeAdBreak)
@@ -596,7 +633,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onTimelineUpdateReceived")
         }
 
-        override fun onTrackingUrlCalled(advert: Advert, type: String, url: String) {
+        override fun onTrackingUrlCalled(advert: YospaceAd, type: String, url: String) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
 
             when (type) {

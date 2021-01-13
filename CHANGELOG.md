@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `id` property from `Ad` now returns shortened identifier
 - `mediaFileUrl` property from `Ad` now returns the asset URI
  
- ### Removed
+### Removed
  - `isTruex` property from `Ad` (use `hasInteractiveUnit`)
  
 ### Fixed

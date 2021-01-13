@@ -625,7 +625,10 @@ open class BitmovinYospacePlayer(
 
     fun List<YospaceAdBreak>.toBitmovinAdBreaks(): List<AdBreak> {
         var adBreakDurations = 0.0
-        return map { it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0).apply { adBreakDurations += it.duration } }
+        return map {
+            it.toBitmovinAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0)
+                .apply { adBreakDurations += it.duration }
+        }
     }
 
     fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
@@ -644,7 +647,10 @@ open class BitmovinYospacePlayer(
 
     fun List<YospaceAd>.toBitmovinAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
         var absoluteStart = adBreakAbsoluteStart
-        return map { it.toBitmovinAd(absoluteStart, adBreakRelativeStart).apply { absoluteStart += it.duration / 1000.0 } }
+        return map {
+            it.toBitmovinAd(absoluteStart, adBreakRelativeStart)
+                .apply { absoluteStart += it.duration / 1000.0 }
+        }
     }
 
     fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(

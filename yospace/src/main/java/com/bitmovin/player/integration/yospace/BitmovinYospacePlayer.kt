@@ -629,12 +629,13 @@ open class BitmovinYospacePlayer(
     }
 
     fun YospaceAdBreak.toBitmovinAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        relativeStart = relativeStart,
-        absoluteStart = absoluteStart,
-        duration = duration / 1000.0,
-        absoluteEnd = absoluteStart + (duration / 1000.0),
-        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList(),
-        position = AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN
+        breakId ?: "unknown",
+        absoluteStart,
+        relativeStart,
+        duration / 1000.0,
+        absoluteStart + duration / 1000.0,
+        AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN,
+        ads = adverts.toBitmovinAds(absoluteStart, relativeStart).toMutableList()
     )
 
     ///////////////////////////////////////////////////////////////////////////
@@ -647,16 +648,21 @@ open class BitmovinYospacePlayer(
     }
 
     fun YospaceAd.toBitmovinAd(absoluteStart: Double, relativeStart: Double) = Ad(
-        id = id,
-        relativeStart = relativeStart,
-        duration = duration / 1000.0,
-        absoluteStart = absoluteStart,
-        absoluteEnd = absoluteStart + (duration / 1000.0),
-        sequence = sequence,
-        hasInteractiveUnit = hasLinearInteractiveUnit(),
-        isTruex = hasLinearInteractiveUnit(),
-        extensions = extensions,
+        identifier,
+        linearCreative?.id,
+        sequence,
+        absoluteStart,
+        relativeStart,
+        duration / 1000.0,
+        absoluteStart + duration / 1000.0,
+        adSystem,
+        adTitle,
+        advertiser,
+        hasLinearInteractiveUnit(),
+        isFiller,
+        extensions,
         isLinear = !hasLinearInteractiveUnit(),
-        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty()
+        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
+        mediaFileUrl = linearCreative?.assetUri
     )
 }

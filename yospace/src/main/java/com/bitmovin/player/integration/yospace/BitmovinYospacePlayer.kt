@@ -632,7 +632,7 @@ open class BitmovinYospacePlayer(
     }
 
     fun YospaceAdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        breakId ?: "unknown",
+        breakId.orEmpty(),
         absoluteStart,
         relativeStart,
         duration / 1000.0,
@@ -666,6 +666,7 @@ open class BitmovinYospacePlayer(
         advertiser,
         hasLinearInteractiveUnit(),
         isFiller,
+        advertLineage,
         extensions,
         isLinear = !hasLinearInteractiveUnit(),
         clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),

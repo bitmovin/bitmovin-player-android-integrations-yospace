@@ -520,7 +520,7 @@ open class BitmovinYospacePlayer(
             activeAd = activeAdBreak
                 ?.ads
                 ?.filterIsInstance<Ad>()
-                ?.first { it.id == ad?.id }
+                ?.firstOrNull { it.id == ad?.identifier }
 
                 // Else create ad manually
                 ?: run {

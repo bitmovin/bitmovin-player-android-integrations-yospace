@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- `creativeId`, `title`, `avertiser`, `system` and `isFiller` properties to `Ad`
+- `creativeId`, `title`, `avertiser`, `system`, `lineage` and `isFiller` properties to `Ad`
 
 ### Changed
 - `id` property from `AdBreak` now returns `breakId`

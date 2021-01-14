@@ -497,13 +497,13 @@ open class BitmovinYospacePlayer(
             handler.post { yospaceEventEmitter.emit(adBreakStartedEvent) }
         }
 
-        override fun onAdvertStart(ad: YospaceAd?) {
+        override fun onAdvertStart(advert: YospaceAd?) {
             BitLog.d("YoSpace onAdvertStart")
 
             // Render TrueX ad
-            if (ad?.hasLinearInteractiveUnit() == true) {
+            if (advert?.hasLinearInteractiveUnit() == true) {
                 truexRenderer?.let {
-                    BitLog.d("TrueX ad found: $ad")
+                    BitLog.d("TrueX ad found: $advert")
 
                     // Suppress analytics in order for YoSpace TrueX tracking to work
                     BitLog.d("YoSpace analytics suppressed")
@@ -512,7 +512,7 @@ open class BitmovinYospacePlayer(
                     super@BitmovinYospacePlayer.pause()
 
                     val adBreakPosition = activeAdBreak?.position ?: AdBreakPosition.PREROLL
-                    it.renderAd(ad, adBreakPosition)
+                    it.renderAd(advert, adBreakPosition)
                 }
             }
 
@@ -520,7 +520,7 @@ open class BitmovinYospacePlayer(
             activeAd = activeAdBreak
                 ?.ads
                 ?.filterIsInstance<Ad>()
-                ?.firstOrNull { it.id == ad?.identifier }
+                ?.firstOrNull { it.id == advert?.identifier }
 
                 // Else create ad manually
                 ?: run {
@@ -532,15 +532,15 @@ open class BitmovinYospacePlayer(
                         adAbsoluteStart = absoluteTime
                         adRelativeStart = activeAdBreak?.relativeStart ?: absoluteTime
                     } else /* VOD */ {
-                        adAbsoluteStart = ad?.startMillis?.div(1000.0) ?: absoluteTime
+                        adAbsoluteStart = advert?.startMillis?.div(1000.0) ?: absoluteTime
                         adRelativeStart = adTimeline?.absoluteToRelative(adAbsoluteStart)
                             ?: adAbsoluteStart
                     }
 
-                    ad?.toAd(adAbsoluteStart, adRelativeStart)
+                    advert?.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
-            val companionAds = ad?.companionCreatives?.map { creative ->
+            val companionAds = advert?.companionCreatives?.map { creative ->
                 val resource = creative.getResource(ResourceType.HTML)?.let {
                     CompanionAdResource(it.stringData, CompanionAdType.HTML)
                 } ?: creative.getResource(ResourceType.STATIC)?.let {
@@ -560,10 +560,10 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     YospaceAdStartedEvent(
-                        clickThroughUrl = ad?.linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
-                        indexInQueue = ad?.sequence ?: 0,
-                        duration = ad?.duration?.div(1000.0) ?: 0.0,
-                        timeOffset = ad?.startMillis?.div(1000.0) ?: 0.0,
+                        clickThroughUrl = advert?.linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
+                        indexInQueue = advert?.sequence ?: 0,
+                        duration = advert?.duration?.div(1000.0) ?: 0.0,
+                        timeOffset = advert?.startMillis?.div(1000.0) ?: 0.0,
                         ad = activeAd,
                         companionAds = companionAds
                     )

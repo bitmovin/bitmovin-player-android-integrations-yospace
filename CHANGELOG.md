@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Bitmovin player to `2.60.0+jason`
+
 ### Fixed
 - Player stuck in TrueX filler asset
 

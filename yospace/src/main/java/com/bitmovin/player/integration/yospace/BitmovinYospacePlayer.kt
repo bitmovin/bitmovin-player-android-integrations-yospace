@@ -637,7 +637,7 @@ open class BitmovinYospacePlayer(
         relativeStart,
         duration / 1000.0,
         absoluteStart + duration / 1000.0,
-        AdBreakPosition.values().find { it.value == position } ?: AdBreakPosition.UNKNOWN,
+        position = position.toLowerCase().run { AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN },
         ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
     )
 

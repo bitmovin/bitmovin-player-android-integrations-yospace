@@ -31,6 +31,11 @@ class MainActivity : AppCompatActivity() {
                 "https://live-media-aka-qa.warnermediacdn.com/csmp/cmaf/live/2011916/tbseast-cenc-stg-cmp/master_wv.m3u8?yo.pdt=true&yo.vp=false&yo.ad=true&caid=mml-false&conf_csid=ncaa.com_mmodplayer&context=243427194&nw=42448&playername=top-2.1.2-1&prof=48804:tbs_web_vod&vdur=361.5956&yo.vp=true&yo.av=2&yo.ad=true&&yo.ad=true&yo.dnt=false&yo.dr=true",
                 "https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128",
                 YospaceSourceConfiguration(YospaceAssetType.LINEAR)
+            ),
+            Stream(
+                "Bones",
+                "https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=false",
+                yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
             )
         )
     }
@@ -64,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupPlayer() {
         val playerConfig = PlayerConfiguration().apply {
             playbackConfiguration?.isAutoplayEnabled = true
+            tweaksConfiguration?.useFiletypeExtractorFallbackForHls = true
         }
 
         player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration()).apply {

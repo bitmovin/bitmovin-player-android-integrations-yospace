@@ -10,13 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `creativeId`, `title`, `avertiser`, `system`, `lineage` and `isFiller` properties to `Ad`
 
 ### Changed
+- Bitmovin player to `2.60.0+jason`
 - `id` property from `AdBreak` now returns `breakId`
 - `id` property from `Ad` now returns shortened identifier
 - `mediaFileUrl` property from `Ad` now returns the asset URI
  
 ### Removed
  - `isTruex` property from `Ad` (use `hasInteractiveUnit`)
- 
+
 ### Fixed
 - Player stuck in TrueX filler asset
 

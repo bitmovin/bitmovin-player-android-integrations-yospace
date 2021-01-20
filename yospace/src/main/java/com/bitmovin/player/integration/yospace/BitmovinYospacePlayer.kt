@@ -16,11 +16,12 @@ import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
+import com.yospace.android.hls.analytic.advert.AdBreak as YospaceAdBreak
 import com.bitmovin.player.integration.yospace.util.*
 import com.bitmovin.player.model.advertising.AdQuartile
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
-import com.yospace.android.hls.analytic.advert.Advert
+import com.yospace.android.hls.analytic.advert.Advert as YospaceAd
 import com.yospace.android.hls.analytic.advert.Resource.*
 import com.yospace.android.xml.VastPayload
 import com.yospace.android.xml.VmapPayload
@@ -75,7 +76,173 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // Player event listeners
+    // Playback
+    ///////////////////////////////////////////////////////////////
+
+    fun load(sourceConfig: SourceConfiguration?, yospaceSourceConfig: YospaceSourceConfiguration, truexConfig: TruexConfiguration? = null) {
+        BitLog.d("Load YoSpace Source Configuration")
+
+        loadState = LoadState.LOADING
+        truexRenderer = truexConfig?.let { BitmovinTruexAdRenderer(context, it).apply { listener = truexAdRendererListener } }
+        this.yospaceSourceConfig = yospaceSourceConfig
+        this.sourceConfig = sourceConfig
+
+        if (yospaceSession != null) {
+            super.unload()
+        }
+
+        resetYospaceSession()
+
+        val originalUrl = sourceConfig?.firstSourceItem?.hlsSource?.url
+        if (originalUrl == null) {
+            yospaceEventEmitter.emit(ErrorEvent(
+                YospaceErrorCodes.YOSPACE_INVALID_SOURCE,
+                "Invalid YoSpace source. You must provide an HLS source"
+            ))
+            unload()
+            return
+        }
+
+        yospaceSessionProperties = SessionProperties(originalUrl).readTimeout(yospaceConfig.readTimeout)
+            .connectTimeout(yospaceConfig.connectTimeout)
+            .requestTimeout(yospaceConfig.requestTimeout)
+            .apply {
+                userAgent(yospaceConfig.userAgent)
+                addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING
+                    or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
+            }
+
+        when (yospaceSourceConfig.assetType) {
+            YospaceAssetType.LINEAR -> loadLive()
+            YospaceAssetType.VOD -> loadVod()
+            YospaceAssetType.LINEAR_START_OVER -> loadStartOver()
+        }
+    }
+
+    private fun loadLive() = when (yospaceConfig.liveInitialisationType) {
+        YospaceLiveInitialisationType.PROXY -> {
+            val sessionFactory = SessionFactory.createForLiveWithThread(sessionListener, yospaceSessionProperties)
+            startPlayback(sessionFactory.playerUrl)
+        }
+        YospaceLiveInitialisationType.DIRECT -> SessionLive.create(sessionListener, yospaceSessionProperties)
+    }
+
+    private fun loadVod() = SessionNonLinear.create(sessionListener, yospaceSessionProperties)
+
+    private fun loadStartOver() = SessionNonLinearStartOver.create(sessionListener, yospaceSessionProperties)
+
+    override fun unload() {
+        loadState = LoadState.UNLOADING
+        truexRenderer?.stop()
+        super.unload()
+    }
+
+    private fun startPlayback(playbackUrl: String) {
+        if (loadState != LoadState.UNLOADING) {
+            handler.post {
+                val newSourceConfiguration = SourceConfiguration()
+                val sourceItem = SourceItem(HLSSource(playbackUrl))
+                val drmConfiguration = sourceConfig?.firstSourceItem?.getDrmConfiguration(DRMSystems.WIDEVINE_UUID)
+                drmConfiguration?.let { sourceItem.addDRMConfiguration(it) }
+                newSourceConfiguration.addSourceItem(sourceItem)
+                load(newSourceConfiguration)
+            }
+        }
+    }
+
+    override fun pause() {
+        if (yospaceSession?.canPause() == true || yospaceSession == null) {
+            super.pause()
+        }
+    }
+
+    override fun getDuration(): Double = super.getDuration() - (adTimeline?.totalAdBreakDurations()
+        ?: 0.0)
+
+    override fun getCurrentTime(): Double = when {
+        isAd -> {
+            // Return ad time
+            super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
+        }
+        isLive -> {
+            // Return absolute time for LIVE
+            super.getCurrentTime()
+        }
+        else -> {
+            // Return relative time for VOD, or fallback to absolute time
+            adTimeline?.absoluteToRelative(super.getCurrentTime()) ?: super.getCurrentTime()
+        }
+    }
+
+    private fun yospaceTime(): Int {
+        val time = (currentTimeWithAds() * 1000).roundToInt()
+        return if (time < 0) 0 else time
+    }
+
+    fun currentTimeWithAds(): Double = super.getCurrentTime()
+
+    override fun seek(time: Double) {
+        if (yospaceSession?.canSeek() == true) {
+            adTimeline?.let {
+                val seekTime = yospaceSession!!.willSeekTo(time.toLong())
+                val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
+                BitLog.d("Seeking to $absoluteSeekTime")
+                super.seek(absoluteSeekTime)
+                return
+            }
+        }
+        BitLog.d("Seeking to $time")
+        super.seek(time)
+    }
+
+    fun forceSeek(time: Double) {
+        BitLog.d("Seeking to $time")
+        super.seek(time)
+    }
+
+    override fun mute() {
+        if (yospaceSession?.canMute() == true || yospaceSession == null) {
+            super.mute()
+        }
+    }
+
+    override fun isAd(): Boolean = when {
+        yospaceSourceConfig != null -> activeAd != null
+        else -> super.isAd()
+    }
+
+    override fun skipAd() {
+        if (yospaceSourceConfig == null) {
+            super.skipAd()
+        }
+    }
+
+    override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
+        yospaceEventEmitter.emit(WarningEvent(
+            YospaceWarningCodes.UNSUPPORTED_API,
+            "scheduleAd API is not available when playing back a YoSpace asset"
+        ))
+    } else {
+        super.scheduleAd(adItem)
+    }
+
+    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
+        yospaceEventEmitter.emit(WarningEvent(
+            YospaceWarningCodes.UNSUPPORTED_API,
+            "setAdViewGroup API is not available when playing back a YoSpace asset"
+        ))
+    } else {
+        super.setAdViewGroup(adViewGroup)
+    }
+
+    fun onLinearClickThrough() = yospaceSession?.onLinearClickThrough()
+
+    fun onCompanionClickThrough(companionId: String) = yospaceSession?.onCompanionClickThrough(companionId)
+
+    fun onCompanionRendered(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
+
+    ///////////////////////////////////////////////////////////////
+    // Player Event Listeners
     ///////////////////////////////////////////////////////////////
 
     private fun addEventListeners() {
@@ -195,177 +362,50 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // Playback
+    // TrueX
     ///////////////////////////////////////////////////////////////
 
-    fun load(sourceConfig: SourceConfiguration?, yospaceSourceConfig: YospaceSourceConfiguration, truexConfig: TruexConfiguration? = null) {
-        BitLog.d("Load YoSpace Source Configuration")
+    private val truexAdRendererListener = object : BitmovinTruexAdRendererListener {
 
-        loadState = LoadState.LOADING
-        truexRenderer = truexConfig?.let { BitmovinTruexAdRenderer(context, it).apply { listener = truexAdRendererListener } }
-        this.yospaceSourceConfig = yospaceSourceConfig
-        this.sourceConfig = sourceConfig
+        override fun onAdCompleted() {
+            BitLog.d("YoSpace analytics unsuppressed")
+            yospaceSession?.suppressAnalytics(false)
 
-        if (yospaceSession != null) {
-            super.unload()
-        }
-
-        resetYospaceSession()
-
-        val originalUrl = sourceConfig?.firstSourceItem?.hlsSource?.url
-        if (originalUrl == null) {
-            yospaceEventEmitter.emit(ErrorEvent(
-                YospaceErrorCodes.YOSPACE_INVALID_SOURCE,
-                "Invalid YoSpace source. You must provide an HLS source"
-            ))
-            unload()
-            return
-        }
-
-        yospaceSessionProperties = SessionProperties(originalUrl).readTimeout(yospaceConfig.readTimeout)
-            .connectTimeout(yospaceConfig.connectTimeout)
-            .requestTimeout(yospaceConfig.requestTimeout)
-            .apply {
-                userAgent(yospaceConfig.userAgent)
-                addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING
-                    or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
+            activeAd?.let {
+                // Only seek over filler if there is at least one second remaining
+                // This prevents the player from getting stuck indefinitely in filler
+                if (it.absoluteEnd - currentTimeWithAds() >= 1) {
+                    BitLog.d("Skipping TrueX filler")
+                    forceSeek(it.absoluteEnd)
+                }
             }
 
-        when (yospaceSourceConfig.assetType) {
-            YospaceAssetType.LINEAR -> loadLive()
-            YospaceAssetType.VOD -> loadVod()
-            YospaceAssetType.LINEAR_START_OVER -> loadStartOver()
+            BitLog.d("Resuming player")
+            play()
         }
-    }
 
-    private fun loadLive() = when (yospaceConfig.liveInitialisationType) {
-        YospaceLiveInitialisationType.PROXY -> {
-            val sessionFactory = SessionFactory.createForLiveWithThread(sessionListener, yospaceSessionProperties)
-            startPlayback(sessionFactory.playerUrl)
-        }
-        YospaceLiveInitialisationType.DIRECT -> SessionLive.create(sessionListener, yospaceSessionProperties)
-    }
+        override fun onAdFree() {
+            BitLog.d("YoSpace analytics unsuppressed")
+            yospaceSession?.suppressAnalytics(false)
 
-    private fun loadVod() = SessionNonLinear.create(sessionListener, yospaceSessionProperties)
-
-    private fun loadStartOver() = SessionNonLinearStartOver.create(sessionListener, yospaceSessionProperties)
-
-    override fun unload() {
-        loadState = LoadState.UNLOADING
-        truexRenderer?.stop()
-        super.unload()
-    }
-
-    private fun startPlayback(playbackUrl: String) {
-        if (loadState != LoadState.UNLOADING) {
-            handler.post {
-                val newSourceConfiguration = SourceConfiguration()
-                val sourceItem = SourceItem(HLSSource(playbackUrl))
-                val drmConfiguration = sourceConfig?.firstSourceItem?.getDrmConfiguration(DRMSystems.WIDEVINE_UUID)
-                drmConfiguration?.let { sourceItem.addDRMConfiguration(it) }
-                newSourceConfiguration.addSourceItem(sourceItem)
-                load(newSourceConfiguration)
+            // Seek to end of ad break
+            activeAdBreak?.let {
+                BitLog.d("Skipping ad break")
+                forceSeek(it.absoluteEnd + 0.5)
             }
+
+            BitLog.d("Resuming player")
+            play()
+        }
+
+        override fun onSessionAdFree() {
+            BitLog.d("Session ad free")
+            yospaceEventEmitter.emit(TruexAdFreeEvent())
         }
     }
 
     ///////////////////////////////////////////////////////////////
-    // Playback parameters
-    ///////////////////////////////////////////////////////////////
-
-    override fun pause() {
-        if (yospaceSession?.canPause() == true || yospaceSession == null) {
-            super.pause()
-        }
-    }
-
-    override fun getDuration(): Double = super.getDuration() - (adTimeline?.totalAdBreakDurations()
-        ?: 0.0)
-
-    override fun getCurrentTime(): Double = when {
-        isAd -> {
-            // Return ad time
-            super.getCurrentTime() - (activeAd?.absoluteStart ?: 0.0)
-        }
-        isLive -> {
-            // Return absolute time for LIVE
-            super.getCurrentTime()
-        }
-        else -> {
-            // Return relative time for VOD, or fallback to absolute time
-            adTimeline?.absoluteToRelative(super.getCurrentTime()) ?: super.getCurrentTime()
-        }
-    }
-
-    private fun yospaceTime(): Int {
-        val time = (currentTimeWithAds() * 1000).roundToInt()
-        return if (time < 0) 0 else time
-    }
-
-    fun currentTimeWithAds(): Double = super.getCurrentTime()
-
-    override fun seek(time: Double) {
-        if (yospaceSession?.canSeek() == true) {
-            adTimeline?.let {
-                val seekTime = yospaceSession!!.willSeekTo(time.toLong())
-                val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
-                BitLog.d("Seeking to $absoluteSeekTime")
-                super.seek(absoluteSeekTime)
-                return
-            }
-        }
-        BitLog.d("Seeking to $time")
-        super.seek(time)
-    }
-
-    fun forceSeek(time: Double) {
-        BitLog.d("Seeking to $time")
-        super.seek(time)
-    }
-
-    override fun mute() {
-        if (yospaceSession?.canMute() == true || yospaceSession == null) {
-            super.mute()
-        }
-    }
-
-    override fun isAd(): Boolean = when {
-        yospaceSourceConfig != null -> activeAd != null
-        else -> super.isAd()
-    }
-
-    override fun skipAd() {
-        if (yospaceSourceConfig == null) {
-            super.skipAd()
-        }
-    }
-
-    override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(WarningEvent(
-            YospaceWarningCodes.UNSUPPORTED_API,
-            "scheduleAd API is not available when playing back a YoSpace asset"
-        ))
-    } else {
-        super.scheduleAd(adItem)
-    }
-
-    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(WarningEvent(
-            YospaceWarningCodes.UNSUPPORTED_API,
-            "setAdViewGroup API is not available when playing back a YoSpace asset"
-        ))
-    } else {
-        super.setAdViewGroup(adViewGroup)
-    }
-
-    fun onLinearClickThrough() = yospaceSession?.onLinearClickThrough()
-
-    fun onCompanionClickThrough(companionId: String) = yospaceSession?.onCompanionClickThrough(companionId)
-
-    fun onCompanionRendered(companionId: String) = yospaceSession?.onCompanionEvent("creativeView", companionId)
-
-    ///////////////////////////////////////////////////////////////
-    // YoSpace session
+    // Yospace Session
     ///////////////////////////////////////////////////////////////
 
     private val sessionListener: YospaceEventListener<Session> = YospaceEventListener { event ->
@@ -429,56 +469,12 @@ open class BitmovinYospacePlayer(
     }
 
     ///////////////////////////////////////////////////////////////
-    // TrueX
-    ///////////////////////////////////////////////////////////////
-
-    private val truexAdRendererListener = object : BitmovinTruexAdRendererListener {
-
-        override fun onAdCompleted() {
-            BitLog.d("YoSpace analytics unsuppressed")
-            yospaceSession?.suppressAnalytics(false)
-
-            activeAd?.let {
-                // Only seek over filler if there is at least one second remaining
-                // This prevents the player from getting stuck indefinitely in filler
-                if (it.absoluteEnd - currentTimeWithAds() >= 1) {
-                    BitLog.d("Skipping TrueX filler")
-                    forceSeek(it.absoluteEnd)
-                }
-            }
-
-            BitLog.d("Resuming player")
-            play()
-        }
-
-        override fun onAdFree() {
-            BitLog.d("YoSpace analytics unsuppressed")
-            yospaceSession?.suppressAnalytics(false)
-
-            // Seek to end of ad break
-            activeAdBreak?.let {
-                BitLog.d("Skipping ad break")
-                forceSeek(it.absoluteEnd + 0.5)
-            }
-
-            BitLog.d("Resuming player")
-            play()
-        }
-
-        override fun onSessionAdFree() {
-            BitLog.d("Session ad free")
-            yospaceEventEmitter.emit(TruexAdFreeEvent())
-        }
-    }
-
-
-    ///////////////////////////////////////////////////////////////
-    // YoSpace analytics
+    // Yospace Analytics
     ///////////////////////////////////////////////////////////////
 
     private val analyticEventListener: AnalyticEventListener = object : AnalyticEventListener {
 
-        override fun onAdvertBreakStart(adBreak: com.yospace.android.hls.analytic.advert.AdBreak?) {
+        override fun onAdvertBreakStart(adBreak: YospaceAdBreak?) {
             BitLog.d("YoSpace onAdvertBreakStart")
 
             val absoluteTime = currentTimeWithAds()
@@ -501,7 +497,7 @@ open class BitmovinYospacePlayer(
             handler.post { yospaceEventEmitter.emit(adBreakStartedEvent) }
         }
 
-        override fun onAdvertStart(advert: Advert?) {
+        override fun onAdvertStart(advert: YospaceAd?) {
             BitLog.d("YoSpace onAdvertStart")
 
             // Render TrueX ad
@@ -524,7 +520,7 @@ open class BitmovinYospacePlayer(
             activeAd = activeAdBreak
                 ?.ads
                 ?.filterIsInstance<Ad>()
-                ?.first { it.id == advert?.id }
+                ?.firstOrNull { it.id == advert?.identifier }
 
                 // Else create ad manually
                 ?: run {
@@ -564,7 +560,7 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     YospaceAdStartedEvent(
-                        clickThroughUrl = advert?.adClickThroughUrl().orEmpty(),
+                        clickThroughUrl = advert?.linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
                         indexInQueue = advert?.sequence ?: 0,
                         duration = advert?.duration?.div(1000.0) ?: 0.0,
                         timeOffset = advert?.startMillis?.div(1000.0) ?: 0.0,
@@ -575,7 +571,7 @@ open class BitmovinYospacePlayer(
             }
         }
 
-        override fun onAdvertEnd(advert: Advert?) {
+        override fun onAdvertEnd(advert: YospaceAd?) {
             BitLog.d("YoSpace onAdvertEnd")
 
             val adFinishedEvent = AdFinishedEvent(activeAd)
@@ -584,7 +580,7 @@ open class BitmovinYospacePlayer(
             activeAd = null
         }
 
-        override fun onAdvertBreakEnd(adBreak: com.yospace.android.hls.analytic.advert.AdBreak?) {
+        override fun onAdvertBreakEnd(adBreak: YospaceAdBreak?) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
             val adBreakFinishedEvent = AdBreakFinishedEvent(activeAdBreak)
@@ -596,7 +592,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onTimelineUpdateReceived")
         }
 
-        override fun onTrackingUrlCalled(advert: Advert, type: String, url: String) {
+        override fun onTrackingUrlCalled(advert: YospaceAd, type: String, url: String) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
 
             when (type) {
@@ -622,4 +618,58 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace onVastReceived: " + vastPayload.raw)
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AdBreak Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAdBreak>.toAdBreaks(): List<AdBreak> {
+        var adBreakDurations = 0.0
+        return map {
+            it.toAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0)
+                .apply { adBreakDurations += it.duration }
+        }
+    }
+
+    fun YospaceAdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
+        breakId.orEmpty(),
+        absoluteStart,
+        relativeStart,
+        duration / 1000.0,
+        absoluteStart + duration / 1000.0,
+        position = position.toLowerCase().run { AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN },
+        ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
+    )
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Ad Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun List<YospaceAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
+        var absoluteStart = adBreakAbsoluteStart
+        return map {
+            it.toAd(absoluteStart, adBreakRelativeStart)
+                .apply { absoluteStart += it.duration / 1000.0 }
+        }
+    }
+
+    fun YospaceAd.toAd(absoluteStart: Double, relativeStart: Double) = Ad(
+        identifier,
+        linearCreative?.id,
+        sequence,
+        absoluteStart,
+        relativeStart,
+        duration / 1000.0,
+        absoluteStart + duration / 1000.0,
+        adSystem,
+        adTitle,
+        advertiser,
+        hasLinearInteractiveUnit(),
+        isFiller,
+        advertLineage,
+        extensions,
+        isLinear = !hasLinearInteractiveUnit(),
+        clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
+        mediaFileUrl = linearCreative?.assetUri
+    )
 }

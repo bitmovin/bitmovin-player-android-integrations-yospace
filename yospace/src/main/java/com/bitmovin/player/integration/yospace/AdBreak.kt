@@ -1,17 +1,27 @@
 package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.model.advertising.Ad
-
-import java.util.ArrayList
+import com.bitmovin.player.model.advertising.AdBreak as BitmovinAdBreak
 
 data class AdBreak(
-    override var id: String = "unknown",
+    override var id: String,
+    val absoluteStart: Double,
     val relativeStart: Double,
     val duration: Double,
-    val absoluteStart: Double,
     val absoluteEnd: Double,
     var position: AdBreakPosition = AdBreakPosition.UNKNOWN,
     override val replaceContentDuration: Double = 0.0,
     override var scheduleTime: Double = 0.0,
     override var ads: MutableList<Ad> = mutableListOf()
-) : com.bitmovin.player.model.advertising.AdBreak
+) : BitmovinAdBreak {
+    override fun toString() =
+        "id=$id, " +
+        "absoluteStart=$absoluteStart, " +
+        "relativeStart=$relativeStart, " +
+        "duration=$duration, " +
+        "absoluteEnd=$absoluteEnd, " +
+        "position=${position.name}, " +
+        "replaceContentDuration=$replaceContentDuration, " +
+        "scheduleTime=$scheduleTime, " +
+        "ads=${ads.size}"
+}

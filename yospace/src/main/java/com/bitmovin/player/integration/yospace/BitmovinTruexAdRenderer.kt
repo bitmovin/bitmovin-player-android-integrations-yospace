@@ -158,18 +158,14 @@ class BitmovinTruexAdRenderer(
         isAdFree = false
         isSessionAdFree = false
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Tracking Events
+    ///////////////////////////////////////////////////////////////////////////
+
+    private fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
+    private fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
+    private fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
+    private fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
+    private fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")
 }
-
-///////////////////////////////////////////////////////////////////////////
-// Extensions
-///////////////////////////////////////////////////////////////////////////
-
-private fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
-
-private fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
-
-private fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
-
-private fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
-
-private fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")

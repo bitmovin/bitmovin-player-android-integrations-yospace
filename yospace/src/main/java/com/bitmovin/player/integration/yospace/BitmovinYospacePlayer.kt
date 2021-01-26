@@ -17,8 +17,9 @@ import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.yospace.android.hls.analytic.advert.AdBreak as YospaceAdBreak
-import com.bitmovin.player.integration.yospace.util.*
 import com.bitmovin.player.model.advertising.AdQuartile
+import com.bitmovin.player.model.emsg.EventMessage
+import com.bitmovin.player.model.id3.BinaryFrame
 import com.yospace.android.hls.analytic.*
 import com.yospace.android.hls.analytic.Session.SessionProperties
 import com.yospace.android.hls.analytic.advert.Advert as YospaceAd
@@ -294,7 +295,7 @@ open class BitmovinYospacePlayer(
 
         super.addEventListener(OnMetadataListener { metadataEvent ->
             if (yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
-                metadataEvent.createTimedMetadata()?.let {
+                metadataEvent.toTimedMetadata()?.let {
                     timedMetadataEvents.add(it)
                     // Only send metadata events if play event has been sent
                     if (isPlayingEventSent) {
@@ -623,7 +624,7 @@ open class BitmovinYospacePlayer(
     // AdBreak Transformation
     ///////////////////////////////////////////////////////////////////////////
 
-    fun List<YospaceAdBreak>.toAdBreaks(): List<AdBreak> {
+    private fun List<YospaceAdBreak>.toAdBreaks(): List<AdBreak> {
         var adBreakDurations = 0.0
         return map {
             it.toAdBreak(it.startMillis / 1000.0, (it.startMillis - adBreakDurations) / 1000.0)
@@ -631,7 +632,7 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    fun YospaceAdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
+    private fun YospaceAdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
         breakId.orEmpty(),
         absoluteStart,
         relativeStart,
@@ -645,7 +646,7 @@ open class BitmovinYospacePlayer(
     // Ad Transformation
     ///////////////////////////////////////////////////////////////////////////
 
-    fun List<YospaceAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
+    private fun List<YospaceAd>.toAds(adBreakAbsoluteStart: Double, adBreakRelativeStart: Double): List<Ad> {
         var absoluteStart = adBreakAbsoluteStart
         return map {
             it.toAd(absoluteStart, adBreakRelativeStart)
@@ -653,7 +654,7 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    fun YospaceAd.toAd(absoluteStart: Double, relativeStart: Double) = Ad(
+    private fun YospaceAd.toAd(absoluteStart: Double, relativeStart: Double) = Ad(
         identifier,
         linearCreative?.id,
         sequence,
@@ -672,4 +673,73 @@ open class BitmovinYospacePlayer(
         clickThroughUrl = linearCreative?.videoClicks?.clickThroughUrl.orEmpty(),
         mediaFileUrl = linearCreative?.assetUri
     )
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Metadata Transformation
+    ///////////////////////////////////////////////////////////////////////////
+
+    private fun MetadataEvent.toTimedMetadata() = when {
+        type === "EMSG" -> convertEmsgToId3()
+        type === "ID3" -> processId3()
+        else -> null
+    }
+
+    private fun MetadataEvent.processId3(): TimedMetadata? {
+        var ymid: String? = null
+        var yseq: String? = null
+        var ytyp: String? = null
+        var ydur: String? = null
+        var yprg: String? = null
+
+        for (i in 0 until metadata.length()) {
+            val entry = metadata.get(i)
+            if (entry is BinaryFrame) {
+                when (entry.id) {
+                    "YMID" -> ymid = String(entry.data)
+                    "YSEQ" -> yseq = String(entry.data)
+                    "YTYP" -> ytyp = String(entry.data)
+                    "YDUR" -> ydur = String(entry.data)
+                    "YPRG" -> yprg = String(entry.data)
+                }
+            }
+        }
+
+        return generateTimedMetadata(ymid, yseq, ytyp, ydur, yprg)
+    }
+
+    private fun MetadataEvent.convertEmsgToId3(): TimedMetadata? {
+        var ymid: String? = null
+        var yseq: String? = null
+        var ytyp: String? = null
+        var ydur: String? = null
+        var yprg: String? = null
+
+        for (i in 0 until metadata.length()) {
+            val message = metadata.get(i) as EventMessage
+            val data = String(message.messageData).split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            for (j in data.indices) {
+                val entry = data[j].split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                if (entry.size > 1) {
+                    val key = entry[0]
+                    val value = entry[1]
+                    BitLog.d("Key: $key, value: $value")
+                    when (key) {
+                        "YMID" -> ymid = value
+                        "YSEQ" -> yseq = value
+                        "YTYP" -> ytyp = value
+                        "YDUR" -> ydur = value
+                        "YPRG" -> yprg = value
+                    }
+                }
+            }
+        }
+
+        return generateTimedMetadata(ymid, yseq, ytyp, ydur, yprg)
+    }
+
+    private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?) = when {
+        ymid != null && yseq != null && ytyp != null && ydur != null -> TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur)
+        yprg != null -> TimedMetadata.createFromMetadata(yprg, 0.0f)
+        else -> null
+    }
 }

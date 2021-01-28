@@ -42,7 +42,9 @@ private const val SESSION_NO_ANALYTICS = 6002
 private const val SESSION_NOT_INITIALISED = 6003
 private const val UNSUPPORTED_API = 6004
 
+// State enums
 private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
+private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 open class BitmovinYospacePlayer(
     private val context: Context,
@@ -57,7 +59,7 @@ open class BitmovinYospacePlayer(
     private val yospaceEventEmitter = YospaceEventEmitter()
     private var yospaceSessionProperties: SessionProperties? = null
     private var yospaceSourceConfig: YospaceSourceConfiguration? = null
-    private var yospaceSessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
+    private var yospaceSessionStatus = SessionStatus.NOT_INITIALIZED
     private val yospaceTime: Int get() = yospaceTime()
     private var isLiveAdPaused = false
     private val handler = Handler(Looper.getMainLooper())
@@ -284,7 +286,7 @@ open class BitmovinYospacePlayer(
         })
 
         super.addEventListener(OnSourceUnloadedListener {
-            if (yospaceSessionStatus !== YospaceSesssionStatus.NOT_INITIALIZED) {
+            if (yospaceSessionStatus !== SessionStatus.NOT_INITIALIZED) {
                 BitLog.d("Sending STOPPED event: $yospaceTime")
                 yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
                 resetYospaceSession()
@@ -350,7 +352,7 @@ open class BitmovinYospacePlayer(
         })
 
         super.addEventListener(OnReadyListener {
-            yospaceSessionStatus = YospaceSesssionStatus.INITIALIZED
+            yospaceSessionStatus = SessionStatus.INITIALIZED
         })
     }
 
@@ -464,7 +466,7 @@ open class BitmovinYospacePlayer(
         }
 
     private fun resetYospaceSession() {
-        yospaceSessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
+        yospaceSessionStatus = SessionStatus.NOT_INITIALIZED
         yospaceSession?.removeAnalyticListener(analyticEventListener)
         yospaceSession?.shutdown()
         yospaceSession = null

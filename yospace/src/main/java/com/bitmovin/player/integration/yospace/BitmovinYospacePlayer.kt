@@ -37,10 +37,10 @@ import com.bitmovin.player.api.event.listener.EventListener as BitmovinEventList
 import com.yospace.util.event.EventListener as YospaceEventListener
 
 // Yospace Error/Warning Codes
-private const val INVALID_SOURCE_CODE = 6001
-private const val NO_ANALYTICS_CODE = 6002
-private const val NOT_INITIALISED_CODE = 6003
-private const val UNSUPPORTED_API_CODE = 6004
+private const val INVALID_YOSPACE_SOURCE = 6001
+private const val SESSION_NO_ANALYTICS = 6002
+private const val SESSION_NOT_INITIALISED = 6003
+private const val UNSUPPORTED_API = 6004
 
 open class BitmovinYospacePlayer(
     private val context: Context,
@@ -103,7 +103,7 @@ open class BitmovinYospacePlayer(
         val originalUrl = sourceConfig?.firstSourceItem?.hlsSource?.url
         if (originalUrl == null) {
             yospaceEventEmitter.emit(ErrorEvent(
-                INVALID_SOURCE_CODE,
+                INVALID_YOSPACE_SOURCE,
                 "Invalid YoSpace source. You must provide an HLS source"
             ))
             unload()
@@ -226,7 +226,7 @@ open class BitmovinYospacePlayer(
 
     override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(WarningEvent(
-            UNSUPPORTED_API_CODE,
+            UNSUPPORTED_API,
             "scheduleAd API is not available when playing back a YoSpace asset"
         ))
     } else {
@@ -235,7 +235,7 @@ open class BitmovinYospacePlayer(
 
     override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(WarningEvent(
-            UNSUPPORTED_API_CODE,
+            UNSUPPORTED_API,
             "setAdViewGroup API is not available when playing back a YoSpace asset"
         ))
     } else {
@@ -438,11 +438,11 @@ open class BitmovinYospacePlayer(
                 yospaceSession?.let { startPlayback(it.playerUrl) }
             }
             Session.State.NO_ANALYTICS -> handleYospaceSessionFailure(
-                NO_ANALYTICS_CODE,
+                SESSION_NO_ANALYTICS,
                 "Source URL does not refer to a YoSpace stream"
             )
             Session.State.NOT_INITIALISED -> handleYospaceSessionFailure(
-                NOT_INITIALISED_CODE,
+                SESSION_NOT_INITIALISED,
                 "Failed to initialise YoSpace stream."
             )
         }

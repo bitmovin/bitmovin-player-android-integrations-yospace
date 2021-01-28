@@ -42,6 +42,8 @@ private const val SESSION_NO_ANALYTICS = 6002
 private const val SESSION_NOT_INITIALISED = 6003
 private const val UNSUPPORTED_API = 6004
 
+private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
+
 open class BitmovinYospacePlayer(
     private val context: Context,
     playerConfig: PlayerConfiguration?,

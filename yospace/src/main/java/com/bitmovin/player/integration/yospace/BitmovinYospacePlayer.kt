@@ -36,6 +36,16 @@ import kotlin.properties.Delegates
 import com.bitmovin.player.api.event.listener.EventListener as BitmovinEventListener
 import com.yospace.util.event.EventListener as YospaceEventListener
 
+// Yospace Error/Warning Codes
+private const val INVALID_YOSPACE_SOURCE = 6001
+private const val SESSION_NO_ANALYTICS = 6002
+private const val SESSION_NOT_INITIALISED = 6003
+private const val UNSUPPORTED_API = 6004
+
+// State enums
+private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
+private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
+
 open class BitmovinYospacePlayer(
     private val context: Context,
     playerConfig: PlayerConfiguration?,
@@ -49,7 +59,7 @@ open class BitmovinYospacePlayer(
     private val yospaceEventEmitter = YospaceEventEmitter()
     private var yospaceSessionProperties: SessionProperties? = null
     private var yospaceSourceConfig: YospaceSourceConfiguration? = null
-    private var yospaceSessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
+    private var yospaceSessionStatus = SessionStatus.NOT_INITIALIZED
     private val yospaceTime: Int get() = yospaceTime()
     private var isLiveAdPaused = false
     private val handler = Handler(Looper.getMainLooper())
@@ -97,7 +107,7 @@ open class BitmovinYospacePlayer(
         val originalUrl = sourceConfig?.firstSourceItem?.hlsSource?.url
         if (originalUrl == null) {
             yospaceEventEmitter.emit(ErrorEvent(
-                YospaceErrorCodes.YOSPACE_INVALID_SOURCE,
+                INVALID_YOSPACE_SOURCE,
                 "Invalid YoSpace source. You must provide an HLS source"
             ))
             unload()
@@ -220,7 +230,7 @@ open class BitmovinYospacePlayer(
 
     override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(WarningEvent(
-            YospaceWarningCodes.UNSUPPORTED_API,
+            UNSUPPORTED_API,
             "scheduleAd API is not available when playing back a YoSpace asset"
         ))
     } else {
@@ -229,7 +239,7 @@ open class BitmovinYospacePlayer(
 
     override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(WarningEvent(
-            YospaceWarningCodes.UNSUPPORTED_API,
+            UNSUPPORTED_API,
             "setAdViewGroup API is not available when playing back a YoSpace asset"
         ))
     } else {
@@ -276,7 +286,7 @@ open class BitmovinYospacePlayer(
         })
 
         super.addEventListener(OnSourceUnloadedListener {
-            if (yospaceSessionStatus !== YospaceSesssionStatus.NOT_INITIALIZED) {
+            if (yospaceSessionStatus !== SessionStatus.NOT_INITIALIZED) {
                 BitLog.d("Sending STOPPED event: $yospaceTime")
                 yospaceStateSource.notify(PlayerState(PlaybackState.STOPPED, yospaceTime, false))
                 resetYospaceSession()
@@ -342,7 +352,7 @@ open class BitmovinYospacePlayer(
         })
 
         super.addEventListener(OnReadyListener {
-            yospaceSessionStatus = YospaceSesssionStatus.INITIALIZED
+            yospaceSessionStatus = SessionStatus.INITIALIZED
         })
     }
 
@@ -432,11 +442,11 @@ open class BitmovinYospacePlayer(
                 yospaceSession?.let { startPlayback(it.playerUrl) }
             }
             Session.State.NO_ANALYTICS -> handleYospaceSessionFailure(
-                YospaceErrorCodes.YOSPACE_NO_ANALYTICS,
+                SESSION_NO_ANALYTICS,
                 "Source URL does not refer to a YoSpace stream"
             )
             Session.State.NOT_INITIALISED -> handleYospaceSessionFailure(
-                YospaceErrorCodes.YOSPACE_NOT_INITIALISED,
+                SESSION_NOT_INITIALISED,
                 "Failed to initialise YoSpace stream."
             )
         }
@@ -456,7 +466,7 @@ open class BitmovinYospacePlayer(
         }
 
     private fun resetYospaceSession() {
-        yospaceSessionStatus = YospaceSesssionStatus.NOT_INITIALIZED
+        yospaceSessionStatus = SessionStatus.NOT_INITIALIZED
         yospaceSession?.removeAnalyticListener(analyticEventListener)
         yospaceSession?.shutdown()
         yospaceSession = null

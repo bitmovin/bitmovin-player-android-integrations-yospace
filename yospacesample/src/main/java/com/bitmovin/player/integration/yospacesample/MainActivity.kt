@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             tweaksConfiguration?.useFiletypeExtractorFallbackForHls = true
         }
 
-        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration()).apply {
+        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration(this)).apply {
             addEventListener(OnSourceLoadedListener {
                 loadUnloadButton.text = getString(R.string.unload)
             })

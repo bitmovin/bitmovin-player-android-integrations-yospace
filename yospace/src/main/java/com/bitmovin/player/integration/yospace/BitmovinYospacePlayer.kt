@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
+import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector
 import com.bitmovin.player.BitmovinPlayer
 import com.bitmovin.player.api.event.data.*
 import com.bitmovin.player.api.event.listener.*
@@ -68,6 +69,7 @@ open class BitmovinYospacePlayer(
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfiguration? = null
     private var truexRenderer: BitmovinTruexAdRenderer? = null
+    private var analyticsCollector: BitmovinPlayerCollector? = null
 
     var adTimeline: AdTimeline? = null
         private set
@@ -84,6 +86,15 @@ open class BitmovinYospacePlayer(
         BitLog.isEnabled = yospaceConfig.isDebug
         BitLog.d("Version ${BuildConfig.VERSION_NAME}")
         addEventListeners()
+
+        yospaceConfig.analyticsConfig?.let {
+            analyticsCollector = BitmovinPlayerCollector(it, yospaceConfig.context).apply { attachPlayer(this@BitmovinYospacePlayer) }
+        }
+    }
+
+    override fun destroy() {
+        analyticsCollector?.detachPlayer()
+        super.destroy()
     }
 
     ///////////////////////////////////////////////////////////////

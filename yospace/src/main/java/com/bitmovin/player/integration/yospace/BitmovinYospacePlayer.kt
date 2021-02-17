@@ -13,6 +13,7 @@ import com.bitmovin.player.config.drm.DRMSystems
 import com.bitmovin.player.config.media.HLSSource
 import com.bitmovin.player.config.media.SourceConfiguration
 import com.bitmovin.player.config.media.SourceItem
+import com.bitmovin.player.integration.yospace.config.BitmovinYospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
@@ -48,9 +49,8 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 open class BitmovinYospacePlayer(
     private val context: Context,
-    playerConfig: PlayerConfiguration?,
-    private val yospaceConfig: YospaceConfiguration
-) : BitmovinPlayer(context, playerConfig) {
+    val configuration: BitmovinYospaceConfiguration
+) : BitmovinPlayer(context, configuration.playerConfiguration) {
 
     private var yospaceSession: Session? = null
     private val yospaceStateSource = EventSourceImpl<PlayerState>()
@@ -81,7 +81,7 @@ open class BitmovinYospacePlayer(
     }
 
     init {
-        BitLog.isEnabled = yospaceConfig.isDebug
+        BitLog.isEnabled = configuration.yospaceConfiguration.isDebug
         BitLog.d("Version ${BuildConfig.VERSION_NAME}")
         addEventListeners()
     }
@@ -114,14 +114,21 @@ open class BitmovinYospacePlayer(
             return
         }
 
-        yospaceSessionProperties = SessionProperties(originalUrl).readTimeout(yospaceConfig.readTimeout)
-            .connectTimeout(yospaceConfig.connectTimeout)
-            .requestTimeout(yospaceConfig.requestTimeout)
-            .apply {
-                userAgent(yospaceConfig.userAgent)
-                addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING
-                    or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
-            }
+        with(configuration.yospaceConfiguration) {
+            yospaceSessionProperties = SessionProperties(originalUrl)
+                .readTimeout(readTimeout)
+                .connectTimeout(connectTimeout)
+                .requestTimeout(requestTimeout)
+                .userAgent(userAgent)
+                .addDebugFlags(
+                    YoLog.DEBUG_POLLING
+                    or YoLog.DEBUG_ID3TAG
+                    or YoLog.DEBUG_PARSING
+                    or YoLog.DEBUG_REPORTS
+                    or YoLog.DEBUG_HTTP
+                    or YoLog.DEBUG_RAW_XML
+                )
+        }
 
         when (yospaceSourceConfig.assetType) {
             YospaceAssetType.LINEAR -> loadLive()
@@ -130,7 +137,7 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    private fun loadLive() = when (yospaceConfig.liveInitialisationType) {
+    private fun loadLive() = when (configuration.yospaceConfiguration.liveInitialisationType) {
         YospaceLiveInitialisationType.PROXY -> {
             val sessionFactory = SessionFactory.createForLiveWithThread(sessionListener, yospaceSessionProperties)
             startPlayback(sessionFactory.playerUrl)
@@ -434,7 +441,7 @@ open class BitmovinYospacePlayer(
 
                 (yospaceSession as? SessionLive)?.let {
                     it.setTimedMetadataSource(yospaceMetadataSource)
-                    if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
+                    if (configuration.yospaceConfiguration.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
                         return@YospaceEventListener
                     }
                 }
@@ -648,7 +655,9 @@ open class BitmovinYospacePlayer(
         relativeStart,
         duration / 1000.0,
         absoluteStart + duration / 1000.0,
-        position = position.toLowerCase().run { AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN },
+        position = position.toLowerCase().run {
+            AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN
+        },
         ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
     )
 

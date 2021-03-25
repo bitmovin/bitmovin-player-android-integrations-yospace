@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - `BitmovinYospaceIntegration` to encapsulate `PlayerConfiguration` and `YospaceConfiguration`
-- 'BitmovinAnalyticsCollector' to `BitmovinYospacePlayer`
+- `BitmovinAnalyticsCollector` to `BitmovinYospacePlayer`
 
 ## [1.18.0]
 

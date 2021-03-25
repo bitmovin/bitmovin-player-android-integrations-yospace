@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `BitmovinYospaceIntegration` to encapsulate `PlayerConfiguration` and `YospaceConfiguration`
 - 'BitmovinAnalyticsCollector' to `BitmovinYospacePlayer`
 
+## [1.18.1]
+
+### Changed
+- Bitmovin player to `2.62.1+jason`
+
 ## [1.18.0]
 
 ### Changed

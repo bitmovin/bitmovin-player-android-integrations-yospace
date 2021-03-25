@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             playbackConfiguration?.isAutoplayEnabled = true
             tweaksConfiguration?.useFiletypeExtractorFallbackForHls = true
         }
-        val yospaceConfig = YospaceConfiguration(isDebug = true)
+        val yospaceConfig = YospaceConfiguration(debug = true)
         val bitmovinYospaceConfiguration = BitmovinYospaceConfiguration(playerConfig, yospaceConfig)
 
         player = BitmovinYospacePlayer(this, bitmovinYospaceConfiguration).apply {

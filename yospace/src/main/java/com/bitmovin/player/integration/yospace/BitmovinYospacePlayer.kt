@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.bitmovin.player.BitmovinPlayer
 import com.bitmovin.player.api.event.data.*
 import com.bitmovin.player.api.event.listener.*
-import com.bitmovin.player.config.PlayerConfiguration
 import com.bitmovin.player.config.advertising.AdItem
 import com.bitmovin.player.config.drm.DRMSystems
 import com.bitmovin.player.config.media.HLSSource
@@ -15,7 +14,6 @@ import com.bitmovin.player.config.media.SourceConfiguration
 import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.config.BitmovinYospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
-import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.yospace.android.hls.analytic.advert.AdBreak as YospaceAdBreak
 import com.bitmovin.player.model.advertising.AdQuartile
@@ -49,7 +47,7 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 open class BitmovinYospacePlayer(
     private val context: Context,
-    val configuration: BitmovinYospaceConfiguration
+    private val configuration: BitmovinYospaceConfiguration
 ) : BitmovinPlayer(context, configuration.playerConfiguration) {
 
     private var yospaceSession: Session? = null
@@ -81,7 +79,7 @@ open class BitmovinYospacePlayer(
     }
 
     init {
-        BitLog.isEnabled = configuration.yospaceConfiguration.isDebug
+        BitLog.isEnabled = configuration.debug
         BitLog.d("Version ${BuildConfig.VERSION_NAME}")
         addEventListeners()
     }
@@ -120,14 +118,17 @@ open class BitmovinYospacePlayer(
                 .connectTimeout(connectTimeout)
                 .requestTimeout(requestTimeout)
                 .userAgent(userAgent)
-                .addDebugFlags(
+
+            if (debug) {
+                yospaceSessionProperties?.addDebugFlags(
                     YoLog.DEBUG_POLLING
-                    or YoLog.DEBUG_ID3TAG
-                    or YoLog.DEBUG_PARSING
-                    or YoLog.DEBUG_REPORTS
-                    or YoLog.DEBUG_HTTP
-                    or YoLog.DEBUG_RAW_XML
+                        or YoLog.DEBUG_ID3TAG
+                        or YoLog.DEBUG_PARSING
+                        or YoLog.DEBUG_REPORTS
+                        or YoLog.DEBUG_HTTP
+                        or YoLog.DEBUG_RAW_XML
                 )
+            }
         }
 
         when (yospaceSourceConfig.assetType) {

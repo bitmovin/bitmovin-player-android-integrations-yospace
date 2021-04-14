@@ -4,17 +4,17 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
+import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector
 import com.bitmovin.player.BitmovinPlayer
 import com.bitmovin.player.api.event.data.*
 import com.bitmovin.player.api.event.listener.*
-import com.bitmovin.player.config.PlayerConfiguration
 import com.bitmovin.player.config.advertising.AdItem
 import com.bitmovin.player.config.drm.DRMSystems
 import com.bitmovin.player.config.media.HLSSource
 import com.bitmovin.player.config.media.SourceConfiguration
 import com.bitmovin.player.config.media.SourceItem
+import com.bitmovin.player.integration.yospace.config.BitmovinYospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
-import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.yospace.android.hls.analytic.advert.AdBreak as YospaceAdBreak
 import com.bitmovin.player.model.advertising.AdQuartile
@@ -47,10 +47,9 @@ private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
 private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 open class BitmovinYospacePlayer(
-    private val context: Context,
-    playerConfig: PlayerConfiguration?,
-    private val yospaceConfig: YospaceConfiguration
-) : BitmovinPlayer(context, playerConfig) {
+    private val configuration: BitmovinYospaceConfiguration,
+    private val context: Context
+) : BitmovinPlayer(context, configuration.playerConfiguration) {
 
     private var yospaceSession: Session? = null
     private val yospaceStateSource = EventSourceImpl<PlayerState>()
@@ -68,6 +67,7 @@ open class BitmovinYospacePlayer(
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfiguration? = null
     private var truexRenderer: BitmovinTruexAdRenderer? = null
+    private var analyticsCollector: BitmovinPlayerCollector? = null
 
     var adTimeline: AdTimeline? = null
         private set
@@ -81,9 +81,19 @@ open class BitmovinYospacePlayer(
     }
 
     init {
-        BitLog.isEnabled = yospaceConfig.isDebug
+        BitLog.isEnabled = configuration.debug
         BitLog.d("Version ${BuildConfig.VERSION_NAME}")
         addEventListeners()
+
+        configuration.analyticsConfiguration?.let {
+            analyticsCollector = BitmovinPlayerCollector(it, context)
+            analyticsCollector?.attachPlayer(this)
+        }
+    }
+
+    override fun destroy() {
+        analyticsCollector?.detachPlayer()
+        super.destroy()
     }
 
     ///////////////////////////////////////////////////////////////
@@ -114,14 +124,24 @@ open class BitmovinYospacePlayer(
             return
         }
 
-        yospaceSessionProperties = SessionProperties(originalUrl).readTimeout(yospaceConfig.readTimeout)
-            .connectTimeout(yospaceConfig.connectTimeout)
-            .requestTimeout(yospaceConfig.requestTimeout)
-            .apply {
-                userAgent(yospaceConfig.userAgent)
-                addDebugFlags(YoLog.DEBUG_POLLING or YoLog.DEBUG_ID3TAG or YoLog.DEBUG_PARSING
-                    or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML)
+        with(configuration.yospaceConfiguration) {
+            yospaceSessionProperties = SessionProperties(originalUrl)
+                .readTimeout(readTimeout)
+                .connectTimeout(connectTimeout)
+                .requestTimeout(requestTimeout)
+                .userAgent(userAgent)
+
+            if (debug) {
+                yospaceSessionProperties?.addDebugFlags(
+                    YoLog.DEBUG_POLLING
+                        or YoLog.DEBUG_ID3TAG
+                        or YoLog.DEBUG_PARSING
+                        or YoLog.DEBUG_REPORTS
+                        or YoLog.DEBUG_HTTP
+                        or YoLog.DEBUG_RAW_XML
+                )
             }
+        }
 
         when (yospaceSourceConfig.assetType) {
             YospaceAssetType.LINEAR -> loadLive()
@@ -130,7 +150,7 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    private fun loadLive() = when (yospaceConfig.liveInitialisationType) {
+    private fun loadLive() = when (configuration.yospaceConfiguration.liveInitialisationType) {
         YospaceLiveInitialisationType.PROXY -> {
             val sessionFactory = SessionFactory.createForLiveWithThread(sessionListener, yospaceSessionProperties)
             startPlayback(sessionFactory.playerUrl)
@@ -434,7 +454,7 @@ open class BitmovinYospacePlayer(
 
                 (yospaceSession as? SessionLive)?.let {
                     it.setTimedMetadataSource(yospaceMetadataSource)
-                    if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
+                    if (configuration.yospaceConfiguration.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
                         return@YospaceEventListener
                     }
                 }
@@ -648,7 +668,9 @@ open class BitmovinYospacePlayer(
         relativeStart,
         duration / 1000.0,
         absoluteStart + duration / 1000.0,
-        position = position.toLowerCase().run { AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN },
+        position = position.toLowerCase().run {
+            AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN
+        },
         ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
     )
 

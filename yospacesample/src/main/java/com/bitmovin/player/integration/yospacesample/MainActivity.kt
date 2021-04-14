@@ -11,6 +11,7 @@ import com.bitmovin.player.config.media.SourceConfiguration
 import com.bitmovin.player.config.media.SourceItem
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
+import com.bitmovin.player.integration.yospace.config.BitmovinYospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import kotlinx.android.synthetic.main.activity_main.*
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "CNN Live",
-                "https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear-novpaid/master.m3u8",
+                "https://live-manifests-aka-preprod.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear-novpaid/master.m3u8",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
             Stream(
@@ -71,8 +72,10 @@ class MainActivity : AppCompatActivity() {
             playbackConfiguration?.isAutoplayEnabled = true
             tweaksConfiguration?.useFiletypeExtractorFallbackForHls = true
         }
+        val yospaceConfig = YospaceConfiguration(debug = true)
+        val bitmovinYospaceConfiguration = BitmovinYospaceConfiguration(playerConfig, yospaceConfig)
 
-        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration()).apply {
+        player = BitmovinYospacePlayer(bitmovinYospaceConfiguration, this).apply {
             addEventListener(OnSourceLoadedListener {
                 loadUnloadButton.text = getString(R.string.unload)
             })

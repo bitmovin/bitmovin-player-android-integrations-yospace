@@ -53,6 +53,7 @@ dependencies {
     implementation supportDependencies.appCompat
     implementation bitmovinPlayerDependencies.bitmovinPlayer
     implementation truexDependencies.truexRenderer
+    implementation bitmovinPlayerDependencies.analytics
 }
 
 publishing {

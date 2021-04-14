@@ -4,6 +4,7 @@ ext {
     bitmovinPlayerVersion = '2.62.1+jason'
     truexRendererVersion = '1.0.8'
     junitVersion = '5.3.2'
+    bitmovinAnalyticsVersion = "1.16.0"
 
     // Library dependencies
     supportDependencies = [
@@ -13,7 +14,8 @@ ext {
     ]
 
     bitmovinPlayerDependencies = [
-            bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
+            bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}",
+            analytics: "com.bitmovin.analytics:collector-bitmovin-player:${bitmovinAnalyticsVersion}"
     ]
 
     truexDependencies = [

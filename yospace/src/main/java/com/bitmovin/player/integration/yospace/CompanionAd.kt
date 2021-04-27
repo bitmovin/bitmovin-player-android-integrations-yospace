@@ -1,7 +1,8 @@
 package com.bitmovin.player.integration.yospace
 
 enum class CompanionAdType {
-    HTML, STATIC
+    HTML, // dynamic, web view
+    STATIC // static, image view
 }
 
 data class CompanionAdResource(

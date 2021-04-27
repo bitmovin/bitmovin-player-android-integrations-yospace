@@ -5,6 +5,9 @@ import com.bitmovin.player.api.event.listener.*
 import com.bitmovin.player.api.event.listener.EventListener
 import java.util.concurrent.ConcurrentHashMap
 
+/*
+* Fires player events to player event observers
+*/
 class YospaceEventEmitter {
     private val eventListeners = ConcurrentHashMap<Class<*>, MutableList<EventListener<*>>>()
 

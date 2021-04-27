@@ -5,7 +5,6 @@ import com.yospace.android.hls.analytic.advert.AdBreak
 import com.yospace.android.hls.analytic.policy.PolicyHandler
 
 class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : PolicyHandler {
-    //TODO fix this class with proper values once we have a VOD test stream
     private var playbackMode: Session.PlaybackMode? = null
 
     override fun canStart(l: Long, list: List<AdBreak>): Boolean = true

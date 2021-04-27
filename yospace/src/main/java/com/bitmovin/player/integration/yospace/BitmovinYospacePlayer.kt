@@ -266,6 +266,10 @@ open class BitmovinYospacePlayer(
         super.setAdViewGroup(adViewGroup)
     }
 
+    ///////////////////////////////////////////////////////////////
+    // Analytics Beacons
+    ///////////////////////////////////////////////////////////////
+
     fun onLinearClickThrough() = yospaceSession?.onLinearClickThrough()
 
     fun onCompanionClickThrough(companionId: String) = yospaceSession?.onCompanionClickThrough(companionId)
@@ -554,6 +558,8 @@ open class BitmovinYospacePlayer(
                 ?.firstOrNull { it.id == advert?.identifier }
 
                 // Else create ad manually
+                // Note: This shouldn't be required, as the ad should belong to the activeAdBreak
+                // However, the activeAdBreak may be null if onAdvertBreakStart does not fire
                 ?: run {
                     val absoluteTime = currentTimeWithAds()
                     val adAbsoluteStart: Double
@@ -571,6 +577,7 @@ open class BitmovinYospacePlayer(
                     advert?.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
+            // Get companion ads from Yospace ad
             val companionAds = advert?.companionCreatives?.map { creative ->
                 val resource = creative.getResource(ResourceType.HTML)?.let {
                     CompanionAdResource(it.stringData, CompanionAdType.HTML)
@@ -603,7 +610,7 @@ open class BitmovinYospacePlayer(
         }
 
         override fun onAdvertEnd(advert: YospaceAd?) {
-            BitLog.d("YoSpace onAdvertEnd")
+            BitLog.d("onAdvertEnd")
 
             val adFinishedEvent = AdFinishedEvent(activeAd)
             handler.post { yospaceEventEmitter.emit(adFinishedEvent) }
@@ -612,7 +619,7 @@ open class BitmovinYospacePlayer(
         }
 
         override fun onAdvertBreakEnd(adBreak: YospaceAdBreak?) {
-            BitLog.d("YoSpace onAdvertBreakEnd")
+            BitLog.d("onAdvertBreakEnd")
 
             val adBreakFinishedEvent = AdBreakFinishedEvent(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakFinishedEvent) }
@@ -620,11 +627,11 @@ open class BitmovinYospacePlayer(
         }
 
         override fun onTimelineUpdateReceived(vmapPayload: VmapPayload) {
-            BitLog.d("YoSpace onTimelineUpdateReceived")
+            BitLog.d("onTimelineUpdateReceived")
         }
 
         override fun onTrackingUrlCalled(advert: YospaceAd, type: String, url: String) {
-            BitLog.d("YoSpace onTrackingUrlCalled: $type")
+            BitLog.d("onTrackingUrlCalled: $type")
 
             when (type) {
                 "firstQuartile" -> {

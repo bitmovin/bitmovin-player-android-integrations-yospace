@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `BitmovinYospaceIntegration` to encapsulate `PlayerConfiguration` and `YospaceConfiguration`
 - `BitmovinAnalyticsCollector` to `BitmovinYospacePlayer`
 
+### Changed
+- Bitmovin Maven link to new Binary URL
+
 ## [1.18.1]
 
 ### Changed

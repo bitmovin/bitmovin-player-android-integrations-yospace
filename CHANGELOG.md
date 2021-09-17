@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `BitmovinYospaceIntegration` to encapsulate `PlayerConfiguration` and `YospaceConfiguration`
 - `BitmovinAnalyticsCollector` to `BitmovinYospacePlayer`
 
+### Changed
+- Bump Bitmovin Player to [2.70.0+jason](https://bitmovin.com/docs/player/releases/android/android-2-70-0) from [2.62.1+jason](https://bitmovin.com/docs/player/releases/android/android-2-62-1).
+- Bump compileSdkVersion to 30.
+- Bump targetSdkVersion to 30.
+
 ## [1.18.2]
 
 ### Changed

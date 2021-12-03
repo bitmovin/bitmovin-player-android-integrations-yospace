@@ -154,6 +154,9 @@ open class BitmovinYospacePlayer(
                 val newSourceConfiguration = SourceConfiguration()
                 val sourceItem = SourceItem(HLSSource(playbackUrl))
                 val drmConfiguration = sourceConfig?.firstSourceItem?.getDrmConfiguration(DRMSystems.WIDEVINE_UUID)
+                sourceConfig?.firstSourceItem?.thumbnailTrack?.let {
+                    sourceItem.setThumbnailTrack(it);
+                }
                 drmConfiguration?.let { sourceItem.addDRMConfiguration(it) }
                 newSourceConfiguration.addSourceItem(sourceItem)
                 load(newSourceConfiguration)

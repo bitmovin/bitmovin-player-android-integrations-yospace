@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.18.4]
+
+### Added
+- Ability to filter for specific metadata types to be fired to Yospace.
+
 ## [1.18.3]
 
 ### Changed

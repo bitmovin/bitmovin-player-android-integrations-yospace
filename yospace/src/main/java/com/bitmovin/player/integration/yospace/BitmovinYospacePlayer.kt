@@ -308,15 +308,17 @@ open class BitmovinYospacePlayer(
 
         super.addEventListener(OnMetadataListener { metadataEvent ->
             if (yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
-                metadataEvent.toTimedMetadata()?.let {
-                    timedMetadataEvents.add(it)
-                    // Only send metadata events if play event has been sent
-                    if (isPlayingEventSent) {
-                        for (metadata in timedMetadataEvents) {
-                            BitLog.d("Sending METADATA event: $metadata")
-                            yospaceMetadataSource.notify(metadata)
+                if (yospaceConfig.filterMetadataType == null || metadataEvent.type == yospaceConfig.filterMetadataType.name) { // Some Yospace Streams will have both emsg v0(emsg) and v1(id3) which can cause duplicate metadata events
+                    metadataEvent.toTimedMetadata()?.let {
+                        timedMetadataEvents.add(it)
+                        // Only send metadata events if play event has been sent
+                        if (isPlayingEventSent) {
+                            for (metadata in timedMetadataEvents) {
+                                BitLog.d("Sending METADATA event: $metadata")
+                                yospaceMetadataSource.notify(metadata)
+                            }
+                            timedMetadataEvents.clear()
                         }
-                        timedMetadataEvents.clear()
                     }
                 }
             }

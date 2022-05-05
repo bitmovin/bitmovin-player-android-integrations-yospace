@@ -9,13 +9,11 @@ def libraryVersion = '1.18.4'
 def libraryCode = 61
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 28
-        versionCode libraryCode
-        versionName libraryVersion
+        targetSdkVersion 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,10 +24,8 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+
+    kotlinOptions { jvmTarget = '11' }
 
     testOptions {
         unitTests.all {
@@ -40,11 +36,12 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    debugImplementation files('libs/yoAdManagement-debug.aar')
-    debugImplementation files('libs/yoUtil-debug.aar')
-    releaseImplementation files('libs/yoAdManagement-release.aar')
-    releaseImplementation files('libs/yoUtil-release.aar')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation(files("libs/admanagement-sdk-3.3.3.aar"))
+    implementation(files("libs/admanagement-util-2.15.9.aar"))
+    annotationProcessor 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.14.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.14.1'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:2.14.1'
 
     testImplementation testDependencies.junitAPI
     testRuntimeOnly testDependencies.junitEngine
@@ -53,6 +50,7 @@ dependencies {
     implementation supportDependencies.appCompat
     implementation bitmovinPlayerDependencies.bitmovinPlayer
     implementation truexDependencies.truexRenderer
+
 }
 
 publishing {

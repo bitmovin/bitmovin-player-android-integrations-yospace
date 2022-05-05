@@ -7,7 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'com.android.tools.build:gradle:7.1.2'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -20,6 +20,13 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url 'https://yospacerepo.jfrog.io/yospacerepo/android-sdk'
+            credentials {
+                username 'ext_eyevsdk'
+                password '5Aq~23Cqw:+xjm./_*oTk.'
+            }
+        }
         maven {
             url 'https://bitmovin.jfrog.io/artifactory/public-releases'
         }

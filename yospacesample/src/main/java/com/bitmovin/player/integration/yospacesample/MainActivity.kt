@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "CNN Live",
-                "https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear-novpaid/master.m3u8",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
             Stream(
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             ),
             Stream(
                 "Bones",
-                "https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=false",
+                "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
             )
         )

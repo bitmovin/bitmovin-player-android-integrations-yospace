@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.20.0]
+
+## Changed
+- Update to Yospace SDK v3
+- Migrated to new Listener APIs
+- Removed obsolete listeners
+- Upgraded to Java 11 and Gradle 7.2
+
+## Added
+- Add PlayerAdapter for Live and VOD
+
 ## [1.18.4]
 
 ### Added

@@ -5,8 +5,8 @@ import com.bitmovin.player.integration.yospace.AdBreakPosition.*
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
-import com.yospace.android.hls.analytic.advert.Advert
-import com.yospace.android.hls.analytic.advert.InteractiveUnit
+import com.yospace.admanagement.Advert
+import com.yospace.admanagement.InteractiveCreative
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -23,22 +23,20 @@ class BitmovinTruexAdRenderer(
 
     var listener: BitmovinTruexAdRendererListener? = null
     private var renderer: TruexAdRenderer? = null
-    private var interactiveUnit: InteractiveUnit? = null
+    private var interactiveUnit: InteractiveCreative? = null
     private var adBreakPosition = PREROLL
     private var isAdFree = false
     private var isSessionAdFree = false
 
     fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
         this.adBreakPosition = adBreakPosition
-        this.interactiveUnit = ad.linearCreative?.interactiveUnit
+        this.interactiveUnit = ad.interactiveCreative
 
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")
             try {
-                val adParams = JSONObject(interactiveUnit.adParameters).apply {
-                    putOpt("user_id", configuration.userId)
-                    putOpt("vast_config_url", configuration.vastConfigUrl)
-                }
+                val map = mapOf("user_id" to configuration.userId, "vast_config_url" to configuration.vastConfigUrl)
+                val adParams = JSONObject(map)
                 renderer = TruexAdRenderer(context).apply {
                     addEventListeners(this)
                     init(interactiveUnit.source, adParams, adBreakPosition.value)
@@ -163,9 +161,9 @@ class BitmovinTruexAdRenderer(
     // Tracking Events
     ///////////////////////////////////////////////////////////////////////////
 
-    private fun InteractiveUnit.notifyAdStarted() = onTrackingEvent("creativeView")
-    private fun InteractiveUnit.notifyAdStopped() = onTrackingEvent("vpaidstopped")
-    private fun InteractiveUnit.notifyAdImpression() = onTrackingEvent("impression")
-    private fun InteractiveUnit.notifyAdVideoStart() = onTrackingEvent("start")
-    private fun InteractiveUnit.notifyAdVideoComplete() = onTrackingEvent("complete")
+    private fun InteractiveCreative.notifyAdStarted() = onTrackingEvent("creativeView")
+    private fun InteractiveCreative.notifyAdStopped() = onTrackingEvent("vpaidstopped")
+    private fun InteractiveCreative.notifyAdImpression() = onTrackingEvent("impression")
+    private fun InteractiveCreative.notifyAdVideoStart() = onTrackingEvent("start")
+    private fun InteractiveCreative.notifyAdVideoComplete() = onTrackingEvent("complete")
 }

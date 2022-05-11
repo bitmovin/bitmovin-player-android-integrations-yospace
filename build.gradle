@@ -21,13 +21,6 @@ allprojects {
         google()
         jcenter()
         maven {
-            url 'https://yospacerepo.jfrog.io/yospacerepo/android-sdk'
-            credentials {
-                username 'ext_eyevsdk'
-                password '5Aq~23Cqw:+xjm./_*oTk.'
-            }
-        }
-        maven {
             url 'https://bitmovin.jfrog.io/artifactory/public-releases'
         }
         maven {

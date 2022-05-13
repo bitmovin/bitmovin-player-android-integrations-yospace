@@ -1,7 +1,7 @@
 package com.bitmovin.player.integration.yospace
 
 import android.content.Context
-import com.bitmovin.player.integration.yospace.AdBreakPosition.*
+import com.bitmovin.player.integration.yospace.AdBreakPosition.PREROLL
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
@@ -35,8 +35,10 @@ class BitmovinTruexAdRenderer(
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")
             try {
-                val map = mapOf("user_id" to configuration.userId, "vast_config_url" to configuration.vastConfigUrl)
-                val adParams = JSONObject(map)
+                val adParams = JSONObject(interactiveUnit.adParameters.attributes as Map<*, *>?).apply {
+                    putOpt("user_id", configuration.userId)
+                    putOpt("vast_config_url", configuration.vastConfigUrl)
+                }
                 renderer = TruexAdRenderer(context).apply {
                     addEventListeners(this)
                     init(interactiveUnit.source, adParams, adBreakPosition.value)

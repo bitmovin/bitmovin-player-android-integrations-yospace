@@ -120,8 +120,7 @@ public class PlayerAdapter implements Player.Listener, MediaSourceEventListener 
 
     private void removePlayheadObserver() {
         if (mPlayheadTimer != null) {
-            Log.i(Constant.getLogTag(), "PlayerAdapter.removePlayheadObserver - called");
-
+            BitLog.INSTANCE.i("PlayerAdapter.removePlayheadObserver - called");
             mPlayheadTimer.cancel();
             mPlayheadTimer = null;
         }

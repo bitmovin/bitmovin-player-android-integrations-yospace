@@ -143,8 +143,7 @@ open class BitmovinYospacePlayer(
                     var mSession = event.payload as SessionLive
                     when (mSession.getSessionResult()) {
                         Session.SessionResult.INITIALISED -> {
-                            Log.i(
-                                Constant.getLogTag(),
+                            BitLog.i(
                                 "Yospace analytics session initialised"
                             )
 
@@ -176,8 +175,7 @@ open class BitmovinYospacePlayer(
             var mSession = event.payload as SessionLive
             when (mSession.getSessionResult()) {
                 Session.SessionResult.INITIALISED -> {
-                    Log.i(
-                        Constant.getLogTag(),
+                    BitLog.i(
                         "Yospace analytics session initialised"
                     )
 
@@ -264,12 +262,14 @@ open class BitmovinYospacePlayer(
     fun currentTimeWithAds(): Double = super.getCurrentTime()
 
     override fun seek(time: Double) {
-        adTimeline?.let {
-            val seekTime = yospaceSession!!.willSeekTo(time.toLong())
-            val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
-            BitLog.d("Seeking to $absoluteSeekTime")
-            super.seek(absoluteSeekTime)
-            return
+        if (yospaceSession?.canSkip() != 0) {
+            adTimeline?.let {
+                val seekTime = yospaceSession!!.willSeekTo(time.toLong())
+                val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
+                BitLog.d("Seeking to $absoluteSeekTime")
+                super.seek(absoluteSeekTime)
+                return
+            }
         }
         BitLog.d("Seeking to $time")
         super.seek(time)

@@ -1,10 +1,8 @@
 package com.bitmovin.player.integration.yospace
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.ViewGroup
 import com.bitmovin.player.BitmovinPlayer
 import com.bitmovin.player.api.event.data.*
@@ -134,11 +132,10 @@ open class BitmovinYospacePlayer(
     private fun loadLive(originalUrl: String, properties: SessionProperties) =
         when (yospaceConfig.liveInitialisationType) {
             YospaceLiveInitialisationType.PROXY -> {
-                val sessionFactory = SessionFactory.create(
+                SessionFactory.create(
                     originalUrl, Session.PlaybackMode.LIVE, properties
                 ) { event: Event<Session> ->
                     // Callback made by SessionLive once it has initialised a session on the Yospace CSM
-                    val adapter = PlayerAdapterLive(context.applicationContext as Activity?, null)
                     // Retrieve the initialised session
                     var mSession = event.payload as SessionLive
                     when (mSession.getSessionResult()) {
@@ -146,15 +143,6 @@ open class BitmovinYospacePlayer(
                             BitLog.i(
                                 "Yospace analytics session initialised"
                             )
-
-                            // attach the Yospace session to the player adapter as a listener,
-                            // so that it will receive player events
-                            adapter.setPlaybackEventListener(mSession)
-
-                            // attach this activity to the Yospace session as an analytic observer,
-                            // so that we will be notified when the session signals analytic events
-
-                            // attach a policy handler to the session
                             return@create
                         }
 
@@ -166,11 +154,10 @@ open class BitmovinYospacePlayer(
         }
 
     private fun loadVod(originalUrl: String, properties: SessionProperties) {
-        val sessionFactory = SessionFactory.create(
+        SessionFactory.create(
             originalUrl, Session.PlaybackMode.VOD, properties
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
-            val adapter = PlayerAdapter(context.applicationContext as Activity?, null)
             // Retrieve the initialised session
             var mSession = event.payload as SessionLive
             when (mSession.getSessionResult()) {
@@ -178,14 +165,6 @@ open class BitmovinYospacePlayer(
                     BitLog.i(
                         "Yospace analytics session initialised"
                     )
-
-                    // attach the Yospace session to the player adapter as a listener,
-                    // so that it will receive player events
-                    adapter.setPlaybackEventListener(mSession)
-                    // attach this activity to the Yospace session as an analytic observer,
-                    // so that we will be notified when the session signals analytic events
-
-                    // attach a policy handler to the session
                     return@create
                 }
 
@@ -194,7 +173,25 @@ open class BitmovinYospacePlayer(
         startPlayback(MediaSourceType.HLS, originalUrl)
     }
 
-    private fun loadStartOver(originalUrl: String, properties: SessionProperties) = SessionNLSO.create(originalUrl, yospaceSessionProperties, sessionListener)
+    private fun loadStartOver(originalUrl: String, properties: SessionProperties) {
+        SessionFactory.create(
+            originalUrl, Session.PlaybackMode.NLSO, properties
+        ) { event: Event<Session> ->
+            // Callback made by Session once it has initialised a session on the Yospace CSM
+            // Retrieve the initialised session
+            var mSession = event.payload as SessionLive
+            when (mSession.getSessionResult()) {
+                Session.SessionResult.INITIALISED -> {
+                    BitLog.i(
+                        "Yospace analytics session initialised"
+                    )
+                    return@create
+                }
+
+            }
+        }
+        startPlayback(MediaSourceType.HLS, originalUrl)
+    }
 
     override fun unload() {
         loadState = LoadState.UNLOADING
@@ -205,7 +202,6 @@ open class BitmovinYospacePlayer(
     private fun startPlayback(mediaSourceType: MediaSourceType, playbackUrl: String) {
         if (loadState != LoadState.UNLOADING) {
             handler.post {
-                val newSourceConfiguration = SourceConfiguration()
                 var sourceItem: SourceItem? = null;
                 if (mediaSourceType == MediaSourceType.DASH) {
                     sourceItem = SourceItem(DASHSource(playbackUrl))
@@ -223,8 +219,7 @@ open class BitmovinYospacePlayer(
                 }
                 drmConfiguration?.let { sourceItem?.addDRMConfiguration(it) }
                 if (sourceItem != null) {
-                    newSourceConfiguration.addSourceItem(sourceItem)
-                    load(newSourceConfiguration)
+                    load(sourceItem)
                 }
             }
         }

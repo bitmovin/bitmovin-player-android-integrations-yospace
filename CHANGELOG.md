@@ -6,14 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.20.0]
 
+### Added
+- Added support for Yospace SDK v3
+
 ## Changed
-- Update to Yospace SDK v3
 - Migrated to new Listener APIs
 - Removed obsolete listeners
 - Upgraded to Java 11 and Gradle 7.2
-
-## Added
-- Add PlayerAdapter for Live and VOD
 
 ## [1.18.4]
 

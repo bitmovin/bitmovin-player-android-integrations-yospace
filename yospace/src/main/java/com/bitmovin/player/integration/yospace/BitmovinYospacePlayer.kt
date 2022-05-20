@@ -137,20 +137,18 @@ open class BitmovinYospacePlayer(
                 ) { event: Event<Session> ->
                     // Callback made by SessionLive once it has initialised a session on the Yospace CSM
                     // Retrieve the initialised session
-                    var mSession = event.payload as SessionLive
-                    when (mSession.getSessionResult()) {
-                        Session.SessionResult.INITIALISED -> {
-                            BitLog.i(
-                                "Yospace analytics session initialised"
-                            )
-                            return@create
-                        }
-
-                    }
+                    whenSessionInitialized(
+                        event.payload as SessionLive,
+                        "Yospace analytics session live initialised"
+                    )
                 }
                 startPlayback(MediaSourceType.HLS, originalUrl)
             }
-            YospaceLiveInitialisationType.DIRECT -> SessionLive.create(originalUrl,yospaceSessionProperties,sessionListener)
+            YospaceLiveInitialisationType.DIRECT -> SessionLive.create(
+                originalUrl,
+                yospaceSessionProperties,
+                sessionListener
+            )
         }
 
     private fun loadVod(originalUrl: String, properties: SessionProperties) {
@@ -159,16 +157,10 @@ open class BitmovinYospacePlayer(
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
-            var mSession = event.payload as SessionLive
-            when (mSession.getSessionResult()) {
-                Session.SessionResult.INITIALISED -> {
-                    BitLog.i(
-                        "Yospace analytics session initialised"
-                    )
-                    return@create
-                }
-
-            }
+            whenSessionInitialized(
+                event.payload as SessionVOD,
+                "Yospace analytics session VOD initialised"
+            )
         }
         startPlayback(MediaSourceType.HLS, originalUrl)
     }
@@ -179,18 +171,21 @@ open class BitmovinYospacePlayer(
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
-            var mSession = event.payload as SessionLive
-            when (mSession.getSessionResult()) {
-                Session.SessionResult.INITIALISED -> {
-                    BitLog.i(
-                        "Yospace analytics session initialised"
-                    )
-                    return@create
-                }
-
-            }
+            whenSessionInitialized(
+                event.payload as SessionNLSO,
+                "Yospace analytics session NLSO initialised"
+            )
         }
         startPlayback(MediaSourceType.HLS, originalUrl)
+    }
+
+    private fun whenSessionInitialized(mSession: Session,message: String) {
+        when (mSession.getSessionResult()) {
+            Session.SessionResult.INITIALISED -> {
+                BitLog.i(message)
+                return
+            }
+        }
     }
 
     override fun unload() {

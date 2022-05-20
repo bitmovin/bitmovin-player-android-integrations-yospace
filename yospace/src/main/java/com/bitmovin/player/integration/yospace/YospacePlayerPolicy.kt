@@ -21,7 +21,7 @@ class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : Play
         playhead: Long,
         timeline: MutableList<com.yospace.admanagement.AdBreak>?,
         duration: Long
-    ): Int  = playerPolicy?.canSkip() ?: 0
+    ): Int = playerPolicy?.canSkip() ?: 0
 
     override fun willSeekTo(
         position: Long,

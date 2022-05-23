@@ -679,7 +679,7 @@ open class BitmovinYospacePlayer(
         }
 
         override fun onAnalyticUpdate() {
-            BitLog.d("YoSpace onAnalyticUpdate: ")
+            BitLog.d("YoSpace onAnalyticUpdate event")
         }
     }
 

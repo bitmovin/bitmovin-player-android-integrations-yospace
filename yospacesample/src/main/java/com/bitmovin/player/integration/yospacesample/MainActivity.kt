@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private val streams by lazy {
         listOf(
             Stream(
-                "CNN Live",
+                "Yospace Live",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
                 YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
             Stream(
-                "Bones",
-                "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8",
+                "Yospace VOD",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
             )
         )

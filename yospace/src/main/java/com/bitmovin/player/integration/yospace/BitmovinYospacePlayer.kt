@@ -256,14 +256,12 @@ open class BitmovinYospacePlayer(
     fun currentTimeWithAds(): Double = super.getCurrentTime()
 
     override fun seek(time: Double) {
-        if (yospaceSession?.canSkip() != 0) {
-            adTimeline?.let {
-                val seekTime = yospaceSession!!.willSeekTo(time.toLong())
-                val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
-                BitLog.d("Seeking to $absoluteSeekTime")
-                super.seek(absoluteSeekTime)
-                return
-            }
+        adTimeline?.let {
+            val seekTime = yospaceSession!!.willSeekTo(time.toLong())
+            val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
+            BitLog.d("Seeking to $absoluteSeekTime")
+            super.seek(absoluteSeekTime)
+            return
         }
         BitLog.d("Seeking to $time")
         super.seek(time)

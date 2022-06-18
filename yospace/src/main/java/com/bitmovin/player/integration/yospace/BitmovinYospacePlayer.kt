@@ -132,13 +132,13 @@ open class BitmovinYospacePlayer(
     private fun loadLive(originalUrl: String, properties: SessionProperties) =
         when (yospaceConfig.liveInitialisationType) {
             YospaceLiveInitialisationType.PROXY -> {
-                SessionFactory.create(
-                    originalUrl, Session.PlaybackMode.LIVE, properties
+                SessionLive.create(
+                    originalUrl, properties
                 ) { event: Event<Session> ->
                     // Callback made by SessionLive once it has initialised a session on the Yospace CSM
                     // Retrieve the initialised session
                     whenSessionInitialized(
-                        event.payload as SessionLive,
+                        event.payload,
                         "Yospace analytics session live initialised"
                     )
                 }
@@ -152,29 +152,30 @@ open class BitmovinYospacePlayer(
         }
 
     private fun loadVod(originalUrl: String, properties: SessionProperties) {
-        SessionFactory.create(
-            originalUrl, Session.PlaybackMode.VOD, properties
+        SessionVOD.create(
+            originalUrl, properties
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
             whenSessionInitialized(
-                event.payload as SessionVOD,
+                event.payload,
                 "Yospace analytics session VOD initialised"
             )
+            startPlayback(MediaSourceType.HLS, event.payload.playbackUrl)
         }
-        startPlayback(MediaSourceType.HLS, originalUrl)
     }
 
     private fun loadStartOver(originalUrl: String, properties: SessionProperties) {
-        SessionFactory.create(
-            originalUrl, Session.PlaybackMode.NLSO, properties
+        SessionNLSO.create(
+            originalUrl, properties
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
             whenSessionInitialized(
-                event.payload as SessionNLSO,
+                event.payload,
                 "Yospace analytics session NLSO initialised"
             )
+            yospaceSession = event.payload
         }
         startPlayback(MediaSourceType.HLS, originalUrl)
     }
@@ -182,6 +183,9 @@ open class BitmovinYospacePlayer(
     private fun whenSessionInitialized(mSession: Session,message: String) {
         when (mSession.getSessionResult()) {
             Session.SessionResult.INITIALISED -> {
+                yospaceSession = mSession
+                mSession.addAnalyticObserver(analyticEventListener)
+                mSession.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i(message)
                 return
             }
@@ -204,7 +208,7 @@ open class BitmovinYospacePlayer(
                     sourceItem = SourceItem(HLSSource(playbackUrl))
                 } else if (mediaSourceType == MediaSourceType.SMOOTH) {
                     sourceItem = SourceItem(SmoothSource(playbackUrl))
-                }else{
+                } else {
                     sourceItem = SourceItem(HLSSource(playbackUrl))
                 }
                 val drmConfiguration =
@@ -378,6 +382,8 @@ open class BitmovinYospacePlayer(
 
         super.addEventListener(OnTimeChangedListener {
             val timeChangedEvent = TimeChangedEvent(currentTime)
+            val playbackEventHandler = yospaceSession as PlaybackEventHandler
+            playbackEventHandler.onPlayheadUpdate((currentTime * 1000).toLong());
             if (yospaceSession as? SessionLive != null) {
                 // Live session
                 val adSkippedEvent = AdSkippedEvent(activeAd)
@@ -494,7 +500,9 @@ open class BitmovinYospacePlayer(
                     }
                 }
 
-                yospaceSession?.let { startPlayback(MediaSourceType.HLS,it.playbackUrl) }
+                yospaceSession?.let {
+                    it.addAnalyticObserver(analyticEventListener)
+                    startPlayback(MediaSourceType.HLS, it.playbackUrl) }
             }
             Session.SessionResult.FAILED -> handleYospaceSessionFailure(
                 SESSION_NO_ANALYTICS,
@@ -606,7 +614,7 @@ open class BitmovinYospacePlayer(
                     advert.toAd(adAbsoluteStart, adRelativeStart)
                 }
 
-            val companionAds = advert.interactiveCreative.nonLinearCreatives.map { creative ->
+            val companionAds = advert.interactiveCreative?.nonLinearCreatives?.map { creative ->
                 val resource = creative.getResource(Resource.ResourceType.HTML)?.let {
                     CompanionAdResource(it.stringData, CompanionAdType.HTML)
                 } ?: creative.getResource(Resource.ResourceType.STATIC)?.let {
@@ -696,7 +704,7 @@ open class BitmovinYospacePlayer(
     }
 
     private fun com.yospace.admanagement.AdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        activeAdBreak!!.id,
+        this.identifier,
         absoluteStart,
         relativeStart,
         duration / 1000.0,

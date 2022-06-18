@@ -4,7 +4,6 @@ import com.yospace.admanagement.PlaybackPolicyHandler
 import com.yospace.admanagement.Session
 
 class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : PlaybackPolicyHandler {
-    //TODO fix this class with proper values once we have a VOD test stream
     private var playbackMode: Session.PlaybackMode? = null
 
     override fun canStop(

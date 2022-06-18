@@ -23,18 +23,18 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "Yospace Live",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
             Stream(
-                "CNN Companion Ads",
-                "https://live-media-aka-qa.warnermediacdn.com/csmp/cmaf/live/2011916/tbseast-cenc-stg-cmp/master_wv.m3u8?yo.pdt=true&yo.vp=false&yo.ad=true&caid=mml-false&conf_csid=ncaa.com_mmodplayer&context=243427194&nw=42448&playername=top-2.1.2-1&prof=48804:tbs_web_vod&vdur=361.5956&yo.vp=true&yo.av=2&yo.ad=true&&yo.ad=true&yo.dnt=false&yo.dr=true",
+                "Yospace Companion Ads",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.lp=true&yo.av=4",
                 "https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128",
                 YospaceSourceConfiguration(YospaceAssetType.LINEAR)
             ),
             Stream(
                 "Yospace VOD",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=4",
                 yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
             )
         )

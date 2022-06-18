@@ -26,6 +26,14 @@ allprojects {
         maven {
             url "https://raw.github.com/socialvibe/truex-mobile-integrations/android"
         }
+        maven {
+            url 'https://yospacerepo.jfrog.io/yospacerepo/android-sdk'
+            credentials {
+                //ADD credentials for build so that gradle can download yospace libraries
+                username ""
+                password ""
+            }
+        }
     }
 }
 

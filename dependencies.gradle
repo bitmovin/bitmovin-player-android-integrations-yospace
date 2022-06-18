@@ -17,8 +17,8 @@ ext {
     ]
 
     yospaceDependencies = [
-            adManagementSDK: "libs/admanagement-sdk-3.3.3.aar",
-            adManagementUtil: "libs/admanagement-util-2.15.9.aar"
+            adManagementSDK: "com.yospace:admanagement-sdk:3.3.3",
+            adManagementUtil: "com.yospace:admanagement-util:2.15.9"
     ]
 
     truexDependencies = [

@@ -137,7 +137,7 @@ open class BitmovinYospacePlayer(
                 ) { event: Event<Session> ->
                     // Callback made by SessionLive once it has initialised a session on the Yospace CSM
                     // Retrieve the initialised session
-                    whenSessionInitialized(
+                    onSessionInitialized(
                         event.payload,
                         "Yospace analytics session live initialised"
                     )
@@ -157,7 +157,7 @@ open class BitmovinYospacePlayer(
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
-            whenSessionInitialized(
+            onSessionInitialized(
                 event.payload,
                 "Yospace analytics session VOD initialised"
             )
@@ -171,7 +171,7 @@ open class BitmovinYospacePlayer(
         ) { event: Event<Session> ->
             // Callback made by Session once it has initialised a session on the Yospace CSM
             // Retrieve the initialised session
-            whenSessionInitialized(
+            onSessionInitialized(
                 event.payload,
                 "Yospace analytics session NLSO initialised"
             )
@@ -180,8 +180,8 @@ open class BitmovinYospacePlayer(
         startPlayback(MediaSourceType.HLS, originalUrl)
     }
 
-    private fun whenSessionInitialized(mSession: Session,message: String) {
-        when (mSession.getSessionResult()) {
+    private fun onSessionInitialized(mSession: Session, message: String) {
+        when (mSession.sessionResult) {
             Session.SessionResult.INITIALISED -> {
                 yospaceSession = mSession
                 mSession.addAnalyticObserver(analyticEventListener)
@@ -500,7 +500,8 @@ open class BitmovinYospacePlayer(
 
                 yospaceSession?.let {
                     it.addAnalyticObserver(analyticEventListener)
-                    startPlayback(MediaSourceType.HLS, it.playbackUrl) }
+                    startPlayback(MediaSourceType.HLS, it.playbackUrl)
+                }
             }
             Session.SessionResult.FAILED -> handleYospaceSessionFailure(
                 SESSION_NO_ANALYTICS,

@@ -180,12 +180,12 @@ open class BitmovinYospacePlayer(
         startPlayback(MediaSourceType.HLS, originalUrl)
     }
 
-    private fun onSessionInitialized(mSession: Session, message: String) {
-        when (mSession.sessionResult) {
+    private fun onSessionInitialized(session: Session, message: String) {
+        when (session.sessionResult) {
             Session.SessionResult.INITIALISED -> {
-                yospaceSession = mSession
-                mSession.addAnalyticObserver(analyticEventListener)
-                mSession.setPlaybackPolicyHandler(yospacePlayerPolicy)
+                yospaceSession = session
+                session.addAnalyticObserver(analyticEventListener)
+                session.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i(message)
                 return
             }

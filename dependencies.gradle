@@ -16,6 +16,11 @@ ext {
             bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
     ]
 
+    yospaceDependencies = [
+            adManagementSDK: "com.yospace:admanagement-sdk:3.3.3",
+            adManagementUtil: "com.yospace:admanagement-util:2.15.9"
+    ]
+
     truexDependencies = [
             truexRenderer: "com.truex:TruexAdRenderer:$truexRendererVersion",
     ]

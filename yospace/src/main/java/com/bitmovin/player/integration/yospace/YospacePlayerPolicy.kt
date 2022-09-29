@@ -1,40 +1,73 @@
 package com.bitmovin.player.integration.yospace
 
-import com.yospace.android.hls.analytic.Session
-import com.yospace.android.hls.analytic.advert.AdBreak
-import com.yospace.android.hls.analytic.policy.PolicyHandler
+import com.yospace.admanagement.PlaybackPolicyHandler
+import com.yospace.admanagement.Session
 
-class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : PolicyHandler {
-    //TODO fix this class with proper values once we have a VOD test stream
+class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : PlaybackPolicyHandler {
     private var playbackMode: Session.PlaybackMode? = null
 
-    override fun canStart(l: Long, list: List<AdBreak>): Boolean = true
+    override fun canStop(
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = true
 
-    override fun canStop(l: Long, list: List<AdBreak>): Boolean = true
+    override fun canPause(
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = playerPolicy?.canPause() ?: true
 
-    override fun canPause(l: Long, list: List<AdBreak>): Boolean = playerPolicy?.canPause() ?: true
+    override fun canSkip(
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?,
+        duration: Long
+    ): Int = playerPolicy?.canSkip() ?: 0
 
-    override fun canRewind(l: Long, list: List<AdBreak>): Boolean = true
+    override fun willSeekTo(
+        position: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Long = playerPolicy?.canSeekTo(position) ?: position
 
-    override fun canSkip(l: Long, list: List<AdBreak>, l1: Long): Int = playerPolicy?.canSkip() ?: 0
+    override fun canChangeVolume(
+        mute: Boolean,
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = playerPolicy?.canMute() ?: true
 
-    override fun canSeek(l: Long, list: List<AdBreak>): Boolean = playerPolicy?.canSeek() ?: true
+    override fun canResize(
+        fullScreen: Boolean,
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = true
 
-    override fun willSeekTo(l: Long, list: List<AdBreak>): Long = playerPolicy?.canSeekTo(l) ?: l
+    override fun canResizeCreative(
+        expand: Boolean,
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = true
 
-    override fun canMute(l: Long, list: List<AdBreak>): Boolean = playerPolicy?.canMute() ?: true
+    override fun canClickThrough(
+        url: String?,
+        playhead: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ): Boolean = true
 
-    override fun canGoFullScreen(l: Long, list: List<AdBreak>): Boolean = true
-
-    override fun canExitFullScreen(l: Long, list: List<AdBreak>): Boolean = true
-
-    override fun canExpandCreative(l: Long, list: List<AdBreak>): Boolean = true
-
-    override fun canCollapseCreative(l: Long, list: List<AdBreak>): Boolean = true
-
-    override fun canClickThrough(s: String, l: Long, list: List<AdBreak>): Boolean = true
-
-    override fun setPlaybackMode(playbackMode: Session.PlaybackMode) {
+    override fun setPlaybackMode(mode: Session.PlaybackMode?) {
         this.playbackMode = playbackMode
+    }
+
+    override fun didSkip(
+        from: Long,
+        to: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ) {
+        BitLog.d("Did skip from :$from to :$to")
+    }
+
+    override fun didSeek(
+        from: Long,
+        to: Long,
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+    ) {
+        BitLog.d("Did seek from :$from to :$to")
     }
 }

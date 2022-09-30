@@ -1,7 +1,7 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.model.advertising.Ad
-import com.bitmovin.player.model.advertising.AdBreak as BitmovinAdBreak
+import com.bitmovin.player.api.advertising.Ad
+import com.bitmovin.player.api.advertising.AdBreak
 
 data class AdBreak(
     override var id: String,
@@ -13,7 +13,7 @@ data class AdBreak(
     override val replaceContentDuration: Double = 0.0,
     override var scheduleTime: Double = 0.0,
     override var ads: MutableList<Ad> = mutableListOf()
-) : BitmovinAdBreak {
+) : AdBreak {
     override fun toString() =
         "id=$id, " +
         "absoluteStart=$absoluteStart, " +

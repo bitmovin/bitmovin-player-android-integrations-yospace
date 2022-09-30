@@ -5,4 +5,4 @@ data class AdData(
     override val bitrate: Int = -1,
     override val minBitrate: Int = -1,
     override val maxBitrate: Int = -1
-) : com.bitmovin.player.model.advertising.AdData
+) : com.bitmovin.player.api.advertising.AdData

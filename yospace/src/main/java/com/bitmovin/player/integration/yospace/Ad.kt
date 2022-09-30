@@ -1,10 +1,9 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.model.advertising.AdData
-import com.bitmovin.player.model.advertising.AdSystem
+import com.bitmovin.player.api.advertising.Ad
+import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.yospace.admanagement.AdvertWrapper
 import com.yospace.admanagement.XmlNode
-import com.bitmovin.player.model.advertising.Ad as BitmovinAd
 
 data class Ad(
     override var id: String?,
@@ -27,7 +26,7 @@ data class Ad(
     override var width: Int = -1,
     override var height: Int = -1,
     override var mediaFileUrl: String? = null
-) : BitmovinAd {
+) : Ad {
     override fun toString() =
         "id=$id, " +
         "creativeId=$creativeId, " +

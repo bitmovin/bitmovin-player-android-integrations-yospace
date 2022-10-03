@@ -1,5 +1,5 @@
 package com.bitmovin.player.integration.yospace
 
-interface OnTruexAdFreeListener {
+interface YospaceAdStartedListener {
     fun onEvent(event: CustomEvent)
 }

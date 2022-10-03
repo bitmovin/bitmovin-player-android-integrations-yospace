@@ -1,8 +1,9 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.api.event.data.*
-import com.bitmovin.player.api.event.listener.*
-import com.bitmovin.player.api.event.listener.EventListener
+import com.bitmovin.player.api.event.Event
+import com.bitmovin.player.api.event.EventListener
+import com.bitmovin.player.api.event.PlayerEvent
+import com.bitmovin.player.api.event.PlayerEvent.*
 import java.util.concurrent.ConcurrentHashMap
 
 class YospaceEventEmitter {
@@ -25,84 +26,104 @@ class YospaceEventEmitter {
     }
 
     @Synchronized
-    fun emit(event: BitmovinPlayerEvent) {
+    fun emit(event: Event) {
         when (event) {
-            is AdBreakStartedEvent -> {
+            is AdBreakStarted -> {
                 BitLog.d("Emitting AdBreakStartedEvent")
                 val listeners = eventListeners[OnAdBreakStartedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdBreakStartedListener).onAdBreakStarted(event)
+                    (it as OnAdBreakStartedListener).onEvent(event)
                 }
             }
-            is AdBreakFinishedEvent -> {
+            is AdBreakFinished -> {
                 BitLog.d("Emitting AdBreakFinishedEvent")
                 val listeners = eventListeners[OnAdBreakFinishedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdBreakFinishedListener).onAdBreakFinished(event)
+                    (it as OnAdBreakFinishedListener).onEvent(event)
                 }
             }
-            is AdStartedEvent -> {
+            is AdStarted -> {
                 BitLog.d("Emitting AdStartedEvent")
                 val listeners = eventListeners[OnAdStartedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdStartedListener).onAdStarted(event)
+                    (it as OnAdStartedListener).onEvent(event)
                 }
             }
-            is AdFinishedEvent -> {
+            is AdFinished -> {
                 BitLog.d("Emitting AdFinishedEvent")
                 val listeners = eventListeners[OnAdFinishedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdFinishedListener).onAdFinished(event)
+                    (it as OnAdFinishedListener).onEvent(event)
                 }
             }
-            is AdClickedEvent -> {
+            is AdClicked -> {
                 val listeners = eventListeners[OnAdClickedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdClickedListener).onAdClicked(event)
+                    (it as OnAdClickedListener).onEvent(event)
                 }
             }
-            is AdErrorEvent -> {
+            is AdError -> {
                 val listeners = eventListeners[OnAdErrorListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdErrorListener).onAdError(event)
+                    (it as OnAdErrorListener).onEvent(event)
                 }
             }
-            is AdSkippedEvent -> {
+            is AdSkipped -> {
                 val listeners = eventListeners[OnAdSkippedListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdSkippedListener).onAdSkipped(event)
+                    (it as OnAdSkippedListener).onEvent(event)
                 }
             }
-            is AdQuartileEvent -> {
+            is AdQuartile -> {
                 val listeners = eventListeners[OnAdQuartileListener::class.java]
                 listeners?.forEach {
-                    (it as OnAdQuartileListener).onAdQuartile(event)
+                    (it as OnAdQuartileListener).onEvent(event)
                 }
             }
-            is ErrorEvent -> {
+            is Error -> {
                 val listeners = eventListeners[OnErrorListener::class.java]
                 listeners?.forEach {
-                    (it as OnErrorListener).onError(event)
+                    (it as OnErrorListener).onEvent(event)
                 }
             }
-            is WarningEvent -> {
+            is Warning -> {
                 val listeners = eventListeners[OnWarningListener::class.java]
                 listeners?.forEach {
-                    (it as OnWarningListener).onWarning(event)
+                    (it as OnWarningListener).onEvent(event)
                 }
             }
-            is TimeChangedEvent -> {
+            is TimeChanged -> {
                 val listeners = eventListeners[OnTimeChangedListener::class.java]
                 listeners?.forEach {
-                    (it as OnTimeChangedListener).onTimeChanged(event)
+                    (it as OnTimeChangedListener).onEvent(event)
                 }
             }
+            else -> {
+                BitLog.d("Emitting Unknown Event")
+            }
+        }
+    }
+
+    @Synchronized
+    // This method is defined to support custom events
+    fun emit(event: CustomEvent) {
+        when (event) {
             is TruexAdFreeEvent -> {
                 BitLog.d("Emitting TruexAdFreeEvent")
                 val listeners = eventListeners[OnTruexAdFreeListener::class.java]
                 listeners?.forEach {
-                    (it as OnTruexAdFreeListener).onTruexAdFree(event)
+                    (it as OnTruexAdFreeListener).onEvent(event)
                 }
+            }
+            is YospaceAdStartedEvent -> {
+                BitLog.d("Emitting YospaceAdStartedEvent")
+                val listeners = eventListeners[YospaceAdStartedListener::class.java]
+                listeners?.forEach {
+                    (it as YospaceAdStartedListener).onEvent(event)
+                }
+            }
+            else -> {
+                BitLog.d("Emitting Unknown Custom Event")
             }
         }
     }
@@ -120,6 +141,20 @@ class YospaceEventEmitter {
         is OnWarningListener -> OnWarningListener::class.java
         is OnTimeChangedListener -> OnTimeChangedListener::class.java
         is OnTruexAdFreeListener -> OnTruexAdFreeListener::class.java
+        is YospaceAdStartedListener -> YospaceAdStartedListener::class.java
         else -> null
     }
+
+    // define interfaces with their legacy name
+    public interface OnAdBreakStartedListener : EventListener<PlayerEvent.AdBreakStarted>
+    public interface OnAdBreakFinishedListener : EventListener<PlayerEvent.AdBreakFinished>
+    public interface OnAdClickedListener : EventListener<PlayerEvent.AdClicked>
+    public interface OnAdErrorListener : EventListener<PlayerEvent.AdError>
+    public interface OnAdFinishedListener : EventListener<PlayerEvent.AdFinished>
+    public interface OnAdStartedListener : EventListener<PlayerEvent.AdStarted>
+    public interface OnAdSkippedListener : EventListener<PlayerEvent.AdSkipped>
+    public interface OnAdQuartileListener : EventListener<PlayerEvent.AdQuartile>
+    public interface OnErrorListener : EventListener<PlayerEvent.Error>
+    public interface OnWarningListener : EventListener<PlayerEvent.Warning>
+    public interface OnTimeChangedListener : EventListener<PlayerEvent.TimeChanged>
 }

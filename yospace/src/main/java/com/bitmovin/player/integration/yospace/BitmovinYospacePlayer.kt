@@ -131,6 +131,7 @@ open class BitmovinYospacePlayer(
                             or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML
                 )
             }
+        SessionProperties.setDebugFlags(com.yospace.admanagement.util.YoLog.DEBUG_VALIDATION)
 
         when (yospaceSourceConfig.assetType) {
             YospaceAssetType.LINEAR -> loadLive(originalUrl, yospaceSessionProperties!!)
@@ -198,6 +199,10 @@ open class BitmovinYospacePlayer(
                 session.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i(message)
                 return
+            }
+            else -> {
+                BitLog.e("Session Initialization failed with result: %s"
+                    .format(session.sessionResult.toString()))
             }
         }
     }
@@ -343,6 +348,11 @@ open class BitmovinYospacePlayer(
         player.on<PlayerEvent.Playing> {
             BitLog.d("Sending PLAYING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.PLAYING, yospaceTime, false))
+
+            // To raise "Playback start" notification
+            val playbackEventHandler = yospaceSession as PlaybackEventHandler
+            playbackEventHandler.onPlayerEvent(PlaybackEventHandler.PlayerEvent.START, (getCurrentTime() * 1000).toLong())
+
             isPlayingEventSent = true
         }
 
@@ -547,6 +557,10 @@ open class BitmovinYospacePlayer(
                 SESSION_NOT_INITIALISED,
                 "Failed to initialise YoSpace stream."
             )
+            else -> {
+                BitLog.e("Yospace Session Initialization failed with result: %s"
+                    .format(yospaceSession?.sessionResult.toString()))
+            }
         }
     }
 
@@ -753,7 +767,7 @@ open class BitmovinYospacePlayer(
         relativeStart,
         duration / 1000.0,
         absoluteStart + duration / 1000.0,
-        position = position.toLowerCase()
+        position = position.lowercase()
             .run { AdBreakPosition.values().find { it.value == this } ?: AdBreakPosition.UNKNOWN },
         ads = adverts.toAds(absoluteStart, relativeStart).toMutableList()
     )

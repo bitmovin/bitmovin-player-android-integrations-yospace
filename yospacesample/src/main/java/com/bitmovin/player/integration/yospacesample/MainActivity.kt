@@ -2,13 +2,16 @@ package com.bitmovin.player.integration.yospacesample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.bitmovin.player.api.event.listener.OnSourceLoadedListener
-import com.bitmovin.player.api.event.listener.OnSourceUnloadedListener
-import com.bitmovin.player.config.PlayerConfiguration
-import com.bitmovin.player.config.drm.WidevineConfiguration
-import com.bitmovin.player.config.media.HLSSource
-import com.bitmovin.player.config.media.SourceConfiguration
-import com.bitmovin.player.config.media.SourceItem
+import com.bitmovin.player.api.event.SourceEvent.Load
+import com.bitmovin.player.api.event.SourceEvent.Unloaded
+import com.bitmovin.player.api.PlayerConfig
+import com.bitmovin.player.api.drm.WidevineConfig
+import com.bitmovin.player.api.event.PlayerEvent
+import com.bitmovin.player.api.event.SourceEvent
+import com.bitmovin.player.api.event.on
+import com.bitmovin.player.api.source.HLSSource
+import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
@@ -52,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         playerView.onResume()
-        player.play()
+        player.player.play()
     }
 
     override fun onPause() {
@@ -67,19 +70,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupPlayer() {
-        val playerConfig = PlayerConfiguration().apply {
-            playbackConfiguration?.isAutoplayEnabled = true
-            tweaksConfiguration?.useFiletypeExtractorFallbackForHls = true
+        val playerConfig = PlayerConfig().apply {
+            playbackConfig.isAutoplayEnabled = true
+            tweaksConfig.useFiletypeExtractorFallbackForHls = true
         }
 
         player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration()).apply {
-            addEventListener(OnSourceLoadedListener {
+            player.on<SourceEvent.Load> {
+                BitLog.d("Change button")
                 loadUnloadButton.text = getString(R.string.unload)
-            })
-            addEventListener(OnSourceUnloadedListener {
+            }
+            player.on<SourceEvent.Unloaded> {
                 loadUnloadButton.text = getString(R.string.load)
-            })
-            playerView.player = this
+            }
+            playerView.player = player
+            BitLog.d("Setup player")
         }
     }
 
@@ -89,26 +94,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun addUIListeners() {
         loadUnloadButton.setOnClickListener {
-            if (player.isPlaying) {
+            if (player.player.isPlaying) {
+                BitLog.d("unload stream")
                 player.unload()
             } else {
+                BitLog.d("Button clicked, load stream")
                 loadStream(streams[streamSpinner.selectedItemPosition])
             }
         }
     }
 
     private fun loadStream(stream: Stream) {
-        val sourceItem = SourceItem(
+        val sourceItem = SourceConfig(
             HLSSource(stream.contentUrl)
         )
 
         stream.drmUrl?.let {
-            sourceItem.addDRMConfiguration(WidevineConfiguration(it))
+            sourceItem.addDrmConfig(WidevineConfig(it))
         }
 
-        val sourceConfig = SourceConfiguration().apply {
-            addSourceItem(sourceItem)
-        }
+        val sourceConfig = sourceItem
 
         player.load(sourceConfig, stream.yospaceSourceConfig, stream.truexConfig)
     }

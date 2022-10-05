@@ -21,7 +21,7 @@ import com.bitmovin.player.model.id3.BinaryFrame
 import com.yospace.admanagement.*
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.Session.SessionProperties.addDebugFlags
-import com.yospace.hls.TimedMetadata
+import com.yospace.admanagement.TimedMetadata
 import com.yospace.hls.player.PlaybackState
 import com.yospace.hls.player.PlayerState
 import com.yospace.util.YoLog
@@ -41,7 +41,7 @@ private const val UNSUPPORTED_API = 6004
 private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
 private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
-open class BitmovinYospacePlayer(
+class BitmovinYospacePlayer(
     private val context: Context,
     playerConfig: PlayerConfiguration?,
     private val yospaceConfig: YospaceConfiguration
@@ -121,6 +121,7 @@ open class BitmovinYospacePlayer(
                             or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML
                 )
             }
+        SessionProperties.setDebugFlags(com.yospace.admanagement.util.YoLog.DEBUG_VALIDATION)
 
         when (yospaceSourceConfig.assetType) {
             YospaceAssetType.LINEAR -> loadLive(originalUrl, yospaceSessionProperties!!)
@@ -334,7 +335,13 @@ open class BitmovinYospacePlayer(
         super.addEventListener(OnSourceLoadedListener {
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
-            (yospaceSession as? SessionNLSO)?.let {
+            (yospaceSession as? SessionVOD)?.let {
+                val adBreaks = it.adBreaks.toAdBreaks()
+                adTimeline = AdTimeline(adBreaks)
+                BitLog.d("Ad breaks: ${it.adBreaks}")
+                BitLog.d(adTimeline.toString())
+            }
+            (yospaceSession as? SessionLive)?.let {
                 val adBreaks = it.adBreaks.toAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
                 BitLog.d("Ad breaks: ${it.adBreaks}")
@@ -367,9 +374,15 @@ open class BitmovinYospacePlayer(
                         timedMetadataEvents.add(it)
                         // Only send metadata events if play event has been sent
                         if (isPlayingEventSent) {
-                            for (metadata in timedMetadataEvents) {
-                                BitLog.d("Sending METADATA event: $metadata")
-                                yospaceMetadataSource.notify(metadata)
+                            // For LIVE streams only
+                            (yospaceSession as? SessionLive)?.let {
+                                for (metadata in timedMetadataEvents) {
+                                    BitLog.d("Sending METADATA event: $metadata")
+                                    // TODO: yospaceMetadataSource has never added any listener
+                                    yospaceMetadataSource.notify(metadata)
+                                    // Manually register for metadata events, may be done differently
+                                    it.onTimedMetadata(metadata)
+                                }
                             }
                             timedMetadataEvents.clear()
                         }
@@ -496,6 +509,8 @@ open class BitmovinYospacePlayer(
                     if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
                         return@YospaceEventListener
                     }
+                    // Playback needs to start first before ad breaks
+                    it.onPlaybackStart(yospaceTime.toLong())
                 }
 
                 yospaceSession?.let {
@@ -703,7 +718,8 @@ open class BitmovinYospacePlayer(
     }
 
     private fun com.yospace.admanagement.AdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        this.identifier,
+        // TODO: figure out this
+        this.identifier?:"test",
         absoluteStart,
         relativeStart,
         duration / 1000.0,
@@ -811,8 +827,11 @@ open class BitmovinYospacePlayer(
     }
 
     private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?) = when {
-        ymid != null && yseq != null && ytyp != null && ydur != null -> TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur)
-        yprg != null -> TimedMetadata.createFromMetadata(yprg, 0.0f)
+        ymid != null && yseq != null && ytyp != null && ydur != null -> TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur,
+            yospaceTime.toLong()
+        )
+        //TODO: check which timedMetaData to use
+//        yprg != null -> TimedMetadata.createFromMetadata(yprg, 0.0f)
         else -> null
     }
 }

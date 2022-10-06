@@ -19,12 +19,13 @@ import com.bitmovin.player.model.advertising.AdSystem
 import com.bitmovin.player.model.emsg.EventMessage
 import com.bitmovin.player.model.id3.BinaryFrame
 import com.yospace.admanagement.*
+import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.Session.SessionProperties.addDebugFlags
-import com.yospace.admanagement.TimedMetadata
 import com.yospace.hls.player.PlaybackState
 import com.yospace.hls.player.PlayerState
 import com.yospace.util.YoLog
+import com.yospace.util.event.EventListener
 import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
@@ -315,6 +316,15 @@ class BitmovinYospacePlayer(
     ///////////////////////////////////////////////////////////////
 
     private fun addEventListeners() {
+        yospaceMetadataSource.addListener(EventListener<TimedMetadata> {
+            yospaceSession?.onTimedMetadata(it.payload)
+        })
+
+        super.addEventListener(OnPlayListener {
+            BitLog.d("Sending Play event: $yospaceTime")
+            yospaceSession?.onPlayerEvent(PlayerEvent.START, yospaceTime.toLong())
+        })
+
         super.addEventListener(OnPausedListener {
             BitLog.d("Sending PAUSED event: $yospaceTime")
             isLiveAdPaused = isLive && isAd
@@ -336,12 +346,6 @@ class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionVOD)?.let {
-                val adBreaks = it.adBreaks.toAdBreaks()
-                adTimeline = AdTimeline(adBreaks)
-                BitLog.d("Ad breaks: ${it.adBreaks}")
-                BitLog.d(adTimeline.toString())
-            }
-            (yospaceSession as? SessionLive)?.let {
                 val adBreaks = it.adBreaks.toAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
                 BitLog.d("Ad breaks: ${it.adBreaks}")
@@ -378,10 +382,7 @@ class BitmovinYospacePlayer(
                             (yospaceSession as? SessionLive)?.let {
                                 for (metadata in timedMetadataEvents) {
                                     BitLog.d("Sending METADATA event: $metadata")
-                                    // TODO: yospaceMetadataSource has never added any listener
                                     yospaceMetadataSource.notify(metadata)
-                                    // Manually register for metadata events, may be done differently
-                                    it.onTimedMetadata(metadata)
                                 }
                             }
                             timedMetadataEvents.clear()
@@ -509,12 +510,9 @@ class BitmovinYospacePlayer(
                     if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
                         return@YospaceEventListener
                     }
-                    // Playback needs to start first before ad breaks
-                    it.onPlaybackStart(yospaceTime.toLong())
                 }
 
                 yospaceSession?.let {
-                    it.addAnalyticObserver(analyticEventListener)
                     startPlayback(MediaSourceType.HLS, it.playbackUrl)
                 }
             }
@@ -718,8 +716,7 @@ class BitmovinYospacePlayer(
     }
 
     private fun com.yospace.admanagement.AdBreak.toAdBreak(absoluteStart: Double, relativeStart: Double) = AdBreak(
-        // TODO: figure out this
-        this.identifier?:"test",
+        this.identifier?:"",
         absoluteStart,
         relativeStart,
         duration / 1000.0,
@@ -830,8 +827,6 @@ class BitmovinYospacePlayer(
         ymid != null && yseq != null && ytyp != null && ydur != null -> TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur,
             yospaceTime.toLong()
         )
-        //TODO: check which timedMetaData to use
-//        yprg != null -> TimedMetadata.createFromMetadata(yprg, 0.0f)
         else -> null
     }
 }

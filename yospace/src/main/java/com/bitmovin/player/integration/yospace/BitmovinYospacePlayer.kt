@@ -157,7 +157,7 @@ open class BitmovinYospacePlayer(
             }
             YospaceLiveInitialisationType.DIRECT -> SessionLive.create(
                 originalUrl,
-                yospaceSessionProperties,
+                properties,
                 sessionListener
             )
         }
@@ -349,10 +349,6 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending PLAYING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.PLAYING, yospaceTime, false))
 
-            // To raise "Playback start" notification
-            val playbackEventHandler = yospaceSession as PlaybackEventHandler
-            playbackEventHandler.onPlayerEvent(PlaybackEventHandler.PlayerEvent.START, (getCurrentTime() * 1000).toLong())
-
             isPlayingEventSent = true
         }
 
@@ -462,16 +458,12 @@ open class BitmovinYospacePlayer(
     fun addEventListener(listener: EventListener<*>?) {
         listener?.let {
             yospaceEventEmitter.addEventListener(it)
-//            if (it !is OnTimeChangedListener) {
-//                super.addEventListener(it)
-//            }
         }
     }
 
     fun removeEventListener(listener: EventListener<*>?) {
         listener?.let {
             yospaceEventEmitter.removeEventListener(it)
-//            super.removeEventListener(it)
         }
     }
 

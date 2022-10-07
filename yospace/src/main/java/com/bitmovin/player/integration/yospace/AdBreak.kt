@@ -1,6 +1,5 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.api.advertising.Ad
 import com.bitmovin.player.api.advertising.AdBreak
 
 data class AdBreak(

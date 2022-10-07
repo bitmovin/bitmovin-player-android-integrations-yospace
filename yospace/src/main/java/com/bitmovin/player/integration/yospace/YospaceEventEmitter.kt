@@ -4,10 +4,13 @@ import com.bitmovin.player.api.event.Event
 import com.bitmovin.player.api.event.EventListener
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.PlayerEvent.*
+import com.yospace.admanagement.Event as YoEvent
+import com.yospace.admanagement.EventListener as YoEventListener
 import java.util.concurrent.ConcurrentHashMap
 
 class YospaceEventEmitter {
     private val eventListeners = ConcurrentHashMap<Class<*>, MutableList<EventListener<*>>>()
+    private val yoEventListeners = ConcurrentHashMap<Class<*>, MutableList<YoEventListener<*>>>()
 
     @Synchronized
     fun addEventListener(listener: EventListener<*>) {
@@ -18,10 +21,26 @@ class YospaceEventEmitter {
     }
 
     @Synchronized
+    fun addEventListener(listener: YoEventListener<*>) {
+        val listenerClass: Class<*>? = listenerClass(listener)
+        listenerClass?.let {
+            yoEventListeners[it]?.add(listener) ?: yoEventListeners.put(it, mutableListOf(listener))
+        }
+    }
+
+    @Synchronized
     fun removeEventListener(listener: EventListener<*>) {
         val listenerClass = listenerClass(listener)
         listenerClass?.let {
             eventListeners[it]?.remove(listener)
+        }
+    }
+
+    @Synchronized
+    fun removeEventListener(listener: YoEventListener<*>) {
+        val listenerClass = listenerClass(listener)
+        listenerClass?.let {
+            yoEventListeners[it]?.remove(listener)
         }
     }
 
@@ -99,7 +118,7 @@ class YospaceEventEmitter {
                 }
             }
             else -> {
-                BitLog.d("Emitting Unknown Event")
+                BitLog.d("Emitting Unknown Event: $event")
             }
         }
     }
@@ -110,20 +129,20 @@ class YospaceEventEmitter {
         when (event) {
             is TruexAdFreeEvent -> {
                 BitLog.d("Emitting TruexAdFreeEvent")
-                val listeners = eventListeners[OnTruexAdFreeListener::class.java]
+                val listeners = yoEventListeners[OnTruexAdFreeListener::class.java]
                 listeners?.forEach {
-                    (it as OnTruexAdFreeListener).onEvent(event)
+                    (it as OnTruexAdFreeListener).handle(YoEvent(event))
                 }
             }
             is YospaceAdStartedEvent -> {
                 BitLog.d("Emitting YospaceAdStartedEvent")
-                val listeners = eventListeners[YospaceAdStartedListener::class.java]
+                val listeners = yoEventListeners[YospaceAdStartedListener::class.java]
                 listeners?.forEach {
-                    (it as YospaceAdStartedListener).onEvent(event)
+                    (it as YospaceAdStartedListener).handle(YoEvent(event))
                 }
             }
             else -> {
-                BitLog.d("Emitting Unknown Custom Event")
+                BitLog.d("Emitting Unknown Custom Event: $event")
             }
         }
     }
@@ -140,9 +159,19 @@ class YospaceEventEmitter {
         is OnErrorListener -> OnErrorListener::class.java
         is OnWarningListener -> OnWarningListener::class.java
         is OnTimeChangedListener -> OnTimeChangedListener::class.java
+        else -> {
+            BitLog.d("Adding undefined listener: $listener")
+            null
+        }
+    }
+
+    private fun listenerClass(listener: YoEventListener<*>): Class<*>? = when (listener) {
         is OnTruexAdFreeListener -> OnTruexAdFreeListener::class.java
         is YospaceAdStartedListener -> YospaceAdStartedListener::class.java
-        else -> null
+        else -> {
+            BitLog.d("Adding undefined listener: $listener")
+            null
+        }
     }
 
     // define interfaces with their legacy name
@@ -157,4 +186,6 @@ class YospaceEventEmitter {
     public interface OnErrorListener : EventListener<PlayerEvent.Error>
     public interface OnWarningListener : EventListener<PlayerEvent.Warning>
     public interface OnTimeChangedListener : EventListener<PlayerEvent.TimeChanged>
+    public interface OnTruexAdFreeListener : YoEventListener<TruexAdFreeEvent>
+    public interface YospaceAdStartedListener : YoEventListener<CustomEvent>
 }

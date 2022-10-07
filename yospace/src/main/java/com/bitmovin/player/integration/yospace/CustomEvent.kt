@@ -17,7 +17,7 @@ open class CustomEvent {
 /**
  * Includes all possible events that the [Source] can emit.
  */
-sealed class CustomSourceEvent : CustomEvent() {
+open class CustomSourceEvent : CustomEvent() {
     /**
      * Emitted when a source error occurred.
      */

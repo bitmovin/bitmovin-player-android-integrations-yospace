@@ -42,7 +42,7 @@ private const val UNSUPPORTED_API = 6004
 private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
 private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
-class BitmovinYospacePlayer(
+open class BitmovinYospacePlayer(
     private val context: Context,
     playerConfig: PlayerConfiguration?,
     private val yospaceConfig: YospaceConfiguration
@@ -122,7 +122,6 @@ class BitmovinYospacePlayer(
                             or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP or YoLog.DEBUG_RAW_XML
                 )
             }
-        SessionProperties.setDebugFlags(com.yospace.admanagement.util.YoLog.DEBUG_VALIDATION)
 
         when (yospaceSourceConfig.assetType) {
             YospaceAssetType.LINEAR -> loadLive(originalUrl, yospaceSessionProperties!!)
@@ -317,6 +316,7 @@ class BitmovinYospacePlayer(
 
     private fun addEventListeners() {
         yospaceMetadataSource.addListener(EventListener<TimedMetadata> {
+            BitLog.d("Sending Timed Metadata: $yospaceTime")
             yospaceSession?.onTimedMetadata(it.payload)
         })
 
@@ -378,12 +378,9 @@ class BitmovinYospacePlayer(
                         timedMetadataEvents.add(it)
                         // Only send metadata events if play event has been sent
                         if (isPlayingEventSent) {
-                            // For LIVE streams only
-                            (yospaceSession as? SessionLive)?.let {
-                                for (metadata in timedMetadataEvents) {
-                                    BitLog.d("Sending METADATA event: $metadata")
-                                    yospaceMetadataSource.notify(metadata)
-                                }
+                            for (metadata in timedMetadataEvents) {
+                                BitLog.d("Sending METADATA event: $metadata")
+                                yospaceMetadataSource.notify(metadata)
                             }
                             timedMetadataEvents.clear()
                         }

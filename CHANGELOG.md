@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.20.0]
 
 ### Added
+- Added support for Bitmovin Player SDK v3
+
+## Changed
+- Migrated to new Listener APIs
+- Added custom events and error code for yospace
+
+## [1.20.0]
+
+### Added
 - Added support for Yospace SDK v3
 
 ## Changed

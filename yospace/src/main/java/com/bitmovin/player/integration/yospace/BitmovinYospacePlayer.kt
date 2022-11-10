@@ -11,7 +11,7 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.bitmovin.player.api.deficiency.SourceErrorCode
-import com.bitmovin.player.api.event.EventListener
+import com.bitmovin.player.api.event.EventListener as BitmovinEventListener
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.data.*
@@ -19,24 +19,23 @@ import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.media.*
 import com.bitmovin.player.api.metadata.emsg.EventMessage
 import com.bitmovin.player.api.metadata.id3.BinaryFrame
+import com.bitmovin.player.api.source.SourceType as MediaSourceType
+import com.bitmovin.player.api.drm.WidevineConfig as DRMSystems
 import com.bitmovin.player.api.source.*
 import com.bitmovin.player.integration.yospace.config.TruexConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
 import com.yospace.admanagement.*
-import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent
+import com.yospace.admanagement.TimedMetadata
+import com.yospace.admanagement.EventListener as YospaceEventListener
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.Session.SessionProperties.addDebugFlags
 import com.yospace.hls.player.PlaybackState
 import com.yospace.hls.player.PlayerState
 import com.yospace.util.YoLog
-import com.yospace.util.event.EventListener
 import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
-import com.bitmovin.player.api.drm.WidevineConfig as DRMSystems
-import com.bitmovin.player.api.source.SourceType as MediaSourceType
-import com.yospace.admanagement.EventListener as YospaceEventListener
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -334,10 +333,12 @@ open class BitmovinYospacePlayer(
     ///////////////////////////////////////////////////////////////
 
     private fun addEventListeners() {
-        yospaceMetadataSource.addListener(EventListener<TimedMetadata> {
-            BitLog.d("Sending Timed Metadata: $yospaceTime")
-            yospaceSession?.onTimedMetadata(it.payload)
-        })
+        yospaceMetadataSource.addListener(
+            com.yospace.util.event.EventListener<TimedMetadata> {
+                BitLog.d("Sending Timed Metadata: $yospaceTime")
+                yospaceSession?.onTimedMetadata(it.payload)
+            }
+        )
 
         player.on<PlayerEvent.Paused> {
             BitLog.d("Sending PAUSED event: $yospaceTime")
@@ -455,18 +456,6 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    fun addEventListener(listener: EventListener<*>?) {
-        listener?.let {
-            yospaceEventEmitter.addEventListener(it)
-        }
-    }
-
-    fun removeEventListener(listener: EventListener<*>?) {
-        listener?.let {
-            yospaceEventEmitter.removeEventListener(it)
-        }
-    }
-
     ///////////////////////////////////////////////////////////////
     // TrueX
     ///////////////////////////////////////////////////////////////
@@ -533,12 +522,8 @@ open class BitmovinYospacePlayer(
                 }
 
                 yospaceSession?.let {
-<<<<<<< HEAD
-                    startPlayback(MediaSourceType.HLS, it.playbackUrl)
-=======
                     it.addAnalyticObserver(analyticEventListener)
                     startPlayback(MediaSourceType.Hls, it.playbackUrl)
->>>>>>> 86e82a4 (upgrade BM player & samples)
                 }
             }
             Session.SessionResult.FAILED -> handleYospaceSessionFailure(

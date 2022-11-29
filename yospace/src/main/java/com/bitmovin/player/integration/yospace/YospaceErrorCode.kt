@@ -10,10 +10,9 @@ import com.bitmovin.player.api.deficiency.WarningCode
  * - 6003: Session Not Initialised
  */
 enum class YospaceErrorCode(override val value: Int) : ErrorCode {
-    InvalidYospaceSourceE(6001),
+    InvalidYospaceSource(6001),
     SessionNoAnalytics(6002),
-    SessionNotInitialised(6003),
-    UnsupportedAPI(6004);
+    SessionNotInitialised(6003);
 
     companion object {
         private val map by lazy { YospaceErrorCode.values().associateBy(YospaceErrorCode::value) }

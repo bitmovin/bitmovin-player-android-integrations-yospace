@@ -4,14 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.20.0]
+## [Unreleased]
 
 ### Added
 - Added support for Bitmovin Player SDK v3
 
-## Changed
+### Changed
 - Migrated to new Listener APIs
 - Added custom events and error code for yospace
+
+### Removed
+- Support for Bitmovin Player SDK v2
 
 ## [1.20.0]
 

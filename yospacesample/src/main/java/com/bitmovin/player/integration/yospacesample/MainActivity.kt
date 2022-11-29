@@ -2,20 +2,17 @@ package com.bitmovin.player.integration.yospacesample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.bitmovin.player.api.event.SourceEvent.Load
-import com.bitmovin.player.api.event.SourceEvent.Unloaded
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.drm.WidevineConfig
-import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
-import com.bitmovin.player.api.source.HLSSource
 import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
-import com.bitmovin.player.integration.yospace.config.YospaceSourceConfiguration
+import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,18 +24,18 @@ class MainActivity : AppCompatActivity() {
             Stream(
                 "Yospace Live",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
-                yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.LINEAR)
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
             ),
             Stream(
                 "Yospace Companion Ads",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.lp=true&yo.av=4",
                 "https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128",
-                YospaceSourceConfiguration(YospaceAssetType.LINEAR)
+                YospaceSourceConfig(YospaceAssetType.LINEAR)
             ),
             Stream(
                 "Yospace VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=4",
-                yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )
     }
@@ -55,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         playerView.onResume()
-        player.player.play()
+        player.play()
     }
 
     override fun onPause() {
@@ -94,7 +91,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addUIListeners() {
         loadUnloadButton.setOnClickListener {
-            if (player.player.isPlaying) {
+            if (player.isPlaying()) {
                 BitLog.d("unload stream")
                 player.unload()
             } else {
@@ -105,15 +102,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadStream(stream: Stream) {
-        val sourceItem = SourceConfig(
-            HLSSource(stream.contentUrl)
-        )
-
-        stream.drmUrl?.let {
-            sourceItem.addDrmConfig(WidevineConfig(it))
-        }
-
-        val sourceConfig = sourceItem
+        val sourceConfig = SourceConfig(stream.contentUrl, SourceType.Hls)
+        sourceConfig.drmConfig = WidevineConfig(stream.drmUrl)
 
         player.load(sourceConfig, stream.yospaceSourceConfig, stream.truexConfig)
     }

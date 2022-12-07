@@ -8,8 +8,8 @@ data class YospaceConfig(
     val connectTimeout: Int = 25_000,
     val requestTimeout: Int = 25_000,
     val liveInitialisationType: YospaceLiveInitialisationType = YospaceLiveInitialisationType.DIRECT,
-    val isDebug: Boolean = true,
-    val filterMetadataType: MetadataType? = MetadataType.ID3
+    val isDebug: Boolean = false,
+    val filterMetadataType: MetadataType? = MetadataType.EMSG
 )
 
 public enum class MetadataType{

@@ -118,7 +118,7 @@ class YospaceEventEmitter {
                 }
             }
             else -> {
-                BitLog.d("Emitting Unknown Event: $event")
+                BitLog.d("Skipping Unknown Event: $event")
             }
         }
     }

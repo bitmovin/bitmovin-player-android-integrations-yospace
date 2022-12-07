@@ -3,6 +3,8 @@ package com.bitmovin.player.integration.yospacesample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bitmovin.player.api.PlayerConfig
+import com.bitmovin.player.api.PlaybackConfig
+import com.bitmovin.player.api.TweaksConfig
 import com.bitmovin.player.api.drm.WidevineConfig
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
@@ -23,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "Yospace Live",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
             ),
             Stream(
@@ -67,10 +69,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupPlayer() {
-        val playerConfig = PlayerConfig().apply {
-            playbackConfig.isAutoplayEnabled = true
-            tweaksConfig.useFiletypeExtractorFallbackForHls = true
-        }
+        val playerConfig = PlayerConfig(
+            playbackConfig = PlaybackConfig(isAutoplayEnabled = true),
+            tweaksConfig = TweaksConfig(useFiletypeExtractorFallbackForHls = true)
+        )
 
         player = BitmovinYospacePlayer(this, playerConfig, YospaceConfig()).apply {
             player.on<SourceEvent.Load> {
@@ -86,7 +88,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSpinner() {
-        streamSpinner.adapter = StreamSpinnerAdapter(this, streams, android.R.layout.simple_spinner_item)
+        streamSpinner.adapter =
+            StreamSpinnerAdapter(this, streams, android.R.layout.simple_spinner_item)
     }
 
     private fun addUIListeners() {

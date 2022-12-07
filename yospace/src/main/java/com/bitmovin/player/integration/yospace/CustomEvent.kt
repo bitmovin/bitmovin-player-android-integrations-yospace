@@ -8,16 +8,16 @@ import com.bitmovin.player.api.source.Source
 /**
  * Includes all possible custom events the [Player] or [Source] can emit.
  */
-open class CustomEvent {
+sealed class CustomEvent {
     /**
      * The time at which the event was emitted in milliseconds since the Unix Epoch.
      */
-    var timestamp: Long = System.currentTimeMillis() / 1000
+    var timestamp: Long = System.currentTimeMillis()
 }
 /**
- * Includes all possible events that the [Source] can emit.
+ * Includes custom events that the [Source] can emit.
  */
-open class CustomSourceEvent : CustomEvent() {
+sealed class CustomSourceEvent : CustomEvent() {
     /**
      * Emitted when a source error occurred.
      */

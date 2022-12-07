@@ -90,7 +90,7 @@ open class BitmovinYospacePlayer(
     // Playback
     ///////////////////////////////////////////////////////////////
 
-    fun load(sourceConfig: SourceConfig?, yospaceSourceConfig: YospaceSourceConfig, truexConfig: TruexConfig? = null) {
+    fun load(sourceConfig: SourceConfig, yospaceSourceConfig: YospaceSourceConfig, truexConfig: TruexConfig? = null) {
         BitLog.d("Load YoSpace Source Configuration")
 
         loadState = LoadState.LOADING
@@ -104,8 +104,8 @@ open class BitmovinYospacePlayer(
 
         resetYospaceSession()
 
-        val originalUrl = sourceConfig?.url
-        if (originalUrl == null) {
+        val originalUrl = sourceConfig.url
+        if (originalUrl.isEmpty() || sourceConfig.type != MediaSourceType.Hls) {
             yospaceEventEmitter.emit(
                 CustomSourceEvent.Error(
                     YospaceErrorCode.InvalidYospaceSource,
@@ -120,7 +120,7 @@ open class BitmovinYospacePlayer(
         sessionProperties.connectTimeout = yospaceConfig.connectTimeout
         sessionProperties.requestTimeout = yospaceConfig.requestTimeout
         sessionProperties.userAgent = yospaceConfig.userAgent
-        SessionProperties.setDebugFlags(com.yospace.admanagement.util.YoLog.DEBUG_VALIDATION);
+        // SessionProperties.setDebugFlags(com.yospace.admanagement.util.YoLog.DEBUG_VALIDATION);
 
         yospaceSessionProperties = sessionProperties
             .apply {
@@ -586,6 +586,8 @@ open class BitmovinYospacePlayer(
     private val analyticEventListener: AnalyticEventObserver = object : AnalyticEventObserver {
 
         override fun onAdvertBreakStart(adBreak: com.yospace.admanagement.AdBreak?) {
+            BitLog.d("YoSpace onAdvertBreakStart")
+
             val absoluteTime = currentTimeWithAds()
             val adBreakAbsoluteStart: Double
             val adBreakRelativeStart: Double

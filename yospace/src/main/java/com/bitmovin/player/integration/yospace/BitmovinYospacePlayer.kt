@@ -25,6 +25,7 @@ import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import com.yospace.admanagement.*
 import com.yospace.admanagement.TimedMetadata
 import com.yospace.admanagement.EventListener as YospaceEventListener
+import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent as YoPlayerEvent
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.Session.SessionProperties.addDebugFlags
 import com.yospace.hls.player.PlaybackState
@@ -33,7 +34,6 @@ import com.yospace.util.YoLog
 import com.yospace.util.event.EventSourceImpl
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
-import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent as YoPlayerEvent
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -213,27 +213,13 @@ open class BitmovinYospacePlayer(
     private fun startPlayback(mediaSourceType: MediaSourceType, playbackUrl: String) {
         if (loadState != LoadState.UNLOADING) {
             handler.post {
-                var sourceItem: SourceConfig? = null;
-                sourceItem = when (mediaSourceType) {
-                    MediaSourceType.Dash -> {
-                        SourceConfig(DASHSource(playbackUrl))
-                    }
-                    MediaSourceType.Hls -> {
-                        SourceConfig(HLSSource(playbackUrl))
-                    }
-                    MediaSourceType.Smooth -> {
-                        SourceConfig(SmoothSource(playbackUrl))
-                    }
-                    else -> {
-                        SourceConfig(HLSSource(playbackUrl))
-                    }
-                }
-                val drmConfiguration =
-                    sourceConfig?.getDrmConfig(DRMSystems.UUID)
+                val sourceItem = SourceConfig(playbackUrl, mediaSourceType)
                 sourceConfig?.thumbnailTrack?.let {
                     sourceItem.thumbnailTrack = it
                 }
-                drmConfiguration?.let { sourceItem.addDrmConfig(it) }
+                sourceConfig?.drmConfig?.let {
+                    sourceItem.drmConfig = it
+                }
                 player.load(sourceItem)
             }
         }
@@ -348,7 +334,15 @@ open class BitmovinYospacePlayer(
 
         player.on<PlayerEvent.Ready> {
             BitLog.d("Sending PLAYSTART event: $yospaceTime")
-            yospaceSession?.onPlaybackStart()
+            yospaceSessionStatus = SessionStatus.INITIALIZED
+
+            // SessionLive has a specialized onPlaybackStart(playhead) method that starts the analytic poller.
+            // NOTICE: It differs from the one in class Session, which does not add poller.
+            if (this.yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
+                (yospaceSession as? SessionLive)?.onPlaybackStart(yospaceTime.toLong())
+            } else {
+                yospaceSession?.onPlaybackStart()
+            }
         }
 
         player.on<PlayerEvent.Paused> {
@@ -429,12 +423,7 @@ open class BitmovinYospacePlayer(
         player.on<PlayerEvent.TimeChanged> {
             val currentTime = getCurrentTime()
             val timeChangedEvent = PlayerEvent.TimeChanged(currentTime)
-//            BitLog.d("Sending TimeChanged event: $currentTime")
             yospaceSession?.onPlayheadUpdate((currentTime * 1000).toLong())
-
-//            val analyticUrl = yospaceSession?.playbackUrl
-//            val adbreaks = yospaceSession?.getAdBreaks(com.yospace.admanagement.AdBreak.BreakType.LINEAR)
-//            BitLog.d("analyticUrl: $analyticUrl")
 
             if (yospaceSession as? SessionLive != null) {
                 // Live session
@@ -470,10 +459,6 @@ open class BitmovinYospacePlayer(
 
         player.on<PlayerEvent.FullscreenExit> {
             yospaceSession?.onViewSizeChange(PlaybackEventHandler.ViewSize.MINIMISED)
-        }
-
-        player.on<PlayerEvent.Ready> {
-            yospaceSessionStatus = SessionStatus.INITIALIZED
         }
     }
 
@@ -601,8 +586,6 @@ open class BitmovinYospacePlayer(
     private val analyticEventListener: AnalyticEventObserver = object : AnalyticEventObserver {
 
         override fun onAdvertBreakStart(adBreak: com.yospace.admanagement.AdBreak?) {
-            BitLog.d("YoSpace onAdvertBreakStart")
-
             val absoluteTime = currentTimeWithAds()
             val adBreakAbsoluteStart: Double
             val adBreakRelativeStart: Double

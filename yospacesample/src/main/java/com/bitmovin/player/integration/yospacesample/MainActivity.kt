@@ -11,7 +11,7 @@ import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
-import com.bitmovin.player.integration.yospace.config.YospaceConfiguration
+import com.bitmovin.player.integration.yospace.config.YospaceConfig
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "Yospace Live",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
             ),
             Stream(
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             ),
             Stream(
                 "Yospace VOD",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=4",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             tweaksConfig.useFiletypeExtractorFallbackForHls = true
         }
 
-        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfiguration()).apply {
+        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfig()).apply {
             player.on<SourceEvent.Load> {
                 BitLog.d("Change button")
                 loadUnloadButton.text = getString(R.string.unload)

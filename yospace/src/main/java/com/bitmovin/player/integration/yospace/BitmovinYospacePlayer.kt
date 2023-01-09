@@ -17,7 +17,6 @@ import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.metadata.emsg.EventMessage
 import com.bitmovin.player.api.metadata.id3.BinaryFrame
 import com.bitmovin.player.api.source.SourceType as MediaSourceType
-import com.bitmovin.player.api.drm.WidevineConfig as DRMSystems
 import com.bitmovin.player.api.source.*
 import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
@@ -48,8 +47,9 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 open class BitmovinYospacePlayer(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
+    private val player: Player = Player.create(context, playerConfig),
     private val yospaceConfig: YospaceConfig
-) {
+) : Player by player {
 
     private var yospaceSession: Session? = null
     private val yospaceStateSource = EventSourceImpl<PlayerState>()
@@ -67,7 +67,6 @@ open class BitmovinYospacePlayer(
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfig? = null
     private var truexRenderer: BitmovinTruexAdRenderer? = null
-    val player: Player = Player.create(context, playerConfig)
 
     var adTimeline: AdTimeline? = null
         private set
@@ -204,7 +203,7 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    fun unload() {
+    override fun unload() {
         loadState = LoadState.UNLOADING
         truexRenderer?.stop()
         player.unload()
@@ -225,26 +224,15 @@ open class BitmovinYospacePlayer(
         }
     }
 
-    fun isPlaying(): Boolean {
-        return player.isPlaying
-    }
-
-    fun play() {
-        if (!isPlaying()) {
-            player.play()
-        }
-    }
-
-    fun pause() {
+    override fun pause() {
         if (yospaceSession?.canPause() == true || yospaceSession == null) {
             player.pause()
         }
     }
 
-    fun getDuration(): Double = player.duration - (adTimeline?.totalAdBreakDurations()
-        ?: 0.0)
+    private fun calDuration(): Double = player.duration - (adTimeline?.totalAdBreakDurations() ?: 0.0)
 
-    fun getCurrentTime(): Double = when {
+    private fun getCurrentTimeMinusAd(): Double = when {
         player.isAd -> {
             // Return ad time
             player.currentTime - (activeAd?.absoluteStart ?: 0.0)
@@ -266,7 +254,7 @@ open class BitmovinYospacePlayer(
 
     fun currentTimeWithAds(): Double = player.currentTime
 
-    fun seek(time: Double) {
+    override fun seek(time: Double) {
         adTimeline?.let {
             val seekTime = yospaceSession!!.willSeekTo(time.toLong())
             val absoluteSeekTime = it.relativeToAbsolute(seekTime.toDouble())
@@ -283,24 +271,24 @@ open class BitmovinYospacePlayer(
         player.seek(time)
     }
 
-    fun mute() {
+    override fun mute() {
         if (yospaceSession?.canChangeVolume(true) == true || yospaceSession == null) {
             player.mute()
         }
     }
 
-    fun isAd(): Boolean = when {
+    fun isYospaceAd(): Boolean = when {
         yospaceSourceConfig != null -> activeAd != null
         else -> player.isAd
     }
 
-    fun skipAd() {
+    override fun skipAd() {
         if (yospaceSourceConfig == null) {
             player.skipAd()
         }
     }
 
-    fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
+    override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(
             CustomSourceEvent.Warning(
                 YospaceWarningCode.UnsupportedAPI,
@@ -311,7 +299,7 @@ open class BitmovinYospacePlayer(
         player.scheduleAd(adItem)
     }
 
-    fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
+    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(
             CustomSourceEvent.Warning(
                 YospaceWarningCode.UnsupportedAPI,
@@ -347,7 +335,7 @@ open class BitmovinYospacePlayer(
 
         player.on<PlayerEvent.Paused> {
             BitLog.d("Sending PAUSED event: $yospaceTime")
-            isLiveAdPaused = player.isLive && isAd()
+            isLiveAdPaused = player.isLive && isYospaceAd()
             yospaceStateSource.notify(PlayerState(PlaybackState.PAUSED, yospaceTime, false))
 
             yospaceSession?.onPlayerEvent(YoPlayerEvent.PAUSE, yospaceTime.toLong())
@@ -421,7 +409,7 @@ open class BitmovinYospacePlayer(
         }
 
         player.on<PlayerEvent.TimeChanged> {
-            val currentTime = getCurrentTime()
+            val currentTime = getCurrentTimeMinusAd()
             val timeChangedEvent = PlayerEvent.TimeChanged(currentTime)
             yospaceSession?.onPlayheadUpdate((currentTime * 1000).toLong())
 

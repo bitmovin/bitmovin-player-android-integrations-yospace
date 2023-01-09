@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.PlaybackConfig
+import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.TweaksConfig
 import com.bitmovin.player.api.drm.WidevineConfig
 import com.bitmovin.player.api.event.SourceEvent
@@ -74,17 +75,16 @@ class MainActivity : AppCompatActivity() {
             tweaksConfig = TweaksConfig(useFiletypeExtractorFallbackForHls = true)
         )
 
-        player = BitmovinYospacePlayer(this, playerConfig, YospaceConfig()).apply {
-            player.on<SourceEvent.Load> {
-                BitLog.d("Change button")
-                loadUnloadButton.text = getString(R.string.unload)
-            }
-            player.on<SourceEvent.Unloaded> {
-                loadUnloadButton.text = getString(R.string.load)
-            }
-            playerView.player = player
-            BitLog.d("Setup player")
+        player = BitmovinYospacePlayer(this, playerConfig, yospaceConfig = YospaceConfig())
+        player.on<SourceEvent.Load> {
+            BitLog.d("Change button")
+            loadUnloadButton.text = getString(R.string.unload)
         }
+        player.on<SourceEvent.Unloaded> {
+            loadUnloadButton.text = getString(R.string.load)
+        }
+        playerView.player = player
+        BitLog.d("Setup player")
     }
 
     private fun setupSpinner() {
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addUIListeners() {
         loadUnloadButton.setOnClickListener {
-            if (player.isPlaying()) {
+            if (player.isPlaying) {
                 BitLog.d("unload stream")
                 player.unload()
             } else {

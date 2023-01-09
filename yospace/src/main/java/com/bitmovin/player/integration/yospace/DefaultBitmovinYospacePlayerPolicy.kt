@@ -2,7 +2,7 @@ package com.bitmovin.player.integration.yospace
 
 class DefaultBitmovinYospacePlayerPolicy(private val player: BitmovinYospacePlayer) : BitmovinYospacePlayerPolicy {
 
-    override fun canSeek(): Boolean = !player.isAd()
+    override fun canSeek(): Boolean = !player.isYospaceAd()
 
     override fun canSeekTo(seekTarget: Long): Long = seekTarget
 

@@ -10,9 +10,9 @@ import com.bitmovin.player.api.source.Source
  */
 sealed class CustomEvent {
     /**
-     * The time at which the event was emitted in milliseconds since the Unix Epoch.
+     * The time at which the event was emitted in seconds since the Unix Epoch.
      */
-    var timestamp: Long = System.currentTimeMillis()
+    var timestamp: Long = System.currentTimeMillis() / 1000
 }
 /**
  * Includes custom events that the [Source] can emit.

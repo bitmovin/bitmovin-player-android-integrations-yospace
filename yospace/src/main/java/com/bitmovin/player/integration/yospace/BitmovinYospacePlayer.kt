@@ -233,7 +233,7 @@ open class BitmovinYospacePlayer(
     private fun calDuration(): Double = player.duration - (adTimeline?.totalAdBreakDurations() ?: 0.0)
 
     private fun getCurrentTimeMinusAd(): Double = when {
-        player.isAd -> {
+        isYospaceAd() -> {
             // Return ad time
             player.currentTime - (activeAd?.absoluteStart ?: 0.0)
         }

@@ -2,7 +2,7 @@ package com.bitmovin.player.integration.yospace.config
 
 import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType
 
-data class YospaceConfiguration(
+data class YospaceConfig(
     val userAgent: String? = null,
     val readTimeout: Int = 25_000,
     val connectTimeout: Int = 25_000,

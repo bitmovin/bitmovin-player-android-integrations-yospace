@@ -1,5 +1,8 @@
 package com.bitmovin.player.integration.yospace
 
+import kotlin.collections.minByOrNull as minBy
+import kotlin.collections.maxByOrNull as maxBy
+
 class AdTimeline(val adBreaks: List<AdBreak>) {
 
     override fun toString() = "${adBreaks.size} ad breaks: ${adBreaks.joinToString { "[${it.relativeStart} - ${it.duration}]" }}"
@@ -43,7 +46,7 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
         val currentAdBreak = currentAdBreak(time)
         val passedAdBreakDurations = totalPassedAdBreakDurations(time)
         return currentAdBreak?.let { it.absoluteStart - passedAdBreakDurations }
-            ?: time - passedAdBreakDurations
+            ?: (time - passedAdBreakDurations)
     }
 
     /**
@@ -54,7 +57,7 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      */
     fun relativeToAbsolute(time: Double): Double = time + adBreaks
         .filter { it.relativeStart < time }
-        .sumByDouble { it.duration }
+        .sumOf { it.duration }
 
     /**
      * Returns the sum of all of the ad break durations
@@ -71,6 +74,6 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      */
     fun totalPassedAdBreakDurations(time: Double) = adBreaks
         .filter { it.absoluteEnd < time }
-        .sumByDouble { it.duration }
+        .sumOf { it.duration }
 
 }

@@ -2,7 +2,7 @@ package com.bitmovin.player.integration.yospace
 
 import android.content.Context
 import com.bitmovin.player.integration.yospace.AdBreakPosition.PREROLL
-import com.bitmovin.player.integration.yospace.config.TruexConfiguration
+import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants
 import com.yospace.admanagement.Advert
@@ -18,7 +18,7 @@ interface BitmovinTruexAdRendererListener {
 
 class BitmovinTruexAdRenderer(
     private val context: Context,
-    private val configuration: TruexConfiguration
+    private val configuration: TruexConfig
 ) {
 
     var listener: BitmovinTruexAdRendererListener? = null

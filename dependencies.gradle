@@ -1,7 +1,7 @@
 ext {
     // Versions
     supportLibraryVersion = '1.1.0'
-    bitmovinPlayerVersion = '2.62.1+jason'
+    bitmovinPlayerVersion = '3.25.2'
     truexRendererVersion = '1.0.8'
     junitVersion = '5.3.2'
 
@@ -13,7 +13,7 @@ ext {
     ]
 
     bitmovinPlayerDependencies = [
-            bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
+            bitmovinPlayer: "com.bitmovin.player:player:${bitmovinPlayerVersion}"
     ]
 
     yospaceDependencies = [

@@ -1,11 +1,9 @@
 package com.bitmovin.player.integration.yospace
 
-import com.bitmovin.player.api.event.data.AdStartedEvent
-import com.bitmovin.player.config.advertising.AdSourceType
-import com.bitmovin.player.model.advertising.Ad
+import com.bitmovin.player.api.advertising.AdSourceType
 
 class YospaceAdStartedEvent(
-    clientType: AdSourceType = AdSourceType.UNKNOWN,
+    clientType: AdSourceType = AdSourceType.Unknown,
     clickThroughUrl: String,
     indexInQueue: Int,
     duration: Double,
@@ -14,4 +12,4 @@ class YospaceAdStartedEvent(
     skipOffset: Double = 0.0,
     ad: Ad? = null,
     val companionAds: List<CompanionAd> = emptyList()
-) : AdStartedEvent(clientType, clickThroughUrl, indexInQueue, duration, timeOffset, position, skipOffset, ad)
+): CustomEvent()

@@ -82,7 +82,7 @@ open class BitmovinYospacePlayer(
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
         BitLog.d("Version ${BuildConfig.BUILD_TYPE}")
-        addEventListeners()
+        onYospaceEvents()
     }
 
     ///////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ open class BitmovinYospacePlayer(
     // Player Event Listeners
     ///////////////////////////////////////////////////////////////
 
-    private fun addEventListeners() {
+    private fun onYospaceEvents() {
         yospaceMetadataSource.addListener {
             BitLog.d("Sending Timed Metadata: $yospaceTime")
             yospaceSession?.onTimedMetadata(it.payload)

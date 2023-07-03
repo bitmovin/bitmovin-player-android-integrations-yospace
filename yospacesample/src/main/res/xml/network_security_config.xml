@@ -2,6 +2,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <!--Allow unencrypted traffic to truex.com-->
         <domain includeSubdomains="true">truex.com</domain>
+        <domain includeSubdomains="true">yospace.com</domain>
     </domain-config>
     <debug-overrides>
         <trust-anchors>

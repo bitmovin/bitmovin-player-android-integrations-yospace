@@ -5,15 +5,15 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
-def libraryVersion = '1.18.3'
-def libraryCode = 60
+def libraryVersion = '1.18.4'
+def libraryCode = 61
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode libraryCode
         versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -26,10 +26,8 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+
+    kotlinOptions { jvmTarget = '11' }
 
     testOptions {
         unitTests.all {
@@ -40,11 +38,9 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    debugImplementation files('libs/yoAdManagement-debug.aar')
-    debugImplementation files('libs/yoUtil-debug.aar')
-    releaseImplementation files('libs/yoAdManagement-release.aar')
-    releaseImplementation files('libs/yoUtil-release.aar')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation yospaceDependencies.adManagementSDK
+    implementation yospaceDependencies.adManagementUtil
+    annotationProcessor 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
 
     testImplementation testDependencies.junitAPI
     testRuntimeOnly testDependencies.junitEngine
@@ -53,7 +49,6 @@ dependencies {
     implementation supportDependencies.appCompat
     implementation bitmovinPlayerDependencies.bitmovinPlayer
     implementation truexDependencies.truexRenderer
-    implementation bitmovinPlayerDependencies.analytics
 }
 
 publishing {

@@ -39,6 +39,19 @@ allprojects {
 }
 ```
 
+Customers will need to use Yospace SDK from their own Yospace account so add Yospace credentails in build.gradle.
+```
+allprojects {
+
+    credentials {
+        //ADD credentials for build so that gradle can download yospace libraries
+        username = ""
+        password = ""
+    }
+}
+```
+
+
 And this line to your main project `build.gradle`
 
 ```

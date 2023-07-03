@@ -1,10 +1,9 @@
 ext {
     // Versions
     supportLibraryVersion = '1.1.0'
-    bitmovinPlayerVersion = '2.70.0+jason'
+    bitmovinPlayerVersion = '3.25.2'
     truexRendererVersion = '1.0.8'
     junitVersion = '5.3.2'
-    bitmovinAnalyticsVersion = "1.16.0"
 
     // Library dependencies
     supportDependencies = [
@@ -14,8 +13,12 @@ ext {
     ]
 
     bitmovinPlayerDependencies = [
-            bitmovinPlayer: "com.bitmovin.player:playercore:${bitmovinPlayerVersion}",
-            analytics: "com.bitmovin.analytics:collector-bitmovin-player:${bitmovinAnalyticsVersion}"
+            bitmovinPlayer: "com.bitmovin.player:player:${bitmovinPlayerVersion}"
+    ]
+
+    yospaceDependencies = [
+            adManagementSDK: "com.yospace:admanagement-sdk:3.3.3",
+            adManagementUtil: "com.yospace:admanagement-util:2.15.9"
     ]
 
     truexDependencies = [

@@ -4,16 +4,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [unreleased]
+## [Unreleased]
 
 ### Added
-- `BitmovinYospaceIntegration` to encapsulate `PlayerConfiguration` and `YospaceConfiguration`
-- `BitmovinAnalyticsCollector` to `BitmovinYospacePlayer`
+- Added support for Bitmovin Player SDK v3
 
 ### Changed
-- Bump Bitmovin Player to [2.70.0+jason](https://bitmovin.com/docs/player/releases/android/android-2-70-0) from [2.62.1+jason](https://bitmovin.com/docs/player/releases/android/android-2-62-1).
-- Bump compileSdkVersion to 30.
-- Bump targetSdkVersion to 30.
+- Migrated to new Listener APIs
+- Added custom events and error code for yospace
+
+### Removed
+- Support for Bitmovin Player SDK v2
+
+## [1.20.0]
+
+### Added
+- Added support for Yospace SDK v3
+
+## Changed
+- Migrated to new Listener APIs
+- Removed obsolete listeners
+- Upgraded to Java 11 and Gradle 7.2
+
+## [1.18.4]
+
+### Added
+- Ability to filter for specific metadata types to be fired to Yospace.
+
+## [1.18.3]
+
+### Changed
+- Copying thumbnailTracks from original SourceConfig to new SourceItem
 
 ## [1.18.2]
 

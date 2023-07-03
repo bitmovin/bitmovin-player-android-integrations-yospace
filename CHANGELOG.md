@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Migrated to new Listener APIs
 - Added custom events and error code for yospace
+- Upgrade `compileSdkVersion` and `targetSdkVersion` to `33`
 
 ### Removed
 - Support for Bitmovin Player SDK v2

@@ -3,17 +3,18 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
+apply from: "../bitmovinpropertiesloader.gradle"
 
 def packageName = 'com.bitmovin.player.integration'
 def libraryVersion = '1.18.4'
 def libraryCode = 61
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode libraryCode
         versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,6 +35,7 @@ android {
             useJUnitPlatform()
         }
     }
+    namespace 'com.bitmovin.player.integration.yospace'
 }
 
 dependencies {
@@ -91,8 +93,8 @@ artifactory {
             // Tell the Artifactory Plugin which artifacts should be published to Artifactory.
             publications('aar')
             publishArtifacts = true
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
+            username = bitmovinProperties.getProperty('artifactory_user') // The publisher user name
+            password = bitmovinProperties.getProperty('artifactory_password') // The publisher password
 
             // Properties to be attached to the published artifacts.
             properties = ['qa.level': 'basic', 'dev.team': 'core']

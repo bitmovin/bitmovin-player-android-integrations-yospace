@@ -32,9 +32,9 @@ Add this to your top level `build.gradle`
 ```
 allprojects {
     repositories {
-	maven {
-	    url  'https://bitmovin.jfrog.io/artifactory/public-releases'
-	}
+        maven {
+            url  'https://bitmovin.jfrog.io/artifactory/public-releases'
+        }
     }
 }
 ```

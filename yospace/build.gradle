@@ -35,6 +35,7 @@ android {
             useJUnitPlatform()
         }
     }
+    namespace 'com.bitmovin.player.integration.yospace'
 }
 
 dependencies {

@@ -8,6 +8,9 @@ import com.yospace.admanagement.Event as YoEvent
 import com.yospace.admanagement.EventListener as YoEventListener
 import java.util.concurrent.ConcurrentHashMap
 
+/*
+* Fires player events to player event observers
+*/
 class YospaceEventEmitter {
     private val eventListeners = ConcurrentHashMap<Class<*>, MutableList<EventListener<*>>>()
     private val yoEventListeners = ConcurrentHashMap<Class<*>, MutableList<YoEventListener<*>>>()

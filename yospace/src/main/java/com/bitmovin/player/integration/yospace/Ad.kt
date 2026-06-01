@@ -27,6 +27,7 @@ data class Ad(
     override var height: Int = -1,
     override var mediaFileUrl: String? = null
 ) : Ad {
+    // No-op: only meaningful for AdSourceType.Bitmovin ads, not Yospace SSAI. Matches the iOS integration.
     override fun clickThroughUrlOpened() = Unit
 
     override fun toString() =

@@ -35,7 +35,7 @@ class BitmovinTruexAdRenderer(
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")
             try {
-                val adParams = JSONObject(interactiveUnit.adParameters.attributes as Map<*, *>?).apply {
+                val adParams = JSONObject(interactiveUnit.adParameters.attributes.orEmpty() as Map<*, *>).apply {
                     putOpt("user_id", configuration.userId)
                     putOpt("vast_config_url", configuration.vastConfigUrl)
                 }

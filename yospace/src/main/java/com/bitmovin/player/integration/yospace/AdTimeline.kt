@@ -64,7 +64,7 @@ class AdTimeline(val adBreaks: List<AdBreak>) {
      *
      * @return total ad break durations
      */
-    fun totalAdBreakDurations(): Double = adBreaks.sumByDouble { it.duration }
+    fun totalAdBreakDurations(): Double = adBreaks.sumOf { it.duration }
 
     /**
      * Returns the sum of all of the ad break durations that have been watched

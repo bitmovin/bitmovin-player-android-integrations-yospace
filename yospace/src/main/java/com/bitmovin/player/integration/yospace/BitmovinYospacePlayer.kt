@@ -47,7 +47,7 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 open class BitmovinYospacePlayer(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
-    private val player: Player = Player.create(context, playerConfig),
+    private val player: Player = Player(context, playerConfig),
     private val yospaceConfig: YospaceConfig
 ) : Player by player {
 
@@ -282,12 +282,16 @@ open class BitmovinYospacePlayer(
         else -> player.isAd
     }
 
+    // Overrides a member deprecated on the Player interface (use Player.ads.* instead). We
+    // intentionally keep the override to intercept the call for Yospace-managed playback.
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun skipAd() {
         if (yospaceSourceConfig == null) {
             player.skipAd()
         }
     }
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(
             CustomSourceEvent.Warning(
@@ -299,6 +303,7 @@ open class BitmovinYospacePlayer(
         player.scheduleAd(adItem)
     }
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
         yospaceEventEmitter.emit(
             CustomSourceEvent.Warning(
@@ -359,8 +364,12 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionVOD)?.let {
+                // SessionVOD.adBreaks is deprecated in the Yospace SDK; migrating away from it is a
+                // separate Yospace API change.
+                @Suppress("DEPRECATION")
                 val adBreaks = it.adBreaks.toAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
+                @Suppress("DEPRECATION")
                 BitLog.d("Ad breaks: ${it.adBreaks}")
                 BitLog.d(adTimeline.toString())
             }

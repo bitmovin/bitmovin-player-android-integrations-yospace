@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 ### Changed
-- Upgraded Bitmovin Player SDK to `3.147.0`
+- Upgraded Bitmovin Player SDK to `3.154.0`
 - Raised `minSdkVersion` from `19` to `23`
 - Upgraded `compileSdkVersion` from `33` to `35`
 

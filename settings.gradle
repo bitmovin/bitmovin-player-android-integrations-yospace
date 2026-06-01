@@ -1,1 +1,1 @@
-include ':yospacesample', ':yospace', ':yoAdManagement-debug', ':yoUtil-debug'
+include ':yospacesample', ':yospace'

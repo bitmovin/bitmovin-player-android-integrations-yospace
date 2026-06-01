@@ -16,11 +16,12 @@ import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
-import kotlinx.android.synthetic.main.activity_main.*
+import com.bitmovin.player.integration.yospacesample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var player: BitmovinYospacePlayer
+    private lateinit var binding: ActivityMainBinding
 
     private val streams by lazy {
         listOf(
@@ -45,7 +46,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupSpinner()
         setupPlayer()
@@ -54,18 +56,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        playerView.onResume()
+        binding.playerView.onResume()
         player.play()
     }
 
     override fun onPause() {
         player.pause()
-        playerView.onPause()
+        binding.playerView.onPause()
         super.onPause()
     }
 
     override fun onDestroy() {
-        playerView.onDestroy()
+        binding.playerView.onDestroy()
         super.onDestroy()
     }
 
@@ -78,28 +80,28 @@ class MainActivity : AppCompatActivity() {
         player = BitmovinYospacePlayer(this, playerConfig, yospaceConfig = YospaceConfig())
         player.on<SourceEvent.Load> {
             BitLog.d("Change button")
-            loadUnloadButton.text = getString(R.string.unload)
+            binding.loadUnloadButton.text = getString(R.string.unload)
         }
         player.on<SourceEvent.Unloaded> {
-            loadUnloadButton.text = getString(R.string.load)
+            binding.loadUnloadButton.text = getString(R.string.load)
         }
-        playerView.player = player
+        binding.playerView.player = player
         BitLog.d("Setup player")
     }
 
     private fun setupSpinner() {
-        streamSpinner.adapter =
+        binding.streamSpinner.adapter =
             StreamSpinnerAdapter(this, streams, android.R.layout.simple_spinner_item)
     }
 
     private fun addUIListeners() {
-        loadUnloadButton.setOnClickListener {
+        binding.loadUnloadButton.setOnClickListener {
             if (player.isPlaying) {
                 BitLog.d("unload stream")
                 player.unload()
             } else {
                 BitLog.d("Button clicked, load stream")
-                loadStream(streams[streamSpinner.selectedItemPosition])
+                loadStream(streams[binding.streamSpinner.selectedItemPosition])
             }
         }
     }

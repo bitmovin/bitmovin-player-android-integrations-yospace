@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+- Raised `minSdkVersion` from `19` to `23`
+
 ## 2.0.0
 
 ### Added

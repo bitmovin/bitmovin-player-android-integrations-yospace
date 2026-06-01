@@ -39,14 +39,23 @@ allprojects {
 }
 ```
 
-Customers will need to use Yospace SDK from their own Yospace account so add Yospace credentails in build.gradle.
-```
-allprojects {
+Customers will need to use the Yospace SDK from their own Yospace account, so add the Yospace
+repository with credentials to your top level `build.gradle`. The credentials must live inside the
+`maven { }` repository block:
 
-    credentials {
-        //ADD credentials for build so that gradle can download yospace libraries
-        username = ""
-        password = ""
+```groovy
+allprojects {
+    repositories {
+        maven {
+            url 'https://yospacerepo.jfrog.io/artifactory/android-sdk'
+            credentials {
+                // Use your Yospace account's username and a JFrog identity/reference token.
+                // Prefer reading these from ~/.gradle/gradle.properties or environment variables
+                // rather than hardcoding them here.
+                username = findProperty('yospaceUser') ?: System.getenv('YOSPACE_USER')
+                password = findProperty('yospaceToken') ?: System.getenv('YOSPACE_TOKEN')
+            }
+        }
     }
 }
 ```

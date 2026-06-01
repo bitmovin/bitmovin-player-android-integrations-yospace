@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.api.Player
+import com.bitmovin.player.api.deficiency.DeficiencyData
 import com.bitmovin.player.api.deficiency.ErrorEvent
 import com.bitmovin.player.api.deficiency.WarningEvent
 import com.bitmovin.player.api.source.Source
@@ -33,7 +34,11 @@ sealed class CustomSourceEvent : CustomEvent() {
         /**
          * Potential additional data.
          */
-        override val data: Any? = null
+        override val data: Any? = null,
+        /**
+         * Additional structured data describing the deficiency.
+         */
+        override val deficiencyData: DeficiencyData? = null
     ) : ErrorEvent, CustomSourceEvent()
 
     /**
@@ -47,7 +52,11 @@ sealed class CustomSourceEvent : CustomEvent() {
         /**
          * The warning message to explain the reason for the source warning.
          */
-        override val message: String
+        override val message: String,
+        /**
+         * Additional structured data describing the deficiency.
+         */
+        override val deficiencyData: DeficiencyData? = null
     ) : WarningEvent, CustomSourceEvent()
 
 }

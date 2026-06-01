@@ -27,6 +27,8 @@ data class Ad(
     override var height: Int = -1,
     override var mediaFileUrl: String? = null
 ) : Ad {
+    override fun clickThroughUrlOpened() = Unit
+
     override fun toString() =
         "id=$id, " +
         "creativeId=$creativeId, " +

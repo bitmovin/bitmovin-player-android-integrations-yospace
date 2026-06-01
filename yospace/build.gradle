@@ -9,7 +9,7 @@ def libraryVersion = '2.0.0'
 def libraryCode = 61
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 35
 
     defaultConfig {
         minSdkVersion 23

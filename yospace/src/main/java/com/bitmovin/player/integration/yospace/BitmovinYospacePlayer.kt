@@ -9,6 +9,7 @@ import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.advertising.AdItem
 import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
+import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.bitmovin.player.api.deficiency.SourceErrorCode
 import com.bitmovin.player.api.event.PlayerEvent
@@ -47,7 +48,7 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 open class BitmovinYospacePlayer(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
-    private val player: Player = Player.create(context, playerConfig),
+    private val player: Player = Player(context, playerConfig),
     private val yospaceConfig: YospaceConfig
 ) : Player by player {
 
@@ -282,33 +283,44 @@ open class BitmovinYospacePlayer(
         else -> player.isAd
     }
 
-    override fun skipAd() {
-        if (yospaceSourceConfig == null) {
-            player.skipAd()
+    override val ads: AdvertisingApi = object : AdvertisingApi by player.ads {
+        override fun skip() {
+            if (yospaceSourceConfig == null) {
+                player.ads.skip()
+            }
+        }
+
+        override fun schedule(adItem: AdItem) = if (yospaceSourceConfig != null) {
+            yospaceEventEmitter.emit(
+                CustomSourceEvent.Warning(
+                    YospaceWarningCode.UnsupportedAPI,
+                    "ads.schedule API is not available when playing back a Yospace asset"
+                )
+            )
+        } else {
+            player.ads.schedule(adItem)
+        }
+
+        override fun setViewGroup(viewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
+            yospaceEventEmitter.emit(
+                CustomSourceEvent.Warning(
+                    YospaceWarningCode.UnsupportedAPI,
+                    "ads.setViewGroup API is not available when playing back a Yospace asset"
+                )
+            )
+        } else {
+            player.ads.setViewGroup(viewGroup)
         }
     }
 
-    override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(
-            CustomSourceEvent.Warning(
-                YospaceWarningCode.UnsupportedAPI,
-                "scheduleAd API is not available when playing back a YoSpace asset"
-            )
-        )
-    } else {
-        player.scheduleAd(adItem)
-    }
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun skipAd() = ads.skip()
 
-    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(
-            CustomSourceEvent.Warning(
-                YospaceWarningCode.UnsupportedAPI,
-                "setAdViewGroup API is not available when playing back a YoSpace asset"
-            )
-        )
-    } else {
-        player.setAdViewGroup(adViewGroup)
-    }
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun scheduleAd(adItem: AdItem) = ads.schedule(adItem)
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun setAdViewGroup(adViewGroup: ViewGroup?) = ads.setViewGroup(adViewGroup)
 
     ///////////////////////////////////////////////////////////////
     // Player Event Listeners
@@ -359,8 +371,12 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending INITIALISING event: $yospaceTime")
             yospaceStateSource.notify(PlayerState(PlaybackState.INITIALISING, yospaceTime, false))
             (yospaceSession as? SessionVOD)?.let {
+                // SessionVOD.adBreaks is deprecated in the Yospace SDK; migrating away from it is a
+                // separate Yospace API change.
+                @Suppress("DEPRECATION")
                 val adBreaks = it.adBreaks.toAdBreaks()
                 adTimeline = AdTimeline(adBreaks)
+                @Suppress("DEPRECATION")
                 BitLog.d("Ad breaks: ${it.adBreaks}")
                 BitLog.d(adTimeline.toString())
             }

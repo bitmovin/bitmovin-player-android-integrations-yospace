@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 apply from: "../bitmovinpropertiesloader.gradle"
@@ -10,11 +9,11 @@ def libraryVersion = '2.0.0'
 def libraryCode = 61
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 35
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 33
+        minSdkVersion 23
+        targetSdkVersion 34
         versionCode libraryCode
         versionName libraryVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -28,7 +27,16 @@ android {
     }
 
 
-    kotlinOptions { jvmTarget = '11' }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions { jvmTarget = '17' }
+
+    buildFeatures {
+        buildConfig true
+    }
 
     testOptions {
         unitTests.all {
@@ -88,13 +96,13 @@ artifactory {
         repository {
             // The Artifactory repository key to publish to
             repoKey = libraryVersion.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+            username = bitmovinProperties.getProperty('artifactory_user') // The publisher user name
+            password = bitmovinProperties.getProperty('artifactory_password') // The publisher password
         }
         defaults {
             // Tell the Artifactory Plugin which artifacts should be published to Artifactory.
             publications('aar')
             publishArtifacts = true
-            username = bitmovinProperties.getProperty('artifactory_user') // The publisher user name
-            password = bitmovinProperties.getProperty('artifactory_password') // The publisher password
 
             // Properties to be attached to the published artifacts.
             properties = ['qa.level': 'basic', 'dev.team': 'core']

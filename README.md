@@ -39,14 +39,23 @@ allprojects {
 }
 ```
 
-Customers will need to use Yospace SDK from their own Yospace account so add Yospace credentails in build.gradle.
-```
-allprojects {
+Customers will need to use the Yospace SDK from their own Yospace account, so add the Yospace
+repository with credentials to your top level `build.gradle`. The credentials must live inside the
+`maven { }` repository block:
 
-    credentials {
-        //ADD credentials for build so that gradle can download yospace libraries
-        username = ""
-        password = ""
+```groovy
+allprojects {
+    repositories {
+        maven {
+            url 'https://yospacerepo.jfrog.io/artifactory/android-sdk'
+            credentials {
+                // Use your Yospace account's username and a JFrog identity/reference token.
+                // Prefer reading these from ~/.gradle/gradle.properties or environment variables
+                // rather than hardcoding them here.
+                username = findProperty('yospaceUser') ?: System.getenv('YOSPACE_USER')
+                password = findProperty('yospaceToken') ?: System.getenv('YOSPACE_TOKEN')
+            }
+        }
     }
 }
 ```
@@ -54,73 +63,72 @@ allprojects {
 
 And this line to your main project `build.gradle`
 
-```
+```groovy
 dependencies {
-    implementation 'com.bitmovin.player.integration:yospace:1.15.3'
+    implementation 'com.bitmovin.player.integration:yospace:2.0.0'
 }
 ```
 
 ### Examples
 
-The following example creates a `BitmovinYospacePlayer` object and loads a `YospaceSourceConfiguration`
+The following example creates a `BitmovinYospacePlayer` and loads a `YospaceSourceConfig`.
 
-#### Basic video playback 
+#### Basic video playback
 
 ```kotlin
-// Create a YospaceConfiguration using the YospaceConfigurationBuilder
-val yospaceConfig = YospaceConfiguration(
+// Create a YospaceConfig
+val yospaceConfig = YospaceConfig(
     userAgent = "userAgent",
-    readTimeout = 25000,
-    requestTimeout = 25000,
-    connectTimeout = 25000,
+    readTimeout = 25_000,
+    connectTimeout = 25_000,
+    requestTimeout = 25_000,
     liveInitialisationType = YospaceLiveInitialisationType.DIRECT,
     isDebug = true
 )
 
-// If playing an asset with TrueX ads, create a TruexConfiguration
-val truexConfig = TruexConfiguration(player_view)
-
 // Create the BitmovinYospacePlayer
-val player = BitmovinYospacePlayer(this, playerConfig, yospaceConfig)
-    
-// Set it to your BitmovinPlayerView
-bitmovinPlayerView.setPlayer(player);
-    
-// Create a SourceConfiguration 
-val sourceItem = SourceItem(HLSSource("asset-url"))
-val sourceConfig = SourceConfiguration()
-sourceConfig.addSourceItem(sourceItem) 
-    
-// Create a YospaceSourceConfiguration with a SourceConfiguration and YospaceAssetType
-val yospaceSourceConfig = YospaceSourceConfiguration(YospaceAssetType.VOD)
+val player = BitmovinYospacePlayer(
+    context = this,
+    playerConfig = PlayerConfig(),
+    yospaceConfig = yospaceConfig
+)
 
-//Load your YospaceSourceConfiguration
-player.load(sourceConfig, yospaceSourceConfig)
+// Attach it to your PlayerView (e.g. from your layout)
+playerView.player = player
+
+// Create a SourceConfig pointing at your HLS asset
+val sourceConfig = SourceConfig("asset-url", SourceType.Hls)
+
+// Create a YospaceSourceConfig with the YospaceAssetType
+val yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+
+// If playing an asset with TrueX ads, create a TruexConfig (optional)
+val truexConfig = TruexConfig(viewGroup = playerView)
+
+// Load the source (truexConfig is optional and defaults to null)
+player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 ```
 
 #### Ad Tracking Events
-The BitmovinYospacePlayer will fire events thought the normal Bitmovin event listeners. These are the ad related event listeners you should create 
+The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
+Subscribe with the `on<EventType> { }` extension. These are the ad related events you will
+typically observe:
 
 ```kotlin
-player.addEventListener(OnAdBreakStartedListener { ... })
-player.addEventListener(OnAdBreakFinishedListener { ... })
-player.addEventListener(OnAdStartedListener { ... })
-player.addEventListener(OnAdFinishedListener { ... })
-player.addEventListener(OnAdClickedListener { ... })
-player.addEventListener(OnAdErrorListener { ... })
-player.addEventListener(OnAdSkippedListener { ... })
-``` 
-
-
-#### Click Through Urls
-Click through URLs will be delivered through each AdStartedEvent.
-```kotlin
-OnAdStartedListener {
-    val clickThroughUrl = it.clickThroughUrl
-}
+player.on<PlayerEvent.AdBreakStarted> { ... }
+player.on<PlayerEvent.AdBreakFinished> { ... }
+player.on<PlayerEvent.AdStarted> { ... }
+player.on<PlayerEvent.AdFinished> { ... }
+player.on<PlayerEvent.AdClicked> { ... }
+player.on<PlayerEvent.AdError> { ... }
+player.on<PlayerEvent.AdSkipped> { ... }
 ```
 
-To track ads, call `clickThroughPressed()` when a user clicks on an ad
+#### Click Through Urls
+The click-through URL is delivered with each ad-started event:
+
 ```kotlin
-player.clickThroughPressed();
+player.on<PlayerEvent.AdStarted> { event ->
+    val clickThroughUrl = event.clickThroughUrl
+}
 ```

@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.7.20'
+    ext.kotlin_version = '2.2.21'
     repositories {
         google()
         mavenCentral()
@@ -10,8 +10,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
+        classpath 'com.android.tools.build:gradle:8.10.1'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:5.2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -30,11 +30,12 @@ allprojects {
             url "https://raw.github.com/socialvibe/truex-mobile-integrations/android"
         }
         maven {
-            url 'https://yospacerepo.jfrog.io/yospacerepo/android-sdk'
+            url 'https://yospacerepo.jfrog.io/artifactory/android-sdk'
             credentials {
-                //ADD credentials for build so that gradle can download yospace libraries
-                username ""
-                password ""
+                // Credentials are read from ~/.gradle/gradle.properties (yospaceUser / yospaceToken)
+                // or the YOSPACE_USER / YOSPACE_TOKEN environment variables. Do not hardcode here.
+                username = findProperty('yospaceUser') ?: System.getenv('YOSPACE_USER')
+                password = findProperty('yospaceToken') ?: System.getenv('YOSPACE_TOKEN')
             }
         }
     }

@@ -37,18 +37,11 @@ yospace/libs/*.aar
 # Android Studio captures folder
 captures/
 
-# IntelliJ
+# IntelliJ / Android Studio
+# These files are user- or machine-specific or regenerated from the Gradle build,
+# so the whole .idea/ directory is ignored rather than tracked.
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/assetWizardSettings.xml
-.idea/dictionaries
-.idea/libraries
-.idea/caches
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/misc.xml
+.idea/
 
 # Keystore files
 # Uncomment the following line if you do not want to check your keystore files in.

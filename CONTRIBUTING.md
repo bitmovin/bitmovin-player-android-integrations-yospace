@@ -14,7 +14,7 @@ Pull requests are welcome and pair well with bug reports and feature requests. H
 - Stay consistent to the file formats of this project.
 - Develop in a fix or feature branch (`fix/describe-your-fix`, `feature/describe-your-feature`), not in `main` or `develop`.
 - Make your changes in your fork.
-- Validate your chances according to the [Yospace Validation Procedure](https://developer.yospace.com/sdk-documentation/android/userguide/latest/en/validate-your-app.html).
+- Validate your changes according to the [Yospace Validation Procedure](https://developer.yospace.com/sdk-documentation/android/userguide/latest/en/validate-your-app.html).
 - Add an entry to the [CHANGELOG.md](CHANGELOG.md) file in the `[Unreleased]` section to describe the changes to the project.
 - Submit a pull request to the main repository.
 

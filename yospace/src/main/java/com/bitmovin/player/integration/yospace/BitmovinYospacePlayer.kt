@@ -9,6 +9,7 @@ import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.advertising.AdItem
 import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
+import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.bitmovin.player.api.deficiency.SourceErrorCode
 import com.bitmovin.player.api.event.PlayerEvent
@@ -282,38 +283,44 @@ open class BitmovinYospacePlayer(
         else -> player.isAd
     }
 
-    // Overrides a member deprecated on the Player interface (use Player.ads.* instead). We
-    // intentionally keep the override to intercept the call for Yospace-managed playback.
-    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun skipAd() {
-        if (yospaceSourceConfig == null) {
-            player.skipAd()
+    override val ads: AdvertisingApi = object : AdvertisingApi by player.ads {
+        override fun skip() {
+            if (yospaceSourceConfig == null) {
+                player.ads.skip()
+            }
+        }
+
+        override fun schedule(adItem: AdItem) = if (yospaceSourceConfig != null) {
+            yospaceEventEmitter.emit(
+                CustomSourceEvent.Warning(
+                    YospaceWarningCode.UnsupportedAPI,
+                    "ads.schedule API is not available when playing back a Yospace asset"
+                )
+            )
+        } else {
+            player.ads.schedule(adItem)
+        }
+
+        override fun setViewGroup(viewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
+            yospaceEventEmitter.emit(
+                CustomSourceEvent.Warning(
+                    YospaceWarningCode.UnsupportedAPI,
+                    "ads.setViewGroup API is not available when playing back a Yospace asset"
+                )
+            )
+        } else {
+            player.ads.setViewGroup(viewGroup)
         }
     }
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun scheduleAd(adItem: AdItem) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(
-            CustomSourceEvent.Warning(
-                YospaceWarningCode.UnsupportedAPI,
-                "scheduleAd API is not available when playing back a YoSpace asset"
-            )
-        )
-    } else {
-        player.scheduleAd(adItem)
-    }
+    override fun skipAd() = ads.skip()
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun setAdViewGroup(adViewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
-        yospaceEventEmitter.emit(
-            CustomSourceEvent.Warning(
-                YospaceWarningCode.UnsupportedAPI,
-                "setAdViewGroup API is not available when playing back a YoSpace asset"
-            )
-        )
-    } else {
-        player.setAdViewGroup(adViewGroup)
-    }
+    override fun scheduleAd(adItem: AdItem) = ads.schedule(adItem)
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun setAdViewGroup(adViewGroup: ViewGroup?) = ads.setViewGroup(adViewGroup)
 
     ///////////////////////////////////////////////////////////////
     // Player Event Listeners

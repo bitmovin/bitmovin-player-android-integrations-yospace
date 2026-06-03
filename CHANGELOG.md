@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Raised `minSdkVersion` from `19` to `23`
 - Upgraded `compileSdkVersion` from `33` to `35`
 
+### Fixed
+- Yospace ad rules are now enforced on the `Player.ads.*` API
+
 ## 2.0.0
 
 ### Added

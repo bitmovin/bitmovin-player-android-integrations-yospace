@@ -10,6 +10,9 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # action-gh-release creates the GitHub Release via GITHUB_TOKEN, which needs write access.
+    permissions:
+      contents: write
     env:
       YOSPACE_USER: ${{ secrets.YOSPACE_USER }}
       YOSPACE_TOKEN: ${{ secrets.YOSPACE_TOKEN }}

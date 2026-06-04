@@ -63,6 +63,21 @@ jobs:
       - name: Publish to Artifactory
         run: ./gradlew artifactoryPublish
 
+      # Promote the release from the internal staging repo to the public, anonymously
+      # readable repo. Mirrors the copy step used by player-android and the analytics SDK.
+      - name: Promote artifact to public-releases
+        run: |
+          VERSION="${{ steps.version.outputs.next }}"
+          ARTIFACT_PATH="com/bitmovin/player/integration/yospace/${VERSION}"
+          HTTP_STATUS=$(curl -sS -o /tmp/copy-response.json -w '%{http_code}' \
+            -X POST -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" \
+            "https://bitmovin.jfrog.io/bitmovin/api/copy/libs-release-local/${ARTIFACT_PATH}?to=/public-releases/${ARTIFACT_PATH}")
+          cat /tmp/copy-response.json
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::JFrog copy to public-releases failed with HTTP ${HTTP_STATUS}"
+            exit 1
+          fi
+
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:

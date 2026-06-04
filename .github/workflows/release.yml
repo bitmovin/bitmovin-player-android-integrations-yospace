@@ -17,7 +17,7 @@ jobs:
       ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Deploy key with write access, allowed to bypass main's branch protection.
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
@@ -25,13 +25,13 @@ jobs:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       # Validate before mutating anything: never tag or publish a broken build.
       - name: Build
@@ -64,7 +64,7 @@ jobs:
         run: ./gradlew artifactoryPublish
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.next }}
           body_path: build/release-notes.md

@@ -10,6 +10,10 @@ This project is not part of a regular maintenance or update schedule. For any up
 
 As an open-source project, we are pleased to accept any and all changes, updates and fixes from the community wishing to use this project. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details on how to contribute.
 
+## Releasing
+
+Releasing a new version is automated and tag-driven. A maintainer triggers the **Release new version** GitHub Action (`workflow_dispatch`) on the `main` branch. The workflow determines the next version from the `## [Unreleased]` entries in [CHANGELOG.md](CHANGELOG.md) (minor for `Added`/`Changed`/`Removed`, patch for `Fixed`/`Security`/`Deprecated`), bumps the version, updates the changelog, tags the release, publishes the AAR to Artifactory, and creates a GitHub release. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 ## Reporting player bugs
 
 If you come across a bug related to the player, please raise this through your support ticketing system.

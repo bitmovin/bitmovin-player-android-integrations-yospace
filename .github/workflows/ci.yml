@@ -2,14 +2,17 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - 'feature/**'
-      - 'fix/**'
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+# Cancel superseded runs on the same ref. The push and pull_request events use
+# different refs (refs/heads/* vs refs/pull/*/merge), so the PR run is not cancelled
+# by its branch's push run; only stale runs of the same event+ref are.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint_and_build:

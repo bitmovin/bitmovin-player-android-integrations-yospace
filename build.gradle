@@ -13,11 +13,23 @@ buildscript {
         classpath 'com.android.tools.build:gradle:8.10.1'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:5.2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.changelog:org.jetbrains.changelog.gradle.plugin:2.5.0"
     }
 }
 
 // Load dependencies
 apply from: 'dependencies.gradle'
+
+// Changelog management (Keep a Changelog format). Replaces the web repo's npm `kacl`.
+apply plugin: 'org.jetbrains.changelog'
+
+changelog {
+    version = providers.gradleProperty('libraryVersion').get()
+    repositoryUrl = 'https://github.com/bitmovin/bitmovin-player-android-integrations-yospace'
+    // Tags in this repo are unprefixed (e.g. 2.1.0), so drop the default "v" prefix
+    // used when building compare URLs in the link-reference footer.
+    versionPrefix = ''
+}
 
 allprojects {
     repositories {
@@ -43,4 +55,72 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+// --- Release automation tasks (used by .github/workflows/release.yml) ---
+
+// Computes the next semantic version from the unreleased CHANGELOG section and prints it
+// to stdout (run with `-q --console=plain` to capture just the version):
+//   Added/Changed/Removed present -> minor bump; only Fixed/Security/Deprecated -> patch bump.
+tasks.register('decideReleaseVersion') {
+    doLast {
+        def sections = changelog.getUnreleased().sections.keySet()
+        if (sections.isEmpty()) {
+            throw new GradleException('No entries in the [Unreleased] section of CHANGELOG.md - nothing to release')
+        }
+        def minorTriggers = ['Added', 'Changed', 'Removed']
+        def patchTriggers = ['Fixed', 'Security', 'Deprecated']
+        def bump
+        if (sections.any { minorTriggers.contains(it) }) {
+            bump = 'minor'
+        } else if (sections.any { patchTriggers.contains(it) }) {
+            bump = 'patch'
+        } else {
+            throw new GradleException("No releasable entries in [Unreleased] (found sections: ${sections})")
+        }
+
+        def current = providers.gradleProperty('libraryVersion').get()
+        def parts = current.tokenize('.').collect { it.toInteger() }
+        if (parts.size() != 3) {
+            throw new GradleException("libraryVersion '${current}' is not a valid X.Y.Z version")
+        }
+        def (major, minor, patch) = parts
+        if (bump == 'minor') {
+            minor += 1
+            patch = 0
+        } else {
+            patch += 1
+        }
+        logger.quiet("${major}.${minor}.${patch}")
+    }
+}
+
+// Writes a new libraryVersion (from -PnewVersion) and increments libraryCode in gradle.properties.
+tasks.register('bumpVersion') {
+    doLast {
+        if (!project.hasProperty('newVersion')) {
+            throw new GradleException('Provide the target version: -PnewVersion=X.Y.Z')
+        }
+        def newVersion = project.property('newVersion')
+        def propsFile = rootProject.file('gradle.properties')
+        def lines = propsFile.readLines()
+        def sawVersion = false, sawCode = false
+        def updated = lines.collect { line ->
+            if (line.startsWith('libraryVersion=')) {
+                sawVersion = true
+                return "libraryVersion=${newVersion}"
+            }
+            if (line.startsWith('libraryCode=')) {
+                sawCode = true
+                def code = line.substring('libraryCode='.length()).trim().toInteger()
+                return "libraryCode=${code + 1}"
+            }
+            return line
+        }
+        if (!sawVersion || !sawCode) {
+            throw new GradleException('Could not find libraryVersion/libraryCode in gradle.properties')
+        }
+        propsFile.text = updated.join(System.lineSeparator()) + System.lineSeparator()
+        logger.lifecycle("Bumped libraryVersion -> ${newVersion}, libraryCode incremented by 1")
+    }
 }

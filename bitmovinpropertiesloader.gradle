@@ -5,3 +5,12 @@ if (propertiesFile.exists()) {
         stream -> bitmovinProperties.load(stream)
     }
 }
+
+// Environment-variable fallbacks for CI publishing. The file (if present) takes precedence,
+// so local development is unaffected. Mirrors the YOSPACE_USER / YOSPACE_TOKEN pattern in build.gradle.
+if (!bitmovinProperties.getProperty('artifactory_user') && System.getenv('ARTIFACTORY_USER')) {
+    bitmovinProperties.setProperty('artifactory_user', System.getenv('ARTIFACTORY_USER'))
+}
+if (!bitmovinProperties.getProperty('artifactory_password') && System.getenv('ARTIFACTORY_PASSWORD')) {
+    bitmovinProperties.setProperty('artifactory_password', System.getenv('ARTIFACTORY_PASSWORD'))
+}

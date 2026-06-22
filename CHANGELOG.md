@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
+- `YospaceAssetType.LINEAR_START_OVER` now initialises a `SessionDVRLive` session (the removed `SessionNLSO` has no direct replacement)
+
+### Removed
+- Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities
+- `YospaceConfig.connectTimeout` is no longer forwarded to the Yospace SDK, which dropped the setting (only `requestTimeout`/`resourceTimeout` remain)
+
 ## [2.1.0] - 2026-06-03
 
 ### Changed

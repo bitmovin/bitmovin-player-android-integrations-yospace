@@ -30,7 +30,7 @@ class BitmovinTruexAdRenderer(
 
     fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
         this.adBreakPosition = adBreakPosition
-        this.interactiveUnit = ad.interactiveCreative
+        this.interactiveUnit = ad.interactiveCreatives.firstOrNull()
 
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")

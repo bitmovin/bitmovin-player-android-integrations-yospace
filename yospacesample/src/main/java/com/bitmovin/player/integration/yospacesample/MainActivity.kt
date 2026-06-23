@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
             Stream(
                 "Yospace Live",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
             ),
             Stream(
                 "Yospace VOD",

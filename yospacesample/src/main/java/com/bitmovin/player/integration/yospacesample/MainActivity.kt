@@ -27,18 +27,12 @@ class MainActivity : AppCompatActivity() {
         listOf(
             Stream(
                 "Yospace Live",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
             ),
             Stream(
-                "Yospace Companion Ads",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.lp=true&yo.av=4",
-                "https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128",
-                YospaceSourceConfig(YospaceAssetType.LINEAR)
-            ),
-            Stream(
                 "Yospace VOD",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )

@@ -87,7 +87,8 @@ val yospaceConfig = YospaceConfig(
     connectTimeout = 25_000,
     requestTimeout = 25_000,
     liveInitialisationType = YospaceLiveInitialisationType.DIRECT,
-    isDebug = true
+    isDebug = true,
+    yospaceDebugMode = YospaceDebugMode.VALIDATION
 )
 
 // Create the BitmovinYospacePlayer

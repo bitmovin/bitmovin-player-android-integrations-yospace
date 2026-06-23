@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging without exposing Yospace SDK APIs to consumers
+
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
 - `YospaceAssetType.LINEAR_START_OVER` now initialises a `SessionDVRLive` session (the removed `SessionNLSO` has no direct replacement)

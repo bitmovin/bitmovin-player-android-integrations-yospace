@@ -21,6 +21,7 @@ import com.bitmovin.player.api.source.SourceType as MediaSourceType
 import com.bitmovin.player.api.source.*
 import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
+import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import com.yospace.admanagement.*
 import com.yospace.admanagement.TimedMetadata
@@ -117,11 +118,7 @@ open class BitmovinYospacePlayer(
         sessionProperties.requestTimeout = yospaceConfig.requestTimeout
         sessionProperties.userAgent = yospaceConfig.userAgent
 
-        // setDebugFlags is now static on SessionProperties; DEBUG_ID3TAG/DEBUG_RAW_XML were dropped
-        // and DEBUG_HTTP is now DEBUG_HTTP_REQUESTS.
-        SessionProperties.setDebugFlags(
-            YoLog.DEBUG_POLLING or YoLog.DEBUG_PARSING or YoLog.DEBUG_REPORTS or YoLog.DEBUG_HTTP_REQUESTS
-        )
+        SessionProperties.setDebugFlags(yospaceConfig.yospaceDebugMode.toYospaceDebugFlags())
 
         yospaceSessionProperties = sessionProperties
 
@@ -804,6 +801,16 @@ open class BitmovinYospacePlayer(
         type === "EMSG" -> convertEmsgToId3()
         type === "ID3" -> processId3()
         else -> null
+    }
+
+    private fun YospaceDebugMode.toYospaceDebugFlags() = when (this) {
+        YospaceDebugMode.NONE -> 0
+        YospaceDebugMode.VALIDATION -> YoLog.DEBUG_VALIDATION
+        YospaceDebugMode.ALL -> YoLog.DEBUG_POLLING or
+            YoLog.DEBUG_PARSING or
+            YoLog.DEBUG_REPORTS or
+            YoLog.DEBUG_HTTP_REQUESTS or
+            YoLog.DEBUG_VALIDATION
     }
 
     private fun PlayerEvent.Metadata.processId3(): TimedMetadata? {

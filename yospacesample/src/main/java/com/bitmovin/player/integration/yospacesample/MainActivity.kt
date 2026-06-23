@@ -15,10 +15,16 @@ import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
+import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import com.bitmovin.player.integration.yospacesample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private companion object {
+        private const val ENABLE_INTEGRATION_LOGS = false
+        private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
+    }
 
     private lateinit var player: BitmovinYospacePlayer
     private lateinit var binding: ActivityMainBinding
@@ -46,6 +52,9 @@ class MainActivity : AppCompatActivity() {
         setupSpinner()
         setupPlayer()
         addUIListeners()
+
+        // Auto-load the default stream (live) on launch to ease testing.
+        loadStream(streams[binding.streamSpinner.selectedItemPosition])
     }
 
     override fun onResume() {
@@ -71,7 +80,18 @@ class MainActivity : AppCompatActivity() {
             tweaksConfig = TweaksConfig(useFiletypeExtractorFallbackForHls = true)
         )
 
-        player = BitmovinYospacePlayer(this, playerConfig, yospaceConfig = YospaceConfig())
+        player = BitmovinYospacePlayer(
+            this,
+            playerConfig,
+            yospaceConfig = YospaceConfig(
+                isDebug = ENABLE_INTEGRATION_LOGS,
+                yospaceDebugMode = if (ENABLE_YOSPACE_VALIDATION_LOGS) {
+                    YospaceDebugMode.VALIDATION
+                } else {
+                    YospaceDebugMode.NONE
+                }
+            )
+        )
         player.on<SourceEvent.Load> {
             BitLog.d("Change button")
             binding.loadUnloadButton.text = getString(R.string.unload)

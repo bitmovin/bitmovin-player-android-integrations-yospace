@@ -29,6 +29,7 @@ import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent as YoPlayerEven
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.util.YoLog
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import kotlin.properties.Delegates
 
 // Yospace Error/Warning Codes
@@ -172,15 +173,15 @@ open class BitmovinYospacePlayer(
         SessionDVRLive.create(
             originalUrl, properties
         ) { event: Event<Session> ->
-            // Callback made by Session once it has initialised a session on the Yospace CSM
-            // Retrieve the initialised session
+            // Playback must use the URL for this initialized Yospace session.
             onSessionInitialized(
                 event.payload,
                 "Yospace analytics session DVRLive initialised"
             )
-            yospaceSession = event.payload
+            if (event.payload.sessionState == Session.SessionState.INITIALISED) {
+                startPlayback(MediaSourceType.Hls, event.payload.playbackUrl)
+            }
         }
-        startPlayback(MediaSourceType.Hls, originalUrl)
     }
 
     private fun onSessionInitialized(session: Session, message: String) {
@@ -249,6 +250,15 @@ open class BitmovinYospacePlayer(
     }
 
     fun currentTimeWithAds(): Double = player.currentTime
+
+    /**
+     * Yospace expects milliseconds from the fixed timeline origin where the first media segment
+     * was available to this session. This anchors ad-break matching and analytics for DVR live.
+     */
+    private fun yospacePlayheadMs(playbackTime: Double = currentTimeWithAds()): Long =
+        ((playbackTime + player.playbackTimeOffsetToRelativeTime) * 1000)
+            .roundToLong()
+            .coerceAtLeast(0)
 
     override fun seek(time: Double) {
         adTimeline?.let {
@@ -331,12 +341,12 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending PLAYSTART event: $yospaceTime")
             yospaceSessionStatus = SessionStatus.INITIALIZED
 
-            // SessionLive has a specialized onPlaybackStart(playhead) method that starts the analytic poller.
-            // NOTICE: It differs from the one in class Session, which does not add poller.
-            if (this.yospaceSourceConfig?.assetType == YospaceAssetType.LINEAR) {
-                (yospaceSession as? SessionLive)?.onPlaybackStart(yospaceTime.toLong())
-            } else {
-                yospaceSession?.onPlaybackStart()
+            // Live sessions need the playhead overload to start the analytic poller.
+            when (yospaceSourceConfig?.assetType) {
+                YospaceAssetType.LINEAR -> (yospaceSession as? SessionLive)?.onPlaybackStart(yospacePlayheadMs())
+                YospaceAssetType.LINEAR_START_OVER ->
+                    (yospaceSession as? SessionDVRLive)?.onPlaybackStart(yospacePlayheadMs())
+                else -> yospaceSession?.onPlaybackStart()
             }
         }
 
@@ -344,7 +354,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("Sending PAUSED event: $yospaceTime")
             isLiveAdPaused = player.isLive && isYospaceAd()
 
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.PAUSE, yospaceTime.toLong())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.PAUSE, yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.Playing> {
@@ -354,7 +364,7 @@ open class BitmovinYospacePlayer(
 
         player.on<PlayerEvent.PlaybackFinished> {
             BitLog.d("Sending STOPPED event: $yospaceTime")
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.STOP, yospaceTime.toLong())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.STOP, yospacePlayheadMs())
         }
 
         player.on<SourceEvent.Loaded> {
@@ -403,9 +413,10 @@ open class BitmovinYospacePlayer(
         player.on<PlayerEvent.TimeChanged> {
             val currentTime = getCurrentTimeMinusAd()
             val timeChangedEvent = PlayerEvent.TimeChanged(currentTime)
-            yospaceSession?.onPlayheadUpdate((currentTime * 1000).toLong())
 
-            if (yospaceSession as? SessionLive != null) {
+            yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+
+            if (yospaceSession as? SessionLive != null || yospaceSession as? SessionDVRLive != null) {
                 // Live session
                 val adSkippedEvent = PlayerEvent.AdSkipped(activeAd)
                 handler.post {

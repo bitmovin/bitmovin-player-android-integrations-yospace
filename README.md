@@ -114,6 +114,8 @@ val truexConfig = TruexConfig(viewGroup = playerView)
 player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 ```
 
+When uploading live validation logs to Yospace, select the same initialisation type in the validation tool as configured in `YospaceConfig.liveInitialisationType`.
+
 #### Ad Tracking Events
 The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
 Subscribe with the `on<EventType> { }` extension. These are the ad related events you will

@@ -14,6 +14,7 @@ import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
+import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
 import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         private const val ENABLE_INTEGRATION_LOGS = false
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
+        private val LIVE_INITIALISATION_TYPE = YospaceLiveInitialisationType.PROXY
     }
 
     private lateinit var player: BitmovinYospacePlayer
@@ -32,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private val streams by lazy {
         listOf(
             Stream(
-                "Yospace Live",
+                "Yospace Live (${LIVE_INITIALISATION_TYPE.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
             ),
@@ -84,6 +86,7 @@ class MainActivity : AppCompatActivity() {
             this,
             playerConfig,
             yospaceConfig = YospaceConfig(
+                liveInitialisationType = LIVE_INITIALISATION_TYPE,
                 isDebug = ENABLE_INTEGRATION_LOGS,
                 yospaceDebugMode = if (ENABLE_YOSPACE_VALIDATION_LOGS) {
                     YospaceDebugMode.VALIDATION

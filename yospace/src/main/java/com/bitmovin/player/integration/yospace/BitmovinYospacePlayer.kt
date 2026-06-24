@@ -132,17 +132,13 @@ open class BitmovinYospacePlayer(
     private fun loadLive(originalUrl: String, properties: SessionProperties) =
         when (yospaceConfig.liveInitialisationType) {
             YospaceLiveInitialisationType.PROXY -> {
-                SessionLive.create(
-                    originalUrl, properties
-                ) { event: Event<Session> ->
-                    // Callback made by SessionLive once it has initialised a session on the Yospace CSM
-                    // Retrieve the initialised session
-                    onSessionInitialized(
-                        event.payload,
-                        "Yospace analytics session live initialised"
-                    )
-                }
-                startPlayback(MediaSourceType.Hls, originalUrl)
+                val playbackUrl = SessionFactory.create(
+                    originalUrl,
+                    Session.SessionMode.LIVE,
+                    properties,
+                    sessionListener
+                )
+                startPlayback(MediaSourceType.Hls, playbackUrl)
             }
             YospaceLiveInitialisationType.DIRECT -> SessionLive.create(
                 originalUrl,

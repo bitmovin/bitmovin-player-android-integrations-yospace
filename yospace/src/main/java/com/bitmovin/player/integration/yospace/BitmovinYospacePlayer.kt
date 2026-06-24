@@ -166,17 +166,23 @@ open class BitmovinYospacePlayer(
     }
 
     private fun loadStartOver(originalUrl: String, properties: SessionProperties) {
-        // SessionNLSO was removed in SDK 3.4.0; SessionDVRLive is the positional seekable-live replacement.
-        SessionDVRLive.create(
-            originalUrl, properties
-        ) { event: Event<Session> ->
-            // Playback must use the URL for this initialized Yospace session.
-            onSessionInitialized(
-                event.payload,
-                "Yospace analytics session DVRLive initialised"
-            )
-            if (event.payload.sessionState == Session.SessionState.INITIALISED) {
-                startPlayback(MediaSourceType.Hls, event.payload.playbackUrl)
+        when (yospaceConfig.liveInitialisationType) {
+            YospaceLiveInitialisationType.PROXY -> {
+                val playbackUrl = SessionFactory.create(
+                    originalUrl,
+                    Session.SessionMode.DVRLIVE,
+                    properties,
+                    sessionListener
+                )
+                startPlayback(MediaSourceType.Hls, playbackUrl)
+            }
+            YospaceLiveInitialisationType.DIRECT -> {
+                // SessionNLSO was removed in SDK 3.4.0; SessionDVRLive is the positional seekable-live replacement.
+                SessionDVRLive.create(
+                    originalUrl,
+                    properties,
+                    sessionListener
+                )
             }
         }
     }
@@ -502,10 +508,8 @@ open class BitmovinYospacePlayer(
                 yospaceSession?.addAnalyticObserver(analyticEventListener)
                 yospaceSession?.setPlaybackPolicyHandler(yospacePlayerPolicy)
 
-                (yospaceSession as? SessionLive)?.let {
-                    if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
-                        return@YospaceEventListener
-                    }
+                if (yospaceConfig.liveInitialisationType != YospaceLiveInitialisationType.DIRECT) {
+                    return@YospaceEventListener
                 }
 
                 yospaceSession?.let {

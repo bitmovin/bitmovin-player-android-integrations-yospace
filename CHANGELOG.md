@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - `YospaceAssetType.LINEAR_START_OVER` playback now uses the initialized Yospace session playback URL and reports a stream-start-relative DVR live playhead, allowing live ad breaks to be recognized correctly
+- `YospaceConfig.liveInitialisationType` now also controls `LINEAR_START_OVER`/`SessionDVRLive` initialisation
 
 ### Removed
 - Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities

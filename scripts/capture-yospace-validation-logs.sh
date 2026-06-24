@@ -143,6 +143,7 @@ capture_case() {
   local init_type
   local test_case_name
   local timeout_seconds
+  local temp_dir
   local temp_log
   local final_log
   local logcat_pid=""
@@ -151,7 +152,9 @@ capture_case() {
   init_type="$(submission_initialisation_type "$submission")"
   test_case_name="$(test_case_extra "$test_case")"
   timeout_seconds="$(test_case_timeout_seconds "$test_case")"
-  temp_log="$(mktemp "/tmp/yospace-validation-${submission}-${test_case}.XXXXXX.log")"
+  temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/yospace-validation-${submission}-${test_case}.XXXXXX")"
+  temp_log="$temp_dir/logcat.log"
+  : > "$temp_log"
   final_log="$run_dir/${submission}_${test_case}.log"
 
   echo "Capturing $submission / $test_case_name"
@@ -173,7 +176,7 @@ capture_case() {
     adb_cmd shell am force-stop "$APP_ID" >/dev/null || true
     cp "$temp_log" "$final_log"
     echo "Wrote $final_log"
-    rm -f "$temp_log"
+    rm -rf "$temp_dir"
     return 0
   fi
 
@@ -182,7 +185,7 @@ capture_case() {
   adb_cmd shell am force-stop "$APP_ID" >/dev/null || true
   mkdir -p "$failed_dir"
   cp "$temp_log" "$failed_dir/${submission}_${test_case}.failed.log"
-  rm -f "$temp_log"
+  rm -rf "$temp_dir"
   echo "Validation run failed. Debug log: $failed_dir/${submission}_${test_case}.failed.log" >&2
   return 1
 }

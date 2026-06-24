@@ -127,6 +127,8 @@ scripts/capture-yospace-validation-logs.sh --submission dvr-live-direct
 
 Each submission creates two logs, one for playback through an ad break and one for playback across two sessions. The generated manifest names the matching Yospace validation-tool selection.
 
+Maintainers can also run the **Yospace Validation Logs** GitHub Action manually. It captures the selected submission on an Android emulator and uploads the generated logs and manifests as a workflow artifact.
+
 #### Ad Tracking Events
 The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
 Subscribe with the `on<EventType> { }` extension. These are the ad related events you will

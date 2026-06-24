@@ -23,7 +23,7 @@ import com.bitmovin.player.integration.yospacesample.databinding.ActivityMainBin
 class MainActivity : AppCompatActivity() {
 
     private companion object {
-        private const val ENABLE_INTEGRATION_LOGS = false
+        private const val ENABLE_INTEGRATION_LOGS = true
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
         private val LIVE_INITIALISATION_TYPE = YospaceLiveInitialisationType.PROXY
     }

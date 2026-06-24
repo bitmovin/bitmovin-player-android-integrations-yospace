@@ -54,9 +54,6 @@ class MainActivity : AppCompatActivity() {
         setupSpinner()
         setupPlayer()
         addUIListeners()
-
-        // Auto-load the default stream (live) on launch to ease testing.
-        loadStream(streams[binding.streamSpinner.selectedItemPosition])
     }
 
     override fun onResume() {

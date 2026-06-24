@@ -4,14 +4,14 @@ set -euo pipefail
 APP_ID="com.bitmovin.player.integration.yospacesample"
 ACTIVITY="$APP_ID.MainActivity"
 DEFAULT_OUTPUT_DIR="build/yospace-validation"
-ADB="${ADB:-adb}"
+ADB="${ADB:-}"
 BUILD=true
 SUBMISSION=""
 OUTPUT_DIR="$DEFAULT_OUTPUT_DIR"
 
 usage() {
   cat <<USAGE
-Usage: $0 --submission <vod|dvr-live-direct|dvr-live-proxy|all> [--output-dir <dir>] [--skip-build]
+Usage: $0 --submission <vod|dvr-live-direct|all> [--output-dir <dir>] [--skip-build]
 
 Generates the two log files required by one Yospace validation submission.
 USAGE
@@ -50,7 +50,7 @@ if [[ -z "$SUBMISSION" ]]; then
 fi
 
 case "$SUBMISSION" in
-  vod|dvr-live-direct|dvr-live-proxy|all) ;;
+  vod|dvr-live-direct|all) ;;
   *)
     echo "Unsupported submission: $SUBMISSION" >&2
     usage >&2
@@ -62,9 +62,29 @@ adb_cmd() {
   "$ADB" "$@"
 }
 
+resolve_adb() {
+  if [[ -n "$ADB" ]]; then
+    return
+  fi
+
+  if command -v adb >/dev/null 2>&1; then
+    ADB="adb"
+    return
+  fi
+
+  local android_home="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}}"
+  if [[ -x "$android_home/platform-tools/adb" ]]; then
+    ADB="$android_home/platform-tools/adb"
+    return
+  fi
+
+  echo "adb not found. Set ADB, ANDROID_HOME, or add adb to PATH." >&2
+  exit 2
+}
+
 submissions() {
   if [[ "$SUBMISSION" == "all" ]]; then
-    printf '%s\n' vod dvr-live-direct dvr-live-proxy
+    printf '%s\n' vod dvr-live-direct
   else
     printf '%s\n' "$SUBMISSION"
   fi
@@ -73,7 +93,7 @@ submissions() {
 submission_asset() {
   case "$1" in
     vod) echo "VOD" ;;
-    dvr-live-direct|dvr-live-proxy) echo "DVR_LIVE" ;;
+    dvr-live-direct) echo "DVR_LIVE" ;;
   esac
 }
 
@@ -81,7 +101,6 @@ submission_initialisation_type() {
   case "$1" in
     vod) echo "PROXY" ;;
     dvr-live-direct) echo "DIRECT" ;;
-    dvr-live-proxy) echo "PROXY" ;;
   esac
 }
 
@@ -89,7 +108,13 @@ submission_initialisation_label() {
   case "$1" in
     vod) echo "N/A" ;;
     dvr-live-direct) echo "DIRECT" ;;
-    dvr-live-proxy) echo "PROXY" ;;
+  esac
+}
+
+submission_validation_selection() {
+  case "$1" in
+    vod) echo "VOD" ;;
+    dvr-live-direct) echo "DVR Live with direct initialisation" ;;
   esac
 }
 
@@ -196,18 +221,16 @@ write_manifest() {
   local asset
   local init_type
   local init_label
+  local validation_selection
 
   asset="$(submission_asset "$submission")"
   init_type="$(submission_initialisation_type "$submission")"
   init_label="$(submission_initialisation_label "$submission")"
+  validation_selection="$(submission_validation_selection "$submission")"
 
   cat > "$run_dir/${submission}_manifest.txt" <<MANIFEST
 Submission: $submission
-Yospace validation selection: $(case "$submission" in
-  vod) echo "VOD" ;;
-  dvr-live-direct) echo "DVR Live with direct initialisation" ;;
-  dvr-live-proxy) echo "DVR Live with proxy initialisation" ;;
-esac)
+Yospace validation selection: $validation_selection
 Asset extra: $asset
 Initialisation type: $init_label
 Commit: $(commit_sha)
@@ -219,7 +242,10 @@ MANIFEST
 }
 
 if [[ "$BUILD" == true ]]; then
+  resolve_adb
   JAVA_HOME="${JAVA_HOME:-/Applications/Android Studio.app/Contents/jbr/Contents/Home}" ./gradlew :yospacesample:installDebug
+else
+  resolve_adb
 fi
 
 mkdir -p "$OUTPUT_DIR"

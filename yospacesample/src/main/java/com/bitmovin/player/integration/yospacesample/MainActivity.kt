@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         private const val ENABLE_INTEGRATION_LOGS = true
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
-        private val LIVE_INITIALISATION_TYPE = YospaceLiveInitialisationType.PROXY
+        private val LIVE_INITIALISATION_TYPE = YospaceLiveInitialisationType.DIRECT
     }
 
     private lateinit var player: BitmovinYospacePlayer
@@ -126,6 +126,9 @@ class MainActivity : AppCompatActivity() {
         }
         player.on<PlayerEvent.Playing> {
             validationRunner?.onPlaybackStarted()
+        }
+        player.on<PlayerEvent.Error> {
+            validationRunner?.fail("player-error")
         }
         player.addEventListener(object : YospaceEventEmitter.OnAdBreakStartedListener {
             override fun onEvent(event: PlayerEvent.AdBreakStarted) {
@@ -340,7 +343,7 @@ class MainActivity : AppCompatActivity() {
             logValidation("PASS testCase=${config.testCase}")
         }
 
-        private fun fail(reason: String) {
+        fun fail(reason: String) {
             if (completed) {
                 return
             }

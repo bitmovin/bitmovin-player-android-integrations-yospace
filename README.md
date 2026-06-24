@@ -116,6 +116,18 @@ player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 
 When uploading live validation logs to Yospace, select the same initialisation type in the validation tool as configured in `YospaceConfig.liveInitialisationType`.
 
+#### Yospace validation logs
+
+The sample app can generate upload-ready validation logs for the Yospace validation tool:
+
+```shell
+scripts/capture-yospace-validation-logs.sh --submission vod
+scripts/capture-yospace-validation-logs.sh --submission dvr-live-direct
+scripts/capture-yospace-validation-logs.sh --submission dvr-live-proxy
+```
+
+Each submission creates two logs, one for playback through an ad break and one for playback across two sessions. The generated manifest names the matching Yospace validation-tool selection.
+
 #### Ad Tracking Events
 The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
 Subscribe with the `on<EventType> { }` extension. These are the ad related events you will

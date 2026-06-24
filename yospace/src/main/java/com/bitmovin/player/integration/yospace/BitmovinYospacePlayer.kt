@@ -12,6 +12,7 @@ import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.bitmovin.player.api.deficiency.SourceErrorCode
+import com.bitmovin.player.api.event.EventListener
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
@@ -75,6 +76,22 @@ open class BitmovinYospacePlayer(
 
     var playerPolicy: BitmovinYospacePlayerPolicy? by Delegates.observable<BitmovinYospacePlayerPolicy?>(null) { _, _, new ->
         yospacePlayerPolicy.playerPolicy = new
+    }
+
+    fun addEventListener(listener: EventListener<*>) {
+        yospaceEventEmitter.addEventListener(listener)
+    }
+
+    fun removeEventListener(listener: EventListener<*>) {
+        yospaceEventEmitter.removeEventListener(listener)
+    }
+
+    fun addEventListener(listener: YospaceEventListener<*>) {
+        yospaceEventEmitter.addEventListener(listener)
+    }
+
+    fun removeEventListener(listener: YospaceEventListener<*>) {
+        yospaceEventEmitter.removeEventListener(listener)
     }
 
     init {

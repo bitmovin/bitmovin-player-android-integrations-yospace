@@ -18,6 +18,7 @@ import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
+import com.bitmovin.player.integration.yospace.YospaceEventEmitter
 import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
 import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
@@ -126,12 +127,16 @@ class MainActivity : AppCompatActivity() {
         player.on<PlayerEvent.Playing> {
             validationRunner?.onPlaybackStarted()
         }
-        player.on<PlayerEvent.AdBreakStarted> {
-            validationRunner?.onAdBreakStarted()
-        }
-        player.on<PlayerEvent.AdBreakFinished> {
-            validationRunner?.onAdBreakFinished()
-        }
+        player.addEventListener(object : YospaceEventEmitter.OnAdBreakStartedListener {
+            override fun onEvent(event: PlayerEvent.AdBreakStarted) {
+                validationRunner?.onAdBreakStarted()
+            }
+        })
+        player.addEventListener(object : YospaceEventEmitter.OnAdBreakFinishedListener {
+            override fun onEvent(event: PlayerEvent.AdBreakFinished) {
+                validationRunner?.onAdBreakFinished()
+            }
+        })
         binding.playerView.player = player
         BitLog.d("Setup player")
     }

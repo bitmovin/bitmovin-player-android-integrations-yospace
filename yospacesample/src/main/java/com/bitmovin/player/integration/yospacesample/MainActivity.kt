@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.PlaybackConfig
 import com.bitmovin.player.api.Player
@@ -72,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         setupSpinner()
         setupPlayer()
         addUIListeners()
+        setupValidationUi()
 
         validationConfig?.let {
             validationRunner = ValidationRunner(it)
@@ -158,6 +161,21 @@ class MainActivity : AppCompatActivity() {
                 BitLog.d("Button clicked, load stream")
                 loadStream(streams[binding.streamSpinner.selectedItemPosition])
             }
+        }
+    }
+
+    private fun setupValidationUi() {
+        val config = validationConfig ?: return
+
+        title = "Automatic validation run"
+        binding.streamSpinner.visibility = View.GONE
+        binding.loadUnloadButton.visibility = View.GONE
+        binding.validationStatusTextView.visibility = View.VISIBLE
+        binding.validationStatusTextView.text = config.statusLabel
+
+        (binding.playerView.layoutParams as ConstraintLayout.LayoutParams).apply {
+            topToBottom = binding.validationStatusTextView.id
+            binding.playerView.layoutParams = this
         }
     }
 
@@ -357,5 +375,20 @@ class MainActivity : AppCompatActivity() {
         get() = when (asset) {
             ValidationAsset.VOD -> "N/A"
             ValidationAsset.DVR_LIVE -> liveInitialisationType.name
+        }
+
+    private val ValidationConfig.statusLabel: String
+        get() = "${asset.displayName}, ${testCase.displayName}"
+
+    private val ValidationAsset.displayName: String
+        get() = when (this) {
+            ValidationAsset.VOD -> "VOD"
+            ValidationAsset.DVR_LIVE -> "DVR Live"
+        }
+
+    private val ValidationTestCase.displayName: String
+        get() = when (this) {
+            ValidationTestCase.AD_BREAK -> "Test 1"
+            ValidationTestCase.TWO_SESSIONS -> "Test 2"
         }
 }

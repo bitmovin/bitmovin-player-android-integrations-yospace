@@ -7,23 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging without exposing Yospace SDK APIs to consumers
+- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging
 
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
-- `YospaceAssetType.LINEAR_START_OVER` now initialises a `SessionDVRLive` session (the removed `SessionNLSO` has no direct replacement)
+- `YospaceAssetType.LINEAR_START_OVER` now uses the recommended DVRLive session mode
 
 ### Fixed
-- `YospaceAssetType.LINEAR_START_OVER` playback now uses the initialized Yospace session playback URL and reports a stream-start-relative DVR live playhead, allowing live ad breaks to be recognized correctly
-- `YospaceConfig.liveInitialisationType` now also controls `LINEAR_START_OVER`/`SessionDVRLive` initialisation
-- Live proxy initialisation now uses the Yospace `SessionFactory` path expected by validation tooling
+- Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used
+- `YospaceConfig.liveInitialisationType` had no effect for `YospaceAssetType.LINEAR_START_OVER`
+- Live proxy initialization used a wrong initialization method of the Yospace SDK
 
 ### Deprecated
-- `YospaceAssetType.LINEAR`; use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback
+- `YospaceAssetType.LINEAR`: Use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback instead.
 
 ### Removed
-- Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities
-- `YospaceConfig.connectTimeout` is no longer forwarded to the Yospace SDK, which dropped the setting (only `requestTimeout`/`resourceTimeout` remain)
+- `com.yospace:admanagement-util` dependency as the Yospace SDK now provides the required utilities directly
+- `YospaceConfig.connectTimeout` as the Yospace SDK does not provide this underlying setting anymore
 
 ## [2.1.0] - 2026-06-03
 

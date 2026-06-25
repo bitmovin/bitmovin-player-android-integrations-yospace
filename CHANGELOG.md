@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceConfig.liveInitialisationType` now also controls `LINEAR_START_OVER`/`SessionDVRLive` initialisation
 - Live proxy initialisation now uses the Yospace `SessionFactory` path expected by validation tooling
 
+### Deprecated
+- `YospaceAssetType.LINEAR`; use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback
+
 ### Removed
 - Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities
 - `YospaceConfig.connectTimeout` is no longer forwarded to the Yospace SDK, which dropped the setting (only `requestTimeout`/`resourceTimeout` remain)

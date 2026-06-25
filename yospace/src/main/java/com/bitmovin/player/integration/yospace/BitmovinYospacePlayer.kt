@@ -87,6 +87,7 @@ open class BitmovinYospacePlayer(
     // Playback
     ///////////////////////////////////////////////////////////////
 
+    @Suppress("DEPRECATION")
     fun load(sourceConfig: SourceConfig, yospaceSourceConfig: YospaceSourceConfig, truexConfig: TruexConfig? = null) {
         BitLog.d("Load YoSpace Source Configuration")
 
@@ -328,6 +329,7 @@ open class BitmovinYospacePlayer(
     // Player Event Listeners
     ///////////////////////////////////////////////////////////////
 
+    @Suppress("DEPRECATION")
     private fun onYospaceEvents() {
         yospaceMetadataSource.addListener {
             BitLog.d("Sending Timed Metadata: $yospaceTime")

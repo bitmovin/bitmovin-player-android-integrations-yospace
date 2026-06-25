@@ -172,7 +172,6 @@ open class BitmovinYospacePlayer(
                 startPlayback(MediaSourceType.Hls, playbackUrl)
             }
             YospaceLiveInitialisationType.DIRECT -> {
-                // SessionNLSO was removed in SDK 3.4.0; SessionDVRLive is the positional seekable-live replacement.
                 SessionDVRLive.create(
                     originalUrl,
                     properties,

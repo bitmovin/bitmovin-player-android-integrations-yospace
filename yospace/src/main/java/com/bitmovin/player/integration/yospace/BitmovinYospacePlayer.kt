@@ -11,7 +11,6 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
-import com.bitmovin.player.api.deficiency.SourceErrorCode
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
@@ -527,8 +526,8 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     CustomSourceEvent.Warning(
-                        YospaceWarningCode.fromValue(errorCode)!!,
-                        "scheduleAd API is not available when playing back a YoSpace asset"
+                        errorCode.toYospaceWarningCode(),
+                        message
                     )
                 )
 
@@ -538,7 +537,14 @@ open class BitmovinYospacePlayer(
             }
         } else {
             BitLog.d("YoSpace session failed, shutting down playback...")
-            handler.post { yospaceEventEmitter.emit(SourceEvent.Error(SourceErrorCode.fromValue(errorCode)!!, message)) }
+            handler.post {
+                yospaceEventEmitter.emit(
+                    CustomSourceEvent.Error(
+                        YospaceErrorCode.fromValue(errorCode) ?: YospaceErrorCode.SessionNotInitialised,
+                        message
+                    )
+                )
+            }
         }
 
     private fun resetYospaceSession() {
@@ -717,7 +723,7 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     CustomSourceEvent.Warning(
-                        YospaceWarningCode.fromValue(SESSION_NO_ANALYTICS)!!,
+                        YospaceWarningCode.SessionAnalyticsIssue,
                         "YoSpace session error: $error"
                     )
                 )
@@ -732,6 +738,11 @@ open class BitmovinYospacePlayer(
     ///////////////////////////////////////////////////////////////////////////
     // AdBreak Transformation
     ///////////////////////////////////////////////////////////////////////////
+
+    private fun Int.toYospaceWarningCode(): YospaceWarningCode = when (this) {
+        SESSION_NO_ANALYTICS -> YospaceWarningCode.NoAnalytics
+        else -> YospaceWarningCode.SessionInitializationIssue
+    }
 
     private fun toAdType(type: String): AdSourceType = when {
         type == "ima" -> AdSourceType.Ima

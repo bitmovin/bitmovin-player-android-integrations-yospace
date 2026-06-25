@@ -25,9 +25,15 @@ enum class YospaceErrorCode(override val value: Int) : ErrorCode {
 /**
  * 6000 - 6999: Yospace-related error codes
  * - 6004: Unsupported API
+ * - 6005: No Analytics
+ * - 6006: Session initialization issue
+ * - 6007: Session analytics issue
  */
 enum class YospaceWarningCode(override val value: Int) : WarningCode {
-    UnsupportedAPI(6004);
+    UnsupportedAPI(6004),
+    NoAnalytics(6005),
+    SessionInitializationIssue(6006),
+    SessionAnalyticsIssue(6007);
 
     companion object {
         private val map by lazy { YospaceWarningCode.values().associateBy(YospaceWarningCode::value) }

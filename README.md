@@ -83,8 +83,6 @@ The following example creates a `BitmovinYospacePlayer` and loads a `YospaceSour
 // Create a YospaceConfig
 val yospaceConfig = YospaceConfig(
     userAgent = "userAgent",
-    readTimeout = 25_000,
-    connectTimeout = 25_000,
     requestTimeout = 25_000,
     liveInitializationType = YospaceLiveInitializationType.DIRECT,
     isDebug = true,

@@ -4,8 +4,6 @@ import com.bitmovin.player.integration.yospace.YospaceLiveInitializationType
 
 data class YospaceConfig(
     val userAgent: String? = null,
-    val readTimeout: Int = 25_000,
-    val connectTimeout: Int = 25_000,
     val requestTimeout: Int = 25_000,
     val liveInitializationType: YospaceLiveInitializationType = YospaceLiveInitializationType.DIRECT,
     val isDebug: Boolean = false,

@@ -113,7 +113,6 @@ open class BitmovinYospacePlayer(
             return
         }
 
-        // connectTimeout has no SDK equivalent since 3.5.0; only requestTimeout/resourceTimeout remain.
         val sessionProperties = SessionProperties()
         sessionProperties.requestTimeout = yospaceConfig.requestTimeout
         sessionProperties.userAgent = yospaceConfig.userAgent

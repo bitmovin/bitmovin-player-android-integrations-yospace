@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceAssetType.LINEAR_START_OVER` playback now uses the initialized Yospace session playback URL and reports a stream-start-relative DVR live playhead, allowing live ad breaks to be recognized correctly
 - `YospaceConfig.liveInitialisationType` now also controls `LINEAR_START_OVER`/`SessionDVRLive` initialisation
 - Live proxy initialisation now uses the Yospace `SessionFactory` path expected by validation tooling
+- Player stalls are now reported to the Yospace SDK as `STALL`/`CONTINUE` events
 
 ### Deprecated
 - `YospaceAssetType.LINEAR`; use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback

@@ -384,11 +384,13 @@ open class BitmovinYospacePlayer(
         }
 
         player.on<PlayerEvent.StallEnded> {
-            BitLog.d("Buffering end: $yospaceTime")
+            BitLog.d("Sending CONTINUE event: $yospaceTime")
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.CONTINUE, yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.StallStarted> {
-            BitLog.d("Buffering start: $yospaceTime")
+            BitLog.d("Sending STALL event: $yospaceTime")
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.STALL, yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.Metadata> { metadataEvent ->

@@ -30,7 +30,7 @@ class BitmovinTruexAdRenderer(
 
     fun renderAd(ad: Advert, adBreakPosition: AdBreakPosition) {
         this.adBreakPosition = adBreakPosition
-        this.interactiveUnit = ad.interactiveCreative
+        this.interactiveUnit = ad.interactiveCreatives.firstOrNull()
 
         interactiveUnit?.let { interactiveUnit ->
             BitLog.d("Rendering ad: ${interactiveUnit.source}")
@@ -123,7 +123,7 @@ class BitmovinTruexAdRenderer(
         }
 
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
-            BitLog.d("Ad cancelled")
+            BitLog.d("Ad canceled")
         }
 
         addEventListener(TruexAdRendererConstants.POPUP_WEBSITE) {

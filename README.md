@@ -83,11 +83,10 @@ The following example creates a `BitmovinYospacePlayer` and loads a `YospaceSour
 // Create a YospaceConfig
 val yospaceConfig = YospaceConfig(
     userAgent = "userAgent",
-    readTimeout = 25_000,
-    connectTimeout = 25_000,
     requestTimeout = 25_000,
-    liveInitialisationType = YospaceLiveInitialisationType.DIRECT,
-    isDebug = true
+    liveInitializationType = YospaceLiveInitializationType.DIRECT,
+    isDebug = true,
+    yospaceDebugMode = YospaceDebugMode.VALIDATION
 )
 
 // Create the BitmovinYospacePlayer
@@ -112,6 +111,8 @@ val truexConfig = TruexConfig(viewGroup = playerView)
 // Load the source (truexConfig is optional and defaults to null)
 player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 ```
+
+When uploading live validation logs to Yospace, select the same initialization type in the validation tool as configured in `YospaceConfig.liveInitializationType`.
 
 #### Ad Tracking Events
 The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.

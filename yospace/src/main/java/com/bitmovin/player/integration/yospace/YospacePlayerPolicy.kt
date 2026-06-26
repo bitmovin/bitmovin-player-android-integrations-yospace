@@ -4,8 +4,6 @@ import com.yospace.admanagement.PlaybackPolicyHandler
 import com.yospace.admanagement.Session
 
 class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : PlaybackPolicyHandler {
-    private var playbackMode: Session.PlaybackMode? = null
-
     override fun canStop(
         playhead: Long,
         timeline: MutableList<com.yospace.admanagement.AdBreak>?
@@ -24,7 +22,8 @@ class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : Play
 
     override fun willSeekTo(
         position: Long,
-        timeline: MutableList<com.yospace.admanagement.AdBreak>?
+        timeline: MutableList<com.yospace.admanagement.AdBreak>?,
+        duration: Long
     ): Long = playerPolicy?.canSeekTo(position) ?: position
 
     override fun canChangeVolume(
@@ -51,9 +50,7 @@ class YospacePlayerPolicy(var playerPolicy: BitmovinYospacePlayerPolicy?) : Play
         timeline: MutableList<com.yospace.admanagement.AdBreak>?
     ): Boolean = true
 
-    override fun setPlaybackMode(mode: Session.PlaybackMode?) {
-        this.playbackMode = playbackMode
-    }
+    override fun setSessionMode(mode: Session.SessionMode?) = Unit
 
     override fun didSkip(
         from: Long,

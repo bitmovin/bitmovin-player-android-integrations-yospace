@@ -14,11 +14,19 @@ import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
+import com.bitmovin.player.integration.yospace.YospaceLiveInitializationType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
+import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
 import com.bitmovin.player.integration.yospacesample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private companion object {
+        private const val ENABLE_INTEGRATION_LOGS = true
+        private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
+        private val LIVE_INITIALIZATION_TYPE = YospaceLiveInitializationType.PROXY
+    }
 
     private lateinit var player: BitmovinYospacePlayer
     private lateinit var binding: ActivityMainBinding
@@ -26,19 +34,13 @@ class MainActivity : AppCompatActivity() {
     private val streams by lazy {
         listOf(
             Stream(
-                "Yospace Live",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=4",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR)
-            ),
-            Stream(
-                "Yospace Companion Ads",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.lp=true&yo.av=4",
-                "https://widevine-stage.license.istreamplanet.com/widevine/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128",
-                YospaceSourceConfig(YospaceAssetType.LINEAR)
+                "Yospace Live (${LIVE_INITIALIZATION_TYPE.name})",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
             ),
             Stream(
                 "Yospace VOD",
-                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )
@@ -77,7 +79,19 @@ class MainActivity : AppCompatActivity() {
             tweaksConfig = TweaksConfig(useFiletypeExtractorFallbackForHls = true)
         )
 
-        player = BitmovinYospacePlayer(this, playerConfig, yospaceConfig = YospaceConfig())
+        player = BitmovinYospacePlayer(
+            this,
+            playerConfig,
+            yospaceConfig = YospaceConfig(
+                liveInitializationType = LIVE_INITIALIZATION_TYPE,
+                isDebug = ENABLE_INTEGRATION_LOGS,
+                yospaceDebugMode = if (ENABLE_YOSPACE_VALIDATION_LOGS) {
+                    YospaceDebugMode.VALIDATION
+                } else {
+                    YospaceDebugMode.NONE
+                }
+            )
+        )
         player.on<SourceEvent.Load> {
             BitLog.d("Change button")
             binding.loadUnloadButton.text = getString(R.string.unload)

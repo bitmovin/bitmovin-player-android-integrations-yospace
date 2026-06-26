@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging
+- Yospace warning codes for no-analytics, initialization, and analytics-session issues
+
+### Changed
+- Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
+- `YospaceAssetType.LINEAR_START_OVER` now uses the recommended DVRLive session mode
+
+### Fixed
+- Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used
+- `YospaceConfig.liveInitializationType` had no effect for `YospaceAssetType.LINEAR_START_OVER`
+- Live proxy sessions could fail Yospace validation
+- Recoverable Yospace session failures could crash before fallback playback
+
+### Deprecated
+- `YospaceAssetType.LINEAR`: Use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback instead.
+
+### Removed
+- `com.yospace:admanagement-util` dependency as the Yospace SDK now provides the required utilities directly
+- `YospaceConfig.readTimeout` and `YospaceConfig.connectTimeout` as the Yospace SDK no longer exposes these settings
+
 ## [2.1.0] - 2026-06-03
 
 ### Changed

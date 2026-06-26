@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used
 - `YospaceConfig.liveInitializationType` had no effect for `YospaceAssetType.LINEAR_START_OVER`
-- Yospace validation could reject live proxy sessions as not factory-created
+- Live proxy sessions could fail Yospace validation
 - Recoverable Yospace session failures could crash before fallback playback
 
 ### Deprecated

@@ -130,25 +130,27 @@ Each submission creates two logs, one for playback through an ad break and one f
 Maintainers can also run the **Yospace Validation Logs** GitHub Action manually. It captures the selected submission on an Android emulator and uploads the generated logs and manifests as a workflow artifact.
 
 #### Ad Tracking Events
-The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
-Subscribe with the `on<EventType> { }` extension. These are the ad related events you will
-typically observe:
+Yospace ad events are delivered through the `player.yospace` event namespace, carrying
+integration-owned `Ad`/`AdBreak` payloads. Subscribe with the `on<EventType> { }` extension.
+These are the ad related events you will typically observe:
 
 ```kotlin
-player.on<PlayerEvent.AdBreakStarted> { ... }
-player.on<PlayerEvent.AdBreakFinished> { ... }
-player.on<PlayerEvent.AdStarted> { ... }
-player.on<PlayerEvent.AdFinished> { ... }
-player.on<PlayerEvent.AdClicked> { ... }
-player.on<PlayerEvent.AdError> { ... }
-player.on<PlayerEvent.AdSkipped> { ... }
+player.yospace.on<YospacePlayerEvent.AdBreakStarted> { event -> event.adBreak }
+player.yospace.on<YospacePlayerEvent.AdBreakFinished> { event -> event.adBreak }
+player.yospace.on<YospacePlayerEvent.AdStarted> { event -> event.ad }
+player.yospace.on<YospacePlayerEvent.AdFinished> { event -> event.ad }
+player.yospace.on<YospacePlayerEvent.AdSkipped> { event -> event.ad }
+player.yospace.on<YospacePlayerEvent.AdQuartile> { event -> event.quartile }
 ```
+
+Standard `player.on<PlayerEvent...>` callbacks receive Bitmovin Player events only and are not
+used for Yospace ad events.
 
 #### Click Through Urls
 The click-through URL is delivered with each ad-started event:
 
 ```kotlin
-player.on<PlayerEvent.AdStarted> { event ->
+player.yospace.on<YospacePlayerEvent.AdStarted> { event ->
     val clickThroughUrl = event.clickThroughUrl
 }
 ```

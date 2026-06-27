@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging without exposing Yospace SDK APIs to consumers
 - Sample-app validation mode, capture script, and manual GitHub Action for generating Yospace validation-tool log submissions
+- `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
+- `BitmovinYospacePlayer.yospace` event namespace with `on`/`next`/`off`, reified Kotlin extensions for `on`/`next`, and `Class`-based Java overloads using `YospacePlayerEventListener`, e.g. `player.yospace.on<YospacePlayerEvent.AdBreakStarted> { ... }`
 
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
 - `YospaceAssetType.LINEAR_START_OVER` now initialises a `SessionDVRLive` session (the removed `SessionNLSO` has no direct replacement)
+- Renamed the Yospace SDK custom-listener registration methods from `addEventListener`/`removeEventListener` to `on`/`off`
 
 ### Fixed
 - `YospaceAssetType.LINEAR_START_OVER` playback now uses the initialized Yospace session playback URL and reports a stream-start-relative DVR live playhead, allowing live ad breaks to be recognized correctly
@@ -22,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities
 - `YospaceConfig.connectTimeout` is no longer forwarded to the Yospace SDK, which dropped the setting (only `requestTimeout`/`resourceTimeout` remain)
+- Routing of Yospace ad events through `Player.on<PlayerEvent...>`; subscribe via `player.yospace.on<YospacePlayerEvent...>` instead, as `Player.on<PlayerEvent...>` now receives Bitmovin Player events only
+- Legacy `OnAdBreakStartedListener`/`OnAdFinishedListener`/etc. event-listener interfaces, superseded by `YospacePlayerEvent`
 
 ## [2.1.0] - 2026-06-03
 

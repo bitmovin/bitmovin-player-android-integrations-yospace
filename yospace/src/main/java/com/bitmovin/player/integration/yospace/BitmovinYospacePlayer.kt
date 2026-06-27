@@ -11,8 +11,6 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
-import com.bitmovin.player.api.deficiency.SourceErrorCode
-import com.bitmovin.player.api.event.EventListener
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
@@ -33,6 +31,7 @@ import com.yospace.admanagement.util.YoLog
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.properties.Delegates
+import kotlin.reflect.KClass
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -78,20 +77,36 @@ open class BitmovinYospacePlayer(
         yospacePlayerPolicy.playerPolicy = new
     }
 
-    fun addEventListener(listener: EventListener<*>) {
-        yospaceEventEmitter.addEventListener(listener)
-    }
+    /**
+     * Yospace-specific event API. Subscribe to integration ad events via `player.yospace.on<...>`.
+     */
+    val yospace: YospaceApi = object : YospaceApi {
+        override fun <E : YospacePlayerEvent> on(eventClass: KClass<E>, action: (E) -> Unit) =
+            yospaceEventEmitter.on(eventClass, action)
 
-    fun removeEventListener(listener: EventListener<*>) {
-        yospaceEventEmitter.removeEventListener(listener)
-    }
+        override fun <E : YospacePlayerEvent> next(eventClass: KClass<E>, action: (E) -> Unit) =
+            yospaceEventEmitter.next(eventClass, action)
 
-    fun addEventListener(listener: YospaceEventListener<*>) {
-        yospaceEventEmitter.addEventListener(listener)
-    }
+        override fun <E : YospacePlayerEvent> off(eventClass: KClass<E>, action: (E) -> Unit) =
+            yospaceEventEmitter.off(eventClass, action)
 
-    fun removeEventListener(listener: YospaceEventListener<*>) {
-        yospaceEventEmitter.removeEventListener(listener)
+        override fun <E : YospacePlayerEvent> off(action: (E) -> Unit) =
+            yospaceEventEmitter.off(action)
+
+        override fun <E : YospacePlayerEvent> on(
+            eventClass: Class<E>,
+            listener: YospacePlayerEventListener<E>
+        ) = yospaceEventEmitter.on(eventClass.kotlin, listener::onEvent)
+
+        override fun <E : YospacePlayerEvent> next(
+            eventClass: Class<E>,
+            listener: YospacePlayerEventListener<E>
+        ) = yospaceEventEmitter.next(eventClass.kotlin, listener::onEvent)
+
+        override fun <E : YospacePlayerEvent> off(
+            eventClass: Class<E>,
+            listener: YospacePlayerEventListener<E>
+        ) = yospaceEventEmitter.off(eventClass.kotlin, listener::onEvent)
     }
 
     init {
@@ -428,28 +443,23 @@ open class BitmovinYospacePlayer(
 
         player.on<PlayerEvent.TimeChanged> {
             val currentTime = getCurrentTimeMinusAd()
-            val timeChangedEvent = PlayerEvent.TimeChanged(currentTime)
 
             yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
 
             if (yospaceSession as? SessionLive != null || yospaceSession as? SessionDVRLive != null) {
                 // Live session
-                val adSkippedEvent = PlayerEvent.AdSkipped(activeAd)
+                val adSkippedEvent = YospacePlayerEvent.AdSkipped(activeAd)
                 handler.post {
-                    yospaceEventEmitter.emit(timeChangedEvent)
                     if (isLiveAdPaused) {
                         activeAdBreak?.let {
                             // Send skip event if live window has moved beyond paused ad
-                            if (timeChangedEvent.time > it.absoluteEnd) {
+                            if (currentTime > it.absoluteEnd) {
                                 yospaceEventEmitter.emit(adSkippedEvent)
                             }
                         }
                     }
                     isLiveAdPaused = false
                 }
-            } else {
-                // Non-live session
-                handler.post { yospaceEventEmitter.emit(timeChangedEvent) }
             }
         }
 
@@ -556,7 +566,14 @@ open class BitmovinYospacePlayer(
             }
         } else {
             BitLog.d("YoSpace session failed, shutting down playback...")
-            handler.post { yospaceEventEmitter.emit(SourceEvent.Error(SourceErrorCode.fromValue(errorCode)!!, message)) }
+            handler.post {
+                yospaceEventEmitter.emit(
+                    CustomSourceEvent.Error(
+                        YospaceErrorCode.fromValue(errorCode) ?: YospaceErrorCode.SessionNotInitialised,
+                        message
+                    )
+                )
+            }
         }
 
     private fun resetYospaceSession() {
@@ -598,7 +615,7 @@ open class BitmovinYospacePlayer(
             activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
 
             // Notify listeners of ABS event
-            val adBreakStartedEvent = PlayerEvent.AdBreakStarted(activeAdBreak)
+            val adBreakStartedEvent = YospacePlayerEvent.AdBreakStarted(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakStartedEvent) }
         }
 
@@ -665,19 +682,38 @@ open class BitmovinYospacePlayer(
                 )
             }.orEmpty()
 
+            val clientType = toAdType(advert.adType ?: "Yospace")
+            val clickThroughUrl = advert.linearCreative?.clickThroughUrl.orEmpty()
+            val duration = advert.duration.div(1000.0)
+            val timeOffset = advert.start.div(1000.0)
+
             // Notify listeners of AS event
             handler.post {
+                // Yospace SDK custom-listener event
                 yospaceEventEmitter.emit(
                     YospaceAdStartedEvent(
-                        clientType = toAdType(advert.adType ?: "Yospace"),
-                        clickThroughUrl = advert.linearCreative?.clickThroughUrl.orEmpty(),
+                        clientType = clientType,
+                        clickThroughUrl = clickThroughUrl,
                         indexInQueue = advert.sequence,
-                        duration = advert.duration.div(1000.0),
-                        timeOffset = advert.start.div(1000.0),
+                        duration = duration,
+                        timeOffset = timeOffset,
                         position = "position",
                         skipOffset = 0.0,
                         ad = activeAd,
                         companionAds = companionAds
+                    )
+                )
+                // Integration ad event
+                yospaceEventEmitter.emit(
+                    YospacePlayerEvent.AdStarted(
+                        ad = activeAd,
+                        companionAds = companionAds,
+                        clientType = clientType,
+                        clickThroughUrl = clickThroughUrl,
+                        indexInQueue = advert.sequence,
+                        duration = duration,
+                        timeOffset = timeOffset,
+                        skipOffset = 0.0
                     )
                 )
             }
@@ -686,7 +722,7 @@ open class BitmovinYospacePlayer(
         override fun onAdvertEnd(session: Session) {
             BitLog.d("YoSpace onAdvertEnd")
 
-            val adFinishedEvent = PlayerEvent.AdFinished(activeAd)
+            val adFinishedEvent = YospacePlayerEvent.AdFinished(activeAd)
             handler.post { yospaceEventEmitter.emit(adFinishedEvent) }
 
             activeAd = null
@@ -695,7 +731,7 @@ open class BitmovinYospacePlayer(
         override fun onAdvertBreakEnd(session: Session) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
-            val adBreakFinishedEvent = PlayerEvent.AdBreakFinished(activeAdBreak)
+            val adBreakFinishedEvent = YospacePlayerEvent.AdBreakFinished(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakFinishedEvent) }
             activeAdBreak = null
         }
@@ -706,17 +742,17 @@ open class BitmovinYospacePlayer(
             when (type) {
                 "firstQuartile" -> {
                     handler.post {
-                        yospaceEventEmitter.emit(PlayerEvent.AdQuartile(AdQuartile.FirstQuartile))
+                        yospaceEventEmitter.emit(YospacePlayerEvent.AdQuartile(AdQuartile.FirstQuartile))
                     }
                 }
                 "midpoint" -> {
                     handler.post {
-                        yospaceEventEmitter.emit(PlayerEvent.AdQuartile(AdQuartile.MidPoint))
+                        yospaceEventEmitter.emit(YospacePlayerEvent.AdQuartile(AdQuartile.MidPoint))
                     }
                 }
                 "thirdQuartile" -> {
                     handler.post {
-                        yospaceEventEmitter.emit(PlayerEvent.AdQuartile(AdQuartile.ThirdQuartile))
+                        yospaceEventEmitter.emit(YospacePlayerEvent.AdQuartile(AdQuartile.ThirdQuartile))
                     }
                 }
             }

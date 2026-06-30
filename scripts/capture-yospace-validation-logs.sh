@@ -152,12 +152,14 @@ wait_for_marker() {
   local log_file="$1"
   local timeout_seconds="$2"
   local deadline=$((SECONDS + timeout_seconds))
+  local recent_log
 
   while (( SECONDS < deadline )); do
-    if grep -Eq "YospaceValidation.*PASS" "$log_file"; then
+    recent_log="$(tail -n 2000 "$log_file")"
+    if grep -Eq "YospaceValidation.*PASS" <<< "$recent_log"; then
       return 0
     fi
-    if grep -Eq "YospaceValidation.*FAIL" "$log_file"; then
+    if grep -Eq "YospaceValidation.*FAIL" <<< "$recent_log"; then
       return 1
     fi
     sleep 2

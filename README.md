@@ -136,6 +136,8 @@ These are the ad related events you will typically observe:
 player.yospace.on<YospacePlayerEvent.AdBreakStarted> { event -> event.adBreak }
 player.yospace.on<YospacePlayerEvent.AdBreakFinished> { event -> event.adBreak }
 player.yospace.on<YospacePlayerEvent.AdStarted> { event -> event.ad }
+player.yospace.on<YospacePlayerEvent.AdClicked> { event -> event.clickThroughUrl }
+player.yospace.on<YospacePlayerEvent.AdError> { event -> event.message }
 player.yospace.on<YospacePlayerEvent.AdFinished> { event -> event.ad }
 player.yospace.on<YospacePlayerEvent.AdSkipped> { event -> event.ad }
 player.yospace.on<YospacePlayerEvent.AdQuartile> { event -> event.quartile }
@@ -150,5 +152,14 @@ The click-through URL is delivered with each ad-started event:
 ```kotlin
 player.yospace.on<YospacePlayerEvent.AdStarted> { event ->
     val clickThroughUrl = event.clickThroughUrl
+}
+```
+
+After opening the click-through URL, notify the ad object so the Yospace SDK can fire its click
+tracking and the integration can emit `YospacePlayerEvent.AdClicked`:
+
+```kotlin
+player.yospace.on<YospacePlayerEvent.AdStarted> { event ->
+    event.ad?.clickThroughUrlOpened()
 }
 ```

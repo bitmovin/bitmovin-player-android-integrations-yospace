@@ -13,6 +13,8 @@ import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
+import com.bitmovin.player.api.event.Event as BitmovinEvent
+import com.bitmovin.player.api.event.EventListener as BitmovinEventListener
 import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.metadata.emsg.EventMessage
 import com.bitmovin.player.api.metadata.id3.BinaryFrame
@@ -31,6 +33,7 @@ import com.yospace.admanagement.util.YoLog
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.properties.Delegates
+import kotlin.reflect.KClass
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -64,6 +67,12 @@ open class BitmovinYospacePlayer(
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfig? = null
     private var truexRenderer: BitmovinTruexAdRenderer? = null
+    private val timeChangedActions =
+        mutableMapOf<EventActionKey, MutableList<(PlayerEvent.TimeChanged) -> Unit>>()
+    private val timeChangedJavaListenerActions =
+        mutableMapOf<JavaEventListenerKey, MutableList<(PlayerEvent.TimeChanged) -> Unit>>()
+    private val yospaceJavaListenerActions =
+        mutableMapOf<YospaceJavaListenerKey, MutableList<(YospacePlayerEvent) -> Unit>>()
 
     var adTimeline: AdTimeline? = null
         private set
@@ -76,7 +85,125 @@ open class BitmovinYospacePlayer(
         yospacePlayerPolicy.playerPolicy = new
     }
 
-    val yospace: YospaceApi = DefaultYospaceApi(yospaceEventEmitter)
+    override fun <E : BitmovinEvent> on(eventClass: KClass<E>, action: (E) -> Unit) {
+        if (eventClass == PlayerEvent.TimeChanged::class) {
+            val wrappedAction = adjustedTimeChangedAction(action)
+            addTimeChangedAction(eventClass, action, wrappedAction)
+            player.on(PlayerEvent.TimeChanged::class, wrappedAction)
+        } else {
+            player.on(eventClass, action)
+        }
+    }
+
+    override fun <E : BitmovinEvent> next(eventClass: KClass<E>, action: (E) -> Unit) {
+        if (eventClass == PlayerEvent.TimeChanged::class) {
+            lateinit var wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+            wrappedAction = {
+                removeTimeChangedAction(eventClass, action, wrappedAction)
+                player.off(PlayerEvent.TimeChanged::class, wrappedAction)
+                emitAdjustedTimeChanged(action)
+            }
+            addTimeChangedAction(eventClass, action, wrappedAction)
+            player.on(PlayerEvent.TimeChanged::class, wrappedAction)
+        } else {
+            player.next(eventClass, action)
+        }
+    }
+
+    override fun <E : BitmovinEvent> off(eventClass: KClass<E>, action: (E) -> Unit) {
+        if (eventClass == PlayerEvent.TimeChanged::class) {
+            removeLastTimeChangedAction(eventClass, action)?.let {
+                player.off(PlayerEvent.TimeChanged::class, it)
+            }
+        } else {
+            player.off(eventClass, action)
+        }
+    }
+
+    override fun <E : BitmovinEvent> off(action: (E) -> Unit) {
+        removeAllTimeChangedActions(action).forEach {
+            player.off(PlayerEvent.TimeChanged::class, it)
+        }
+        player.off(action)
+    }
+
+    override fun <E : BitmovinEvent> on(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
+        if (eventClass == PlayerEvent.TimeChanged::class.java) {
+            val wrappedAction = adjustedTimeChangedAction(eventListener)
+            addTimeChangedJavaListenerAction(eventClass, eventListener, wrappedAction)
+            player.on(PlayerEvent.TimeChanged::class, wrappedAction)
+        } else {
+            player.on(eventClass, eventListener)
+        }
+    }
+
+    override fun <E : BitmovinEvent> next(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
+        if (eventClass == PlayerEvent.TimeChanged::class.java) {
+            lateinit var wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+            wrappedAction = {
+                removeTimeChangedJavaListenerAction(eventClass, eventListener, wrappedAction)
+                player.off(PlayerEvent.TimeChanged::class, wrappedAction)
+                emitAdjustedTimeChanged(eventListener)
+            }
+            addTimeChangedJavaListenerAction(eventClass, eventListener, wrappedAction)
+            player.on(PlayerEvent.TimeChanged::class, wrappedAction)
+        } else {
+            player.next(eventClass, eventListener)
+        }
+    }
+
+    override fun <E : BitmovinEvent> off(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
+        if (eventClass == PlayerEvent.TimeChanged::class.java) {
+            removeLastTimeChangedJavaListenerAction(eventClass, eventListener)?.let {
+                player.off(PlayerEvent.TimeChanged::class, it)
+            }
+        } else {
+            player.off(eventClass, eventListener)
+        }
+    }
+
+    override fun <E : BitmovinEvent> off(eventListener: BitmovinEventListener<in E>) {
+        removeAllTimeChangedJavaListenerActions(eventListener).forEach {
+            player.off(PlayerEvent.TimeChanged::class, it)
+        }
+        player.off(eventListener)
+    }
+
+    @PublishedApi
+    internal fun <E : YospacePlayerEvent> onYospacePlayerEvent(eventClass: KClass<E>, action: (E) -> Unit) =
+        yospaceEventEmitter.on(eventClass, action)
+
+    @PublishedApi
+    internal fun <E : YospacePlayerEvent> nextYospacePlayerEvent(eventClass: KClass<E>, action: (E) -> Unit) =
+        yospaceEventEmitter.next(eventClass, action)
+
+    @PublishedApi
+    internal fun <E : YospacePlayerEvent> offYospacePlayerEvent(eventClass: KClass<E>, action: (E) -> Unit) =
+        yospaceEventEmitter.off(eventClass, action)
+
+    fun <E : YospacePlayerEvent> on(eventClass: Class<E>, listener: YospacePlayerEventListener<E>) {
+        val action = yospacePlayerEventAction(eventClass, listener)
+        addYospaceJavaListenerAction(eventClass, listener, action)
+        addYospaceEmitterAction(eventClass.kotlin, action)
+    }
+
+    fun <E : YospacePlayerEvent> next(eventClass: Class<E>, listener: YospacePlayerEventListener<E>) {
+        lateinit var action: (YospacePlayerEvent) -> Unit
+        action = action@{
+            val event = castYospacePlayerEvent(eventClass, it) ?: return@action
+            removeYospaceJavaListenerAction(eventClass, listener, action)
+            removeYospaceEmitterAction(eventClass.kotlin, action)
+            listener.onEvent(event)
+        }
+
+        addYospaceJavaListenerAction(eventClass, listener, action)
+        addYospaceEmitterAction(eventClass.kotlin, action)
+    }
+
+    fun <E : YospacePlayerEvent> off(eventClass: Class<E>, listener: YospacePlayerEventListener<E>) {
+        val action = removeLastYospaceJavaListenerAction(eventClass, listener) ?: return
+        removeYospaceEmitterAction(eventClass.kotlin, action)
+    }
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
@@ -240,6 +367,151 @@ open class BitmovinYospacePlayer(
             adTimeline?.absoluteToRelative(player.currentTime) ?: player.currentTime
         }
     }
+
+    private fun <E : BitmovinEvent> adjustedTimeChangedAction(action: (E) -> Unit): (PlayerEvent.TimeChanged) -> Unit =
+        { emitAdjustedTimeChanged(action) }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : BitmovinEvent> emitAdjustedTimeChanged(action: (E) -> Unit) {
+        action(PlayerEvent.TimeChanged(getCurrentTimeMinusAd()) as E)
+    }
+
+    private fun <E : BitmovinEvent> adjustedTimeChangedAction(
+        eventListener: BitmovinEventListener<in E>
+    ): (PlayerEvent.TimeChanged) -> Unit = {
+        emitAdjustedTimeChanged(eventListener)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : BitmovinEvent> emitAdjustedTimeChanged(eventListener: BitmovinEventListener<in E>) {
+        eventListener.onEvent(PlayerEvent.TimeChanged(getCurrentTimeMinusAd()) as E)
+    }
+
+    private fun addTimeChangedAction(
+        eventClass: KClass<out BitmovinEvent>,
+        action: Any,
+        wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+    ) {
+        synchronized(timeChangedActions) {
+            timeChangedActions.getOrPut(EventActionKey(eventClass, action)) { mutableListOf() }.add(wrappedAction)
+        }
+    }
+
+    private fun removeLastTimeChangedAction(
+        eventClass: KClass<out BitmovinEvent>,
+        action: Any
+    ): ((PlayerEvent.TimeChanged) -> Unit)? =
+        synchronized(timeChangedActions) {
+            removeLastAction(timeChangedActions, EventActionKey(eventClass, action))
+        }
+
+    private fun removeTimeChangedAction(
+        eventClass: KClass<out BitmovinEvent>,
+        action: Any,
+        wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+    ) {
+        synchronized(timeChangedActions) {
+            removeAction(timeChangedActions, EventActionKey(eventClass, action), wrappedAction)
+        }
+    }
+
+    private fun removeAllTimeChangedActions(action: Any): List<(PlayerEvent.TimeChanged) -> Unit> =
+        synchronized(timeChangedActions) {
+            removeAllActions(timeChangedActions) { it.matchesAction(action) }
+        }
+
+    private fun addTimeChangedJavaListenerAction(
+        eventClass: Class<out BitmovinEvent>,
+        eventListener: Any,
+        wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+    ) {
+        synchronized(timeChangedJavaListenerActions) {
+            timeChangedJavaListenerActions
+                .getOrPut(JavaEventListenerKey(eventClass, eventListener)) { mutableListOf() }
+                .add(wrappedAction)
+        }
+    }
+
+    private fun removeLastTimeChangedJavaListenerAction(
+        eventClass: Class<out BitmovinEvent>,
+        eventListener: Any
+    ): ((PlayerEvent.TimeChanged) -> Unit)? =
+        synchronized(timeChangedJavaListenerActions) {
+            removeLastAction(timeChangedJavaListenerActions, JavaEventListenerKey(eventClass, eventListener))
+        }
+
+    private fun removeTimeChangedJavaListenerAction(
+        eventClass: Class<out BitmovinEvent>,
+        eventListener: Any,
+        wrappedAction: (PlayerEvent.TimeChanged) -> Unit
+    ) {
+        synchronized(timeChangedJavaListenerActions) {
+            removeAction(timeChangedJavaListenerActions, JavaEventListenerKey(eventClass, eventListener), wrappedAction)
+        }
+    }
+
+    private fun removeAllTimeChangedJavaListenerActions(
+        eventListener: Any
+    ): List<(PlayerEvent.TimeChanged) -> Unit> =
+        synchronized(timeChangedJavaListenerActions) {
+            removeAllActions(timeChangedJavaListenerActions) { it.matchesListener(eventListener) }
+        }
+
+    private fun <E : YospacePlayerEvent> yospacePlayerEventAction(
+        eventClass: Class<E>,
+        listener: YospacePlayerEventListener<E>
+    ): (YospacePlayerEvent) -> Unit = action@{
+        val event = castYospacePlayerEvent(eventClass, it) ?: return@action
+        listener.onEvent(event)
+    }
+
+    private fun addYospaceJavaListenerAction(
+        eventClass: Class<out YospacePlayerEvent>,
+        listener: YospacePlayerEventListener<out YospacePlayerEvent>,
+        action: (YospacePlayerEvent) -> Unit
+    ) {
+        synchronized(yospaceJavaListenerActions) {
+            yospaceJavaListenerActions
+                .getOrPut(YospaceJavaListenerKey(eventClass, listener)) { mutableListOf() }
+                .add(action)
+        }
+    }
+
+    private fun removeLastYospaceJavaListenerAction(
+        eventClass: Class<out YospacePlayerEvent>,
+        listener: YospacePlayerEventListener<out YospacePlayerEvent>
+    ): ((YospacePlayerEvent) -> Unit)? =
+        synchronized(yospaceJavaListenerActions) {
+            removeLastAction(yospaceJavaListenerActions, YospaceJavaListenerKey(eventClass, listener))
+        }
+
+    private fun removeYospaceJavaListenerAction(
+        eventClass: Class<out YospacePlayerEvent>,
+        listener: YospacePlayerEventListener<out YospacePlayerEvent>,
+        action: (YospacePlayerEvent) -> Unit
+    ) {
+        synchronized(yospaceJavaListenerActions) {
+            removeAction(yospaceJavaListenerActions, YospaceJavaListenerKey(eventClass, listener), action)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : YospacePlayerEvent> castYospacePlayerEvent(
+        eventClass: Class<E>,
+        event: YospacePlayerEvent
+    ): E? = if (eventClass.isInstance(event)) event as E else null
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : YospacePlayerEvent> addYospaceEmitterAction(
+        eventClass: KClass<E>,
+        action: (YospacePlayerEvent) -> Unit
+    ) = yospaceEventEmitter.on(eventClass, action as (E) -> Unit)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : YospacePlayerEvent> removeYospaceEmitterAction(
+        eventClass: KClass<E>,
+        action: (YospacePlayerEvent) -> Unit
+    ) = yospaceEventEmitter.off(eventClass, action as (E) -> Unit)
 
     private fun yospaceTime(): Int {
         val time = (currentTimeWithAds() * 1000).roundToInt()
@@ -756,15 +1028,6 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingError(error: TrackingErrors.Error, session: Session) {
             BitLog.e("YoSpace onTrackingError: ${error.toJsonString()}")
-            handler.post {
-                yospaceEventEmitter.emit(
-                    YospacePlayerEvent.AdError(
-                        adItem = null,
-                        code = error.errorCode,
-                        message = error.toJsonString()
-                    )
-                )
-            }
         }
     }
 
@@ -915,4 +1178,72 @@ open class BitmovinYospacePlayer(
         )
         else -> null
     }
+}
+
+private fun <K, A> removeLastAction(
+    actionsByKey: MutableMap<K, MutableList<A>>,
+    key: K
+): A? {
+    val actions = actionsByKey[key] ?: return null
+    val action = actions.removeAt(actions.lastIndex)
+    if (actions.isEmpty()) {
+        actionsByKey.remove(key)
+    }
+    return action
+}
+
+private fun <K, A> removeAction(
+    actionsByKey: MutableMap<K, MutableList<A>>,
+    key: K,
+    action: A
+) {
+    val actions = actionsByKey[key] ?: return
+    actions.remove(action)
+    if (actions.isEmpty()) {
+        actionsByKey.remove(key)
+    }
+}
+
+private fun <K, A> removeAllActions(
+    actionsByKey: MutableMap<K, MutableList<A>>,
+    matchesKey: (K) -> Boolean
+): List<A> {
+    val keys = actionsByKey.keys.filter(matchesKey)
+    return keys.flatMap { key ->
+        actionsByKey.remove(key).orEmpty()
+    }
+}
+
+private class EventActionKey(
+    private val eventClass: KClass<out BitmovinEvent>,
+    private val action: Any
+) {
+    fun matchesAction(action: Any) = this.action === action
+
+    override fun equals(other: Any?) =
+        other is EventActionKey && eventClass == other.eventClass && action === other.action
+
+    override fun hashCode() = 31 * eventClass.hashCode() + System.identityHashCode(action)
+}
+
+private class JavaEventListenerKey(
+    private val eventClass: Class<out BitmovinEvent>,
+    private val eventListener: Any
+) {
+    fun matchesListener(eventListener: Any) = this.eventListener === eventListener
+
+    override fun equals(other: Any?) =
+        other is JavaEventListenerKey && eventClass == other.eventClass && eventListener === other.eventListener
+
+    override fun hashCode() = 31 * eventClass.hashCode() + System.identityHashCode(eventListener)
+}
+
+private class YospaceJavaListenerKey(
+    private val eventClass: Class<out YospacePlayerEvent>,
+    private val listener: YospacePlayerEventListener<out YospacePlayerEvent>
+) {
+    override fun equals(other: Any?) =
+        other is YospaceJavaListenerKey && eventClass == other.eventClass && listener === other.listener
+
+    override fun hashCode() = 31 * eventClass.hashCode() + System.identityHashCode(listener)
 }

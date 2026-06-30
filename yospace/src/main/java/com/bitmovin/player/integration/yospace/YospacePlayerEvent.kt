@@ -1,18 +1,15 @@
 package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.api.advertising.AdQuartile as PlayerAdQuartile
-import com.bitmovin.player.api.advertising.AdConfig
-import com.bitmovin.player.api.advertising.AdItem
 import com.bitmovin.player.api.advertising.AdSourceType
 
 /**
  * Yospace integration-owned ad lifecycle events.
  *
- * These are emitted by [BitmovinYospacePlayer] through its [BitmovinYospacePlayer.yospace] namespace
- * (`player.yospace.on<...>`) and carry integration-owned payloads such as [Ad] and [AdBreak]. They
- * intentionally do not extend the
- * Bitmovin Player [com.bitmovin.player.api.event.Event] hierarchy, so the non-serializable payloads
- * never reach the Player UI.
+ * These are emitted by [BitmovinYospacePlayer] and can be observed via the integration `on`/`next`/`off`
+ * extensions. They intentionally do not extend the Bitmovin Player
+ * [com.bitmovin.player.api.event.Event] hierarchy, so the non-serializable payloads never reach the
+ * Player UI.
  */
 sealed class YospacePlayerEvent {
     /**
@@ -44,16 +41,6 @@ sealed class YospacePlayerEvent {
      * Emitted when a Yospace ad was clicked.
      */
     data class AdClicked(val clickThroughUrl: String?) : YospacePlayerEvent()
-
-    /**
-     * Emitted when an error with Yospace ad tracking occurs.
-     */
-    data class AdError(
-        val adItem: AdItem?,
-        val code: Int,
-        val message: String?,
-        val adConfig: AdConfig? = null
-    ) : YospacePlayerEvent()
 
     /**
      * Emitted when a Yospace ad finishes.

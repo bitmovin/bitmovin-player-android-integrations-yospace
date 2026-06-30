@@ -143,26 +143,6 @@ class YospaceEventEmitterTest {
     }
 
     @Test
-    fun `emit delivers ad error payload`() {
-        var error: YospacePlayerEvent.AdError? = null
-
-        emitter.on(YospacePlayerEvent.AdError::class) {
-            error = it
-        }
-
-        emitter.emit(
-            YospacePlayerEvent.AdError(
-                adItem = null,
-                code = 42,
-                message = "tracking error"
-            )
-        )
-
-        assertEquals(42, error?.code)
-        assertEquals("tracking error", error?.message)
-    }
-
-    @Test
     fun `ad clickThroughUrlOpened invokes callback`() {
         var clickCount = 0
         val ad = Ad(

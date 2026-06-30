@@ -134,10 +134,10 @@ class MainActivity : AppCompatActivity() {
         player.on<PlayerEvent.Error> {
             validationRunner?.fail("player-error")
         }
-        player.yospace.on<YospacePlayerEvent.AdBreakStarted> {
+        player.on<YospacePlayerEvent.AdBreakStarted> {
             validationRunner?.onAdBreakStarted()
         }
-        player.yospace.on<YospacePlayerEvent.AdBreakFinished> {
+        player.on<YospacePlayerEvent.AdBreakFinished> {
             validationRunner?.onAdBreakFinished()
         }
         binding.playerView.player = player

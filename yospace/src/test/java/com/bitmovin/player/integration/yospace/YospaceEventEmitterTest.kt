@@ -128,4 +128,64 @@ class YospaceEventEmitterTest {
 
         assertSame(ad, emittedAd)
     }
+
+    @Test
+    fun `emit delivers ad clicked payload`() {
+        var clickThroughUrl: String? = null
+
+        emitter.on(YospacePlayerEvent.AdClicked::class) {
+            clickThroughUrl = it.clickThroughUrl
+        }
+
+        emitter.emit(YospacePlayerEvent.AdClicked("https://example.com"))
+
+        assertEquals("https://example.com", clickThroughUrl)
+    }
+
+    @Test
+    fun `emit delivers ad error payload`() {
+        var error: YospacePlayerEvent.AdError? = null
+
+        emitter.on(YospacePlayerEvent.AdError::class) {
+            error = it
+        }
+
+        emitter.emit(
+            YospacePlayerEvent.AdError(
+                adItem = null,
+                code = 42,
+                message = "tracking error"
+            )
+        )
+
+        assertEquals(42, error?.code)
+        assertEquals("tracking error", error?.message)
+    }
+
+    @Test
+    fun `ad clickThroughUrlOpened invokes callback`() {
+        var clickCount = 0
+        val ad = Ad(
+            id = "ad",
+            creativeId = null,
+            sequence = 0,
+            absoluteStart = 0.0,
+            relativeStart = 0.0,
+            duration = 5.0,
+            absoluteEnd = 5.0,
+            system = null,
+            title = null,
+            advertiser = null,
+            hasInteractiveUnit = false,
+            isFiller = false,
+            lineage = null,
+            extensions = emptyList(),
+            isLinear = true
+        )
+        ad.onClickThroughUrlOpened = { clickCount += 1 }
+
+        ad.clickThroughUrlOpened()
+
+        assertEquals(1, clickCount)
+    }
 }

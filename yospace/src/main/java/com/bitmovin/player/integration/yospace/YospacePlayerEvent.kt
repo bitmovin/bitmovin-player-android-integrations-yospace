@@ -1,6 +1,8 @@
 package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.api.advertising.AdQuartile as PlayerAdQuartile
+import com.bitmovin.player.api.advertising.AdConfig
+import com.bitmovin.player.api.advertising.AdItem
 import com.bitmovin.player.api.advertising.AdSourceType
 
 /**
@@ -34,7 +36,23 @@ sealed class YospacePlayerEvent {
         val indexInQueue: Int = 0,
         val duration: Double = 0.0,
         val timeOffset: Double = 0.0,
+        val position: String? = null,
         val skipOffset: Double = 0.0,
+    ) : YospacePlayerEvent()
+
+    /**
+     * Emitted when a Yospace ad was clicked.
+     */
+    data class AdClicked(val clickThroughUrl: String?) : YospacePlayerEvent()
+
+    /**
+     * Emitted when an error with Yospace ad tracking occurs.
+     */
+    data class AdError(
+        val adItem: AdItem?,
+        val code: Int,
+        val message: String?,
+        val adConfig: AdConfig? = null
     ) : YospacePlayerEvent()
 
     /**

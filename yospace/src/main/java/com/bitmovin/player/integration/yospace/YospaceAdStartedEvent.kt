@@ -8,7 +8,7 @@ class YospaceAdStartedEvent(
     indexInQueue: Int,
     duration: Double,
     timeOffset: Double = 0.0,
-    position: String = "position",
+    position: String = AdBreakPosition.UNKNOWN.value,
     skipOffset: Double = 0.0,
     ad: Ad? = null,
     val companionAds: List<CompanionAd> = emptyList()

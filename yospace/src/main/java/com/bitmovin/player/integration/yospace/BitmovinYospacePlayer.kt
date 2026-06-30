@@ -654,6 +654,12 @@ open class BitmovinYospacePlayer(
             val clickThroughUrl = advert.linearCreative?.clickThroughUrl.orEmpty()
             val duration = advert.duration.div(1000.0)
             val timeOffset = advert.start.div(1000.0)
+            val position = activeAdBreak?.position?.value
+            val adClickThroughUrl = activeAd?.clickThroughUrl
+            activeAd?.onClickThroughUrlOpened = {
+                advert.linearCreative?.onClickThrough()
+                yospaceEventEmitter.emit(YospacePlayerEvent.AdClicked(adClickThroughUrl))
+            }
 
             // Notify listeners of AS event
             handler.post {
@@ -665,7 +671,7 @@ open class BitmovinYospacePlayer(
                         indexInQueue = advert.sequence,
                         duration = duration,
                         timeOffset = timeOffset,
-                        position = "position",
+                        position = position ?: AdBreakPosition.UNKNOWN.value,
                         skipOffset = 0.0,
                         ad = activeAd,
                         companionAds = companionAds
@@ -681,6 +687,7 @@ open class BitmovinYospacePlayer(
                         indexInQueue = advert.sequence,
                         duration = duration,
                         timeOffset = timeOffset,
+                        position = position,
                         skipOffset = 0.0
                     )
                 )
@@ -693,6 +700,7 @@ open class BitmovinYospacePlayer(
             val adFinishedEvent = YospacePlayerEvent.AdFinished(activeAd)
             handler.post { yospaceEventEmitter.emit(adFinishedEvent) }
 
+            activeAd?.onClickThroughUrlOpened = null
             activeAd = null
         }
 
@@ -748,6 +756,15 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingError(error: TrackingErrors.Error, session: Session) {
             BitLog.e("YoSpace onTrackingError: ${error.toJsonString()}")
+            handler.post {
+                yospaceEventEmitter.emit(
+                    YospacePlayerEvent.AdError(
+                        adItem = null,
+                        code = error.errorCode,
+                        message = error.toJsonString()
+                    )
+                )
+            }
         }
     }
 

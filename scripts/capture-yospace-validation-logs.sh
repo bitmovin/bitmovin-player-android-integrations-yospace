@@ -97,14 +97,14 @@ submission_asset() {
   esac
 }
 
-submission_initialisation_type() {
+submission_initialization_type() {
   case "$1" in
     vod) echo "PROXY" ;;
     dvr-live-direct) echo "DIRECT" ;;
   esac
 }
 
-submission_initialisation_label() {
+submission_initialization_label() {
   case "$1" in
     vod) echo "N/A" ;;
     dvr-live-direct) echo "DIRECT" ;;
@@ -114,7 +114,7 @@ submission_initialisation_label() {
 submission_validation_selection() {
   case "$1" in
     vod) echo "VOD" ;;
-    dvr-live-direct) echo "DVR Live with direct initialisation" ;;
+    dvr-live-direct) echo "DVR Live with direct initialization" ;;
   esac
 }
 
@@ -188,7 +188,7 @@ capture_case() {
   }
 
   asset="$(submission_asset "$submission")"
-  init_type="$(submission_initialisation_type "$submission")"
+  init_type="$(submission_initialization_type "$submission")"
   test_case_name="$(test_case_extra "$test_case")"
   timeout_seconds="$(test_case_timeout_seconds "$test_case")"
   temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/yospace-validation-${submission}-${test_case}.XXXXXX")"
@@ -207,7 +207,7 @@ capture_case() {
     -n "$APP_ID/$ACTIVITY" \
     --ez validationMode true \
     --es asset "$asset" \
-    --es initialisationType "$init_type" \
+    --es initializationType "$init_type" \
     --es testCase "$test_case_name" >/dev/null
 
   if wait_for_marker "$temp_log" "$timeout_seconds"; then
@@ -231,15 +231,15 @@ write_manifest() {
   local validation_selection
 
   asset="$(submission_asset "$submission")"
-  init_type="$(submission_initialisation_type "$submission")"
-  init_label="$(submission_initialisation_label "$submission")"
+  init_type="$(submission_initialization_type "$submission")"
+  init_label="$(submission_initialization_label "$submission")"
   validation_selection="$(submission_validation_selection "$submission")"
 
   cat > "$run_dir/${submission}_manifest.txt" <<MANIFEST
 Submission: $submission
 Yospace validation selection: $validation_selection
 Asset extra: $asset
-Initialisation type: $init_label
+Initialization type: $init_label
 Commit: $(commit_sha)
 Created at: $(timestamp)
 Upload files:

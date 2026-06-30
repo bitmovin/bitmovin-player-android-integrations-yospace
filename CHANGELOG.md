@@ -11,20 +11,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Sample-app validation mode, capture script, and manual GitHub Action for generating Yospace validation-tool log submissions
 - `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
 - `BitmovinYospacePlayer.yospace` event namespace with `on`/`next`/`off`, reified Kotlin extensions for `on`/`next`, and `Class`-based Java overloads using `YospacePlayerEventListener`, e.g. `player.yospace.on<YospacePlayerEvent.AdBreakStarted> { ... }`
+- Yospace warning codes for no-analytics, initialization, and analytics-session issues
 
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
-- `YospaceAssetType.LINEAR_START_OVER` now initialises a `SessionDVRLive` session (the removed `SessionNLSO` has no direct replacement)
+- `YospaceAssetType.LINEAR_START_OVER` now uses the recommended DVRLive session mode
 - Renamed the Yospace SDK custom-listener registration methods from `addEventListener`/`removeEventListener` to `on`/`off`
 
 ### Fixed
-- `YospaceAssetType.LINEAR_START_OVER` playback now uses the initialized Yospace session playback URL and reports a stream-start-relative DVR live playhead, allowing live ad breaks to be recognized correctly
-- `YospaceConfig.liveInitialisationType` now also controls `LINEAR_START_OVER`/`SessionDVRLive` initialisation
-- Live proxy initialisation now uses the Yospace `SessionFactory` path expected by validation tooling
+- Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used
+- `YospaceConfig.liveInitializationType` had no effect for `YospaceAssetType.LINEAR_START_OVER`
+- Live proxy sessions could fail Yospace validation
+- Recoverable Yospace session failures could crash before fallback playback
+
+### Deprecated
+- `YospaceAssetType.LINEAR`: Use `YospaceAssetType.LINEAR_START_OVER` for DVR live playback instead.
 
 ### Removed
-- Dropped the separate `com.yospace:admanagement-util` dependency; the SDK now provides the required utilities
-- `YospaceConfig.connectTimeout` is no longer forwarded to the Yospace SDK, which dropped the setting (only `requestTimeout`/`resourceTimeout` remain)
+- `com.yospace:admanagement-util` dependency as the Yospace SDK now provides the required utilities directly
+- `YospaceConfig.readTimeout` and `YospaceConfig.connectTimeout` as the Yospace SDK no longer exposes these settings
 - Routing of Yospace ad events through `Player.on<PlayerEvent...>`; subscribe via `player.yospace.on<YospacePlayerEvent...>` instead, as `Player.on<PlayerEvent...>` now receives Bitmovin Player events only
 - Legacy `OnAdBreakStartedListener`/`OnAdFinishedListener`/etc. event-listener interfaces, superseded by `YospacePlayerEvent`
 

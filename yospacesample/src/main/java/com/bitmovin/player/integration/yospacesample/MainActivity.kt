@@ -20,7 +20,7 @@ import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import com.bitmovin.player.integration.yospace.YospaceAssetType
-import com.bitmovin.player.integration.yospace.YospaceLiveInitialisationType
+import com.bitmovin.player.integration.yospace.YospaceLiveInitializationType
 import com.bitmovin.player.integration.yospace.YospacePlayerEvent
 import com.bitmovin.player.integration.yospace.on
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         private const val VALIDATION_TAG = "YospaceValidation"
         private const val EXTRA_VALIDATION_MODE = "validationMode"
         private const val EXTRA_VALIDATION_ASSET = "asset"
-        private const val EXTRA_VALIDATION_INITIALISATION_TYPE = "initialisationType"
+        private const val EXTRA_VALIDATION_INITIALIZATION_TYPE = "initializationType"
         private const val EXTRA_VALIDATION_TEST_CASE = "testCase"
         private const val TWO_SESSIONS_PLAYBACK_CONFIRMATION_MS = 5_000L
         private const val BETWEEN_SESSIONS_DELAY_MS = 1_000L
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         private const val ENABLE_INTEGRATION_LOGS = true
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
-        private val LIVE_INITIALISATION_TYPE = YospaceLiveInitialisationType.DIRECT
+        private val LIVE_INITIALIZATION_TYPE = YospaceLiveInitializationType.DIRECT
     }
 
     private lateinit var player: BitmovinYospacePlayer
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     private val streams by lazy {
         listOf(
             Stream(
-                "Yospace Live (${selectedLiveInitialisationType.name})",
+                "Yospace Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
             ),
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             this,
             playerConfig,
             yospaceConfig = YospaceConfig(
-                liveInitialisationType = selectedLiveInitialisationType,
+                liveInitializationType = selectedLiveInitializationType,
                 isDebug = ENABLE_INTEGRATION_LOGS && validationConfig == null,
                 yospaceDebugMode = if (ENABLE_YOSPACE_VALIDATION_LOGS || validationConfig != null) {
                     YospaceDebugMode.VALIDATION
@@ -183,8 +183,8 @@ class MainActivity : AppCompatActivity() {
         player.load(sourceConfig, stream.yospaceSourceConfig, stream.truexConfig)
     }
 
-    private val selectedLiveInitialisationType: YospaceLiveInitialisationType
-        get() = validationConfig?.liveInitialisationType ?: LIVE_INITIALISATION_TYPE
+    private val selectedLiveInitializationType: YospaceLiveInitializationType
+        get() = validationConfig?.liveInitializationType ?: LIVE_INITIALIZATION_TYPE
 
     private fun validationStream(asset: ValidationAsset) = when (asset) {
         ValidationAsset.VOD -> streams.first { it.yospaceSourceConfig.assetType == YospaceAssetType.VOD }
@@ -208,11 +208,11 @@ class MainActivity : AppCompatActivity() {
             ?: ValidationAsset.DVR_LIVE
         val testCase = enumValueOrNull<ValidationTestCase>(getStringExtra(EXTRA_VALIDATION_TEST_CASE))
             ?: ValidationTestCase.AD_BREAK
-        val liveInitialisationType = enumValueOrNull<YospaceLiveInitialisationType>(
-            getStringExtra(EXTRA_VALIDATION_INITIALISATION_TYPE)
-        ) ?: YospaceLiveInitialisationType.PROXY
+        val liveInitializationType = enumValueOrNull<YospaceLiveInitializationType>(
+            getStringExtra(EXTRA_VALIDATION_INITIALIZATION_TYPE)
+        ) ?: YospaceLiveInitializationType.DIRECT
 
-        return ValidationConfig(asset, liveInitialisationType, testCase)
+        return ValidationConfig(asset, liveInitializationType, testCase)
     }
 
     private inline fun <reified T : Enum<T>> enumValueOrNull(value: String?): T? =
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
 
     private data class ValidationConfig(
         val asset: ValidationAsset,
-        val liveInitialisationType: YospaceLiveInitialisationType,
+        val liveInitializationType: YospaceLiveInitializationType,
         val testCase: ValidationTestCase
     )
 
@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 
         fun start() {
             logValidation(
-                "START asset=${config.asset} init=${config.initialisationLabel} testCase=${config.testCase}"
+                "START asset=${config.asset} init=${config.initializationLabel} testCase=${config.testCase}"
             )
             handler.postDelayed(
                 timeoutRunnable,
@@ -369,14 +369,14 @@ class MainActivity : AppCompatActivity() {
 
             completed = true
             handler.removeCallbacks(timeoutRunnable)
-            failValidation("$reason asset=${config.asset} init=${config.initialisationLabel} testCase=${config.testCase}")
+            failValidation("$reason asset=${config.asset} init=${config.initializationLabel} testCase=${config.testCase}")
         }
     }
 
-    private val ValidationConfig.initialisationLabel: String
+    private val ValidationConfig.initializationLabel: String
         get() = when (asset) {
             ValidationAsset.VOD -> "N/A"
-            ValidationAsset.DVR_LIVE -> liveInitialisationType.name
+            ValidationAsset.DVR_LIVE -> liveInitializationType.name
         }
 
     private val ValidationConfig.statusLabel: String

@@ -123,7 +123,7 @@ class BitmovinTruexAdRenderer(
         }
 
         addEventListener(TruexAdRendererConstants.USER_CANCEL) {
-            BitLog.d("Ad cancelled")
+            BitLog.d("Ad canceled")
         }
 
         addEventListener(TruexAdRendererConstants.POPUP_WEBSITE) {

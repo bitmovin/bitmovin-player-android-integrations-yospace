@@ -182,7 +182,7 @@ capture_case() {
   local logcat_pid=""
 
   cleanup_capture_case() {
-    trap - RETURN
+    trap - RETURN EXIT
     if [[ -n "$logcat_pid" ]]; then
       kill "$logcat_pid" 2>/dev/null || true
       wait "$logcat_pid" 2>/dev/null || true
@@ -200,7 +200,7 @@ capture_case() {
   test_case_name="$(test_case_extra "$test_case")"
   timeout_seconds="$(test_case_timeout_seconds "$test_case")"
   temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/yospace-validation-${submission}-${test_case}.XXXXXX")"
-  trap cleanup_capture_case RETURN
+  trap cleanup_capture_case RETURN EXIT
   temp_log="$temp_dir/logcat.log"
   : > "$temp_log"
   final_log="$run_dir/${submission}_${test_case}.log"

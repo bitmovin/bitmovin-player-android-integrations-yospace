@@ -173,11 +173,26 @@ capture_case() {
   local final_log
   local logcat_pid=""
 
+  cleanup_capture_case() {
+    trap - RETURN
+    if [[ -n "$logcat_pid" ]]; then
+      kill "$logcat_pid" 2>/dev/null || true
+      wait "$logcat_pid" 2>/dev/null || true
+      logcat_pid=""
+    fi
+    adb_cmd shell am force-stop "$APP_ID" >/dev/null || true
+    if [[ -n "${temp_dir:-}" ]]; then
+      rm -rf "$temp_dir"
+      temp_dir=""
+    fi
+  }
+
   asset="$(submission_asset "$submission")"
   init_type="$(submission_initialisation_type "$submission")"
   test_case_name="$(test_case_extra "$test_case")"
   timeout_seconds="$(test_case_timeout_seconds "$test_case")"
   temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/yospace-validation-${submission}-${test_case}.XXXXXX")"
+  trap cleanup_capture_case RETURN
   temp_log="$temp_dir/logcat.log"
   : > "$temp_log"
   final_log="$run_dir/${submission}_${test_case}.log"
@@ -196,21 +211,13 @@ capture_case() {
     --es testCase "$test_case_name" >/dev/null
 
   if wait_for_marker "$temp_log" "$timeout_seconds"; then
-    kill "$logcat_pid" 2>/dev/null || true
-    wait "$logcat_pid" 2>/dev/null || true
-    adb_cmd shell am force-stop "$APP_ID" >/dev/null || true
     cp "$temp_log" "$final_log"
     echo "Wrote $final_log"
-    rm -rf "$temp_dir"
     return 0
   fi
 
-  kill "$logcat_pid" 2>/dev/null || true
-  wait "$logcat_pid" 2>/dev/null || true
-  adb_cmd shell am force-stop "$APP_ID" >/dev/null || true
   mkdir -p "$failed_dir"
   cp "$temp_log" "$failed_dir/${submission}_${test_case}.failed.log"
-  rm -rf "$temp_dir"
   echo "Validation run failed. Debug log: $failed_dir/${submission}_${test_case}.failed.log" >&2
   return 1
 }
@@ -243,7 +250,7 @@ MANIFEST
 
 if [[ "$BUILD" == true ]]; then
   resolve_adb
-  JAVA_HOME="${JAVA_HOME:-/Applications/Android Studio.app/Contents/jbr/Contents/Home}" ./gradlew :yospacesample:installDebug
+  ./gradlew :yospacesample:installDebug
 else
   resolve_adb
 fi

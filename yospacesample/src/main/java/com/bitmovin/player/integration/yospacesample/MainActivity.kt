@@ -325,6 +325,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         private fun loadNextSession() {
+            if (completed) {
+                return
+            }
+
             sessionIndex += 1
             playbackStartedForSession = false
             adBreakStarted = false
@@ -364,6 +368,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             completed = true
+            handler.removeCallbacks(timeoutRunnable)
             failValidation("$reason asset=${config.asset} init=${config.initialisationLabel} testCase=${config.testCase}")
         }
     }

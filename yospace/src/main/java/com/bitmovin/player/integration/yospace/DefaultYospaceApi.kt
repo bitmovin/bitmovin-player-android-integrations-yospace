@@ -24,7 +24,7 @@ internal class DefaultYospaceApi(
         listener: YospacePlayerEventListener<E>
     ) {
         val action: (YospacePlayerEvent) -> Unit = action@{
-            val event = eventClass.cast(it) ?: return@action
+            val event = castEvent(eventClass, it) ?: return@action
             listener.onEvent(event)
         }
 
@@ -38,9 +38,9 @@ internal class DefaultYospaceApi(
     ) {
         lateinit var action: (YospacePlayerEvent) -> Unit
         action = action@{
+            val event = castEvent(eventClass, it) ?: return@action
             removeJavaListenerAction(eventClass.kotlin, listener, action)
             removeEmitterAction(eventClass.kotlin, action)
-            val event = eventClass.cast(it) ?: return@action
             listener.onEvent(event)
         }
 
@@ -94,6 +94,12 @@ internal class DefaultYospaceApi(
             }
         }
     }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : YospacePlayerEvent> castEvent(
+        eventClass: Class<E>,
+        event: YospacePlayerEvent
+    ): E? = if (eventClass.isInstance(event)) event as E else null
 
     @Suppress("UNCHECKED_CAST")
     private fun <E : YospacePlayerEvent> addEmitterAction(

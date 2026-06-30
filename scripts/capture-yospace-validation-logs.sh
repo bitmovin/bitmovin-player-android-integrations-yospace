@@ -226,12 +226,10 @@ write_manifest() {
   local submission="$1"
   local run_dir="$2"
   local asset
-  local init_type
   local init_label
   local validation_selection
 
   asset="$(submission_asset "$submission")"
-  init_type="$(submission_initialization_type "$submission")"
   init_label="$(submission_initialization_label "$submission")"
   validation_selection="$(submission_validation_selection "$submission")"
 

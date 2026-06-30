@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupValidationUi() {
         val config = validationConfig ?: return
 
-        title = "Automatic validation run"
+        title = getString(R.string.automatic_validation_run)
         binding.streamSpinner.visibility = View.GONE
         binding.loadUnloadButton.visibility = View.GONE
         binding.validationStatusTextView.visibility = View.VISIBLE

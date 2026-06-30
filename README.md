@@ -145,7 +145,8 @@ player.on<YospacePlayerEvent.AdQuartile> { event -> event.quartile }
 ```
 
 Standard `player.on<PlayerEvent...>` callbacks still receive Bitmovin Player events. For VOD SSAI,
-`PlayerEvent.TimeChanged` reports the content timeline, excluding Yospace ad sections.
+`PlayerEvent.TimeChanged` reports content-relative time outside ads and ad-relative time during
+Yospace ad playback.
 
 #### Click Through Urls
 The click-through URL is delivered with each ad-started event:

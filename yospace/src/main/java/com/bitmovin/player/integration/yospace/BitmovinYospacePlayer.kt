@@ -926,7 +926,7 @@ open class BitmovinYospacePlayer(
             val clickThroughUrl = advert.linearCreative?.clickThroughUrl.orEmpty()
             val duration = advert.duration.div(1000.0)
             val timeOffset = advert.start.div(1000.0)
-            val position = activeAdBreak?.position?.value
+            val adBreakPosition = activeAdBreak?.position?.value ?: AdBreakPosition.UNKNOWN.value
             val adClickThroughUrl = activeAd?.clickThroughUrl
             activeAd?.onClickThroughUrlOpened = {
                 advert.linearCreative?.onClickThrough()
@@ -943,7 +943,7 @@ open class BitmovinYospacePlayer(
                         indexInQueue = advert.sequence,
                         duration = duration,
                         timeOffset = timeOffset,
-                        position = position ?: AdBreakPosition.UNKNOWN.value,
+                        position = adBreakPosition,
                         skipOffset = 0.0,
                         ad = activeAd,
                         companionAds = companionAds
@@ -959,7 +959,7 @@ open class BitmovinYospacePlayer(
                         indexInQueue = advert.sequence,
                         duration = duration,
                         timeOffset = timeOffset,
-                        position = position,
+                        position = adBreakPosition,
                         skipOffset = 0.0
                     )
                 )

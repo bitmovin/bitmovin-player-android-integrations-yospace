@@ -53,10 +53,12 @@ class YospaceEventEmitter {
         }
     }
 
-    @Synchronized
     fun emit(event: YospacePlayerEvent) {
         BitLog.d("Emitting ${event::class.simpleName}")
-        eventActions[event::class]?.toList()?.forEach { it(event) }
+        val actions = synchronized(this) {
+            eventActions[event::class]?.toList().orEmpty()
+        }
+        actions.forEach { it(event) }
     }
 
     @Synchronized
@@ -80,21 +82,24 @@ class YospaceEventEmitter {
         }
     }
 
-    @Synchronized
     // This method is defined to support Yospace SDK custom events
     fun emit(event: CustomEvent) {
         when (event) {
             is TruexAdFreeEvent -> {
                 BitLog.d("Emitting TruexAdFreeEvent")
-                val listeners = yoEventListeners[OnTruexAdFreeListener::class.java]
-                listeners?.forEach {
+                val listeners = synchronized(this) {
+                    yoEventListeners[OnTruexAdFreeListener::class.java]?.toList().orEmpty()
+                }
+                listeners.forEach {
                     (it as OnTruexAdFreeListener).handle(YoEvent(event))
                 }
             }
             is YospaceAdStartedEvent -> {
                 BitLog.d("Emitting YospaceAdStartedEvent")
-                val listeners = yoEventListeners[YospaceAdStartedListener::class.java]
-                listeners?.forEach {
+                val listeners = synchronized(this) {
+                    yoEventListeners[YospaceAdStartedListener::class.java]?.toList().orEmpty()
+                }
+                listeners.forEach {
                     (it as YospaceAdStartedListener).handle(YoEvent(event))
                 }
             }

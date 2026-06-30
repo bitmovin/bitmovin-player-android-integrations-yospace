@@ -31,7 +31,6 @@ import com.yospace.admanagement.util.YoLog
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.properties.Delegates
-import kotlin.reflect.KClass
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -77,37 +76,7 @@ open class BitmovinYospacePlayer(
         yospacePlayerPolicy.playerPolicy = new
     }
 
-    /**
-     * Yospace-specific event API. Subscribe to integration ad events via `player.yospace.on<...>`.
-     */
-    val yospace: YospaceApi = object : YospaceApi {
-        override fun <E : YospacePlayerEvent> on(eventClass: KClass<E>, action: (E) -> Unit) =
-            yospaceEventEmitter.on(eventClass, action)
-
-        override fun <E : YospacePlayerEvent> next(eventClass: KClass<E>, action: (E) -> Unit) =
-            yospaceEventEmitter.next(eventClass, action)
-
-        override fun <E : YospacePlayerEvent> off(eventClass: KClass<E>, action: (E) -> Unit) =
-            yospaceEventEmitter.off(eventClass, action)
-
-        override fun <E : YospacePlayerEvent> off(action: (E) -> Unit) =
-            yospaceEventEmitter.off(action)
-
-        override fun <E : YospacePlayerEvent> on(
-            eventClass: Class<E>,
-            listener: YospacePlayerEventListener<E>
-        ) = yospaceEventEmitter.on(eventClass.kotlin, listener::onEvent)
-
-        override fun <E : YospacePlayerEvent> next(
-            eventClass: Class<E>,
-            listener: YospacePlayerEventListener<E>
-        ) = yospaceEventEmitter.next(eventClass.kotlin, listener::onEvent)
-
-        override fun <E : YospacePlayerEvent> off(
-            eventClass: Class<E>,
-            listener: YospacePlayerEventListener<E>
-        ) = yospaceEventEmitter.off(eventClass.kotlin, listener::onEvent)
-    }
+    val yospace: YospaceApi = DefaultYospaceApi(yospaceEventEmitter)
 
     init {
         BitLog.isEnabled = yospaceConfig.isDebug

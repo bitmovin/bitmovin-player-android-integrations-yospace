@@ -2,6 +2,9 @@ package com.bitmovin.player.integration.yospace
 
 import com.bitmovin.player.api.advertising.AdQuartile as PlayerAdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
+import com.bitmovin.player.api.deficiency.DeficiencyData
+import com.bitmovin.player.api.deficiency.ErrorEvent
+import com.bitmovin.player.api.deficiency.WarningEvent
 
 /**
  * Yospace integration-owned ad lifecycle events.
@@ -12,6 +15,25 @@ import com.bitmovin.player.api.advertising.AdSourceType
  * Player UI.
  */
 sealed class YospacePlayerEvent {
+    /**
+     * Emitted when a Yospace integration error occurred.
+     */
+    data class Error(
+        override val code: YospaceErrorCode,
+        override val message: String,
+        override val data: Any? = null,
+        override val deficiencyData: DeficiencyData? = null
+    ) : ErrorEvent, YospacePlayerEvent()
+
+    /**
+     * Emitted when a Yospace integration warning occurred.
+     */
+    data class Warning(
+        override val code: YospaceWarningCode,
+        override val message: String,
+        override val deficiencyData: DeficiencyData? = null
+    ) : WarningEvent, YospacePlayerEvent()
+
     /**
      * Emitted when a Yospace ad break starts.
      */

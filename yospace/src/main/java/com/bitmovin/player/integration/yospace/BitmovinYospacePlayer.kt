@@ -233,7 +233,7 @@ open class BitmovinYospacePlayer(
         val originalUrl = sourceConfig.url
         if (originalUrl.isEmpty() || sourceConfig.type != MediaSourceType.Hls) {
             yospaceEventEmitter.emit(
-                CustomSourceEvent.Error(
+                YospacePlayerEvent.Error(
                     YospaceErrorCode.InvalidYospaceSource,
                     "Invalid YoSpace source. You must provide an HLS source"
                 )
@@ -566,7 +566,7 @@ open class BitmovinYospacePlayer(
 
         override fun schedule(adItem: AdItem) = if (yospaceSourceConfig != null) {
             yospaceEventEmitter.emit(
-                CustomSourceEvent.Warning(
+                YospacePlayerEvent.Warning(
                     YospaceWarningCode.UnsupportedAPI,
                     "ads.schedule API is not available when playing back a Yospace asset"
                 )
@@ -577,7 +577,7 @@ open class BitmovinYospacePlayer(
 
         override fun setViewGroup(viewGroup: ViewGroup?) = if (yospaceSourceConfig != null) {
             yospaceEventEmitter.emit(
-                CustomSourceEvent.Warning(
+                YospacePlayerEvent.Warning(
                     YospaceWarningCode.UnsupportedAPI,
                     "ads.setViewGroup API is not available when playing back a Yospace asset"
                 )
@@ -794,7 +794,7 @@ open class BitmovinYospacePlayer(
         if (yospaceSourceConfig?.retryExcludingYospace == true) {
             handler.post {
                 yospaceEventEmitter.emit(
-                    CustomSourceEvent.Warning(
+                    YospacePlayerEvent.Warning(
                         errorCode.toYospaceWarningCode(),
                         message
                     )
@@ -808,7 +808,7 @@ open class BitmovinYospacePlayer(
             BitLog.d("YoSpace session failed, shutting down playback...")
             handler.post {
                 yospaceEventEmitter.emit(
-                    CustomSourceEvent.Error(
+                    YospacePlayerEvent.Error(
                         YospaceErrorCode.fromValue(errorCode) ?: YospaceErrorCode.SessionNotInitialised,
                         message
                     )
@@ -1018,7 +1018,7 @@ open class BitmovinYospacePlayer(
             BitLog.e("YoSpace onSessionError: $error")
             handler.post {
                 yospaceEventEmitter.emit(
-                    CustomSourceEvent.Warning(
+                    YospacePlayerEvent.Warning(
                         YospaceWarningCode.SessionAnalyticsIssue,
                         "YoSpace session error: $error"
                     )

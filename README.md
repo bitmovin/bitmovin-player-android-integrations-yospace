@@ -127,12 +127,14 @@ Each submission creates two logs, one for playback through an ad break and one f
 
 Maintainers can also run the **Yospace Validation Logs** GitHub Action manually. It captures the selected submission on an Android emulator and uploads the generated logs and manifests as a workflow artifact.
 
-#### Ad Tracking Events
-Yospace ad events carry integration-owned `Ad`/`AdBreak` payloads. Subscribe with the
+#### Yospace Events
+Yospace events carry integration-owned payloads. Subscribe with the
 `on<EventType> { }` extension.
-These are the ad related events you will typically observe:
+These are the events you will typically observe:
 
 ```kotlin
+player.on<YospacePlayerEvent.Error> { event -> event.message }
+player.on<YospacePlayerEvent.Warning> { event -> event.message }
 player.on<YospacePlayerEvent.AdBreakStarted> { event -> event.adBreak }
 player.on<YospacePlayerEvent.AdBreakFinished> { event -> event.adBreak }
 player.on<YospacePlayerEvent.AdStarted> { event -> event.ad }

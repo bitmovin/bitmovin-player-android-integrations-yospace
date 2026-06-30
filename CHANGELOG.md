@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging without exposing Yospace SDK APIs to consumers
 - Sample-app validation mode, capture script, and manual GitHub Action for generating Yospace validation-tool log submissions
 - `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdClicked`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
+- `YospacePlayerEvent.Error` and `YospacePlayerEvent.Warning` for Yospace integration errors and warnings
 - `BitmovinYospacePlayer` `on`/`next`/`off` support for `YospacePlayerEvent`, reified Kotlin extensions for `on`/`next`, and `Class`-based Java overloads using `YospacePlayerEventListener`, e.g. `player.on<YospacePlayerEvent.AdBreakStarted> { ... }`
 - Yospace ad click-through reporting when `Ad.clickThroughUrlOpened()` is called
 - Yospace warning codes for no-analytics, initialization, and analytics-session issues

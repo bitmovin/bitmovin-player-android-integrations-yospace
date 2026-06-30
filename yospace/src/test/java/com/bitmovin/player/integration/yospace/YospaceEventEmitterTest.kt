@@ -143,6 +143,44 @@ class YospaceEventEmitterTest {
     }
 
     @Test
+    fun `emit delivers error payload`() {
+        var error: YospacePlayerEvent.Error? = null
+
+        emitter.on(YospacePlayerEvent.Error::class) {
+            error = it
+        }
+
+        emitter.emit(
+            YospacePlayerEvent.Error(
+                code = YospaceErrorCode.InvalidYospaceSource,
+                message = "Invalid YoSpace source."
+            )
+        )
+
+        assertEquals(YospaceErrorCode.InvalidYospaceSource, error?.code)
+        assertEquals("Invalid YoSpace source.", error?.message)
+    }
+
+    @Test
+    fun `emit delivers warning payload`() {
+        var warning: YospacePlayerEvent.Warning? = null
+
+        emitter.on(YospacePlayerEvent.Warning::class) {
+            warning = it
+        }
+
+        emitter.emit(
+            YospacePlayerEvent.Warning(
+                code = YospaceWarningCode.UnsupportedAPI,
+                message = "Unsupported API."
+            )
+        )
+
+        assertEquals(YospaceWarningCode.UnsupportedAPI, warning?.code)
+        assertEquals("Unsupported API.", warning?.message)
+    }
+
+    @Test
     fun `ad clickThroughUrlOpened invokes callback`() {
         var clickCount = 0
         val ad = Ad(

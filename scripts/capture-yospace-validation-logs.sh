@@ -72,11 +72,19 @@ resolve_adb() {
     return
   fi
 
-  local android_home="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}}"
-  if [[ -x "$android_home/platform-tools/adb" ]]; then
-    ADB="$android_home/platform-tools/adb"
-    return
-  fi
+  local sdk_candidates=(
+    "${ANDROID_HOME:-}"
+    "${ANDROID_SDK_ROOT:-}"
+    "$HOME/Library/Android/sdk"
+    "$HOME/Android/Sdk"
+  )
+  local android_home
+  for android_home in "${sdk_candidates[@]}"; do
+    if [[ -n "$android_home" && -x "$android_home/platform-tools/adb" ]]; then
+      ADB="$android_home/platform-tools/adb"
+      return
+    fi
+  done
 
   echo "adb not found. Set ADB, ANDROID_HOME, or add adb to PATH." >&2
   exit 2

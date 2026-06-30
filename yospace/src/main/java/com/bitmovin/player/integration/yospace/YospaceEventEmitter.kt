@@ -34,13 +34,23 @@ class YospaceEventEmitter {
     @Synchronized
     @Suppress("UNCHECKED_CAST")
     fun <E : YospacePlayerEvent> off(eventClass: KClass<E>, action: (E) -> Unit) {
-        eventActions[eventClass]?.remove(action as (YospacePlayerEvent) -> Unit)
+        eventActions[eventClass]?.let { actions ->
+            actions.remove(action as (YospacePlayerEvent) -> Unit)
+            if (actions.isEmpty()) {
+                eventActions.remove(eventClass)
+            }
+        }
     }
 
     @Synchronized
     @Suppress("UNCHECKED_CAST")
     fun <E : YospacePlayerEvent> off(action: (E) -> Unit) {
-        eventActions.values.forEach { it.remove(action as (YospacePlayerEvent) -> Unit) }
+        eventActions.forEach { (eventClass, actions) ->
+            actions.remove(action as (YospacePlayerEvent) -> Unit)
+            if (actions.isEmpty()) {
+                eventActions.remove(eventClass, actions)
+            }
+        }
     }
 
     @Synchronized
@@ -61,7 +71,12 @@ class YospaceEventEmitter {
     fun off(listener: YoEventListener<*>) {
         val listenerClass = listenerClass(listener)
         listenerClass?.let {
-            yoEventListeners[it]?.remove(listener)
+            yoEventListeners[it]?.let { listeners ->
+                listeners.remove(listener)
+                if (listeners.isEmpty()) {
+                    yoEventListeners.remove(it)
+                }
+            }
         }
     }
 

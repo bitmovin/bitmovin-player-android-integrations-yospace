@@ -173,6 +173,19 @@ class YospaceEventEmitterTest {
     }
 
     @Test
+    fun `emit delivers TrueX ad-free event`() {
+        var count = 0
+
+        emitter.on(YospacePlayerEvent.TruexAdFree::class) {
+            count += 1
+        }
+
+        emitter.emit(YospacePlayerEvent.TruexAdFree)
+
+        assertEquals(1, count)
+    }
+
+    @Test
     fun `emit delivers error payload`() {
         var error: YospacePlayerEvent.Error? = null
 

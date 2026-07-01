@@ -564,6 +564,7 @@ open class BitmovinYospacePlayer(
 
         override fun onSessionAdFree() {
             BitLog.d("Session ad free")
+            yospaceEventEmitter.emit(YospacePlayerEvent.TruexAdFree)
         }
     }
 

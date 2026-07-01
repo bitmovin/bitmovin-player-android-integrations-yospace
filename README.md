@@ -142,6 +142,7 @@ player.on<YospacePlayerEvent.AdClicked> { event -> event.clickThroughUrl }
 player.on<YospacePlayerEvent.AdFinished> { event -> event.ad }
 player.on<YospacePlayerEvent.AdSkipped> { event -> event.ad }
 player.on<YospacePlayerEvent.AdQuartile> { event -> event.quartile }
+player.on<YospacePlayerEvent.TruexAdFree> { /* session is ad-free */ }
 ```
 
 Standard `player.on<PlayerEvent...>` callbacks still receive Bitmovin Player events. For VOD SSAI,

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdClicked`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
 - `YospacePlayerEvent.Error` and `YospacePlayerEvent.Warning` for Yospace integration errors and warnings
 - `BitmovinYospacePlayer` `on`/`next`/`off` support for `YospacePlayerEvent`, reified Kotlin extensions for `on`/`next`, and `Class`-based Java overloads using `YospacePlayerEventListener`, e.g. `player.on<YospacePlayerEvent.AdBreakStarted> { ... }`
+- `YospacePlayerEvent.TruexAdFree` for TrueX ad-free sessions
 - Yospace ad click-through reporting when `Ad.clickThroughUrlOpened()` is called
 - Yospace warning codes for no-analytics, initialization, and analytics-session issues
 

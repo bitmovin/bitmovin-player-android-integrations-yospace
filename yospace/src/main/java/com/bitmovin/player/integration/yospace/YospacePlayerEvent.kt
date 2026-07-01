@@ -78,4 +78,9 @@ sealed class YospacePlayerEvent {
      * Emitted when a Yospace ad quartile is reached.
      */
     data class AdQuartile(val quartile: PlayerAdQuartile) : YospacePlayerEvent()
+
+    /**
+     * Emitted when TrueX marks the session as ad-free.
+     */
+    object TruexAdFree : YospacePlayerEvent()
 }

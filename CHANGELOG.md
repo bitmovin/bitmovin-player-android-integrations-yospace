@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging without exposing Yospace SDK APIs to consumers
+- `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging
 - Sample-app validation mode, capture script, and manual GitHub Action for generating Yospace validation-tool log submissions
 - `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdClicked`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
 - `YospacePlayerEvent.Error` and `YospacePlayerEvent.Warning` for Yospace integration errors and warnings

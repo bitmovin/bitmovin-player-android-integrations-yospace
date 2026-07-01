@@ -41,7 +41,7 @@ import com.bitmovin.player.integration.yospace.policy.BitmovinYospacePlayerPolic
 import com.bitmovin.player.integration.yospace.policy.DefaultBitmovinYospacePlayerPolicy
 import com.bitmovin.player.integration.yospace.policy.YospacePlayerPolicy
 import com.bitmovin.player.integration.yospace.events.AdClickThroughReporter
-import com.bitmovin.player.integration.yospace.events.AdjustedTimeChangedDispatcher
+import com.bitmovin.player.integration.yospace.events.PlayerEventDispatcher
 import com.bitmovin.player.integration.yospace.events.YospaceAdStartedSnapshot
 import com.bitmovin.player.integration.yospace.events.YospaceEventEmitter
 import com.bitmovin.player.integration.yospace.events.YospacePlayerEvent
@@ -90,7 +90,7 @@ open class BitmovinYospacePlayer(
     private var isPlayingEventSent = false
     private var sourceConfig: SourceConfig? = null
     private var truexRenderer: BitmovinTruexAdRenderer? = null
-    private val adjustedTimeChangedDispatcher = AdjustedTimeChangedDispatcher(player, ::getCurrentTimeMinusAd)
+    private val playerEventDispatcher = PlayerEventDispatcher(player, ::getCurrentTimeMinusAd)
     private val yospacePlayerEventDispatcher = YospacePlayerEventDispatcher(yospaceEventEmitter)
     private val adClickThroughReporter = AdClickThroughReporter(yospaceEventEmitter)
 
@@ -105,63 +105,29 @@ open class BitmovinYospacePlayer(
         yospacePlayerPolicy.playerPolicy = new
     }
 
-    override fun <E : BitmovinEvent> on(eventClass: KClass<E>, action: (E) -> Unit) {
-        if (eventClass == PlayerEvent.TimeChanged::class) {
-            adjustedTimeChangedDispatcher.on(eventClass, action)
-        } else {
-            player.on(eventClass, action)
-        }
-    }
+    override fun <E : BitmovinEvent> on(eventClass: KClass<E>, action: (E) -> Unit) =
+        playerEventDispatcher.on(eventClass, action)
 
-    override fun <E : BitmovinEvent> next(eventClass: KClass<E>, action: (E) -> Unit) {
-        if (eventClass == PlayerEvent.TimeChanged::class) {
-            adjustedTimeChangedDispatcher.next(eventClass, action)
-        } else {
-            player.next(eventClass, action)
-        }
-    }
+    override fun <E : BitmovinEvent> next(eventClass: KClass<E>, action: (E) -> Unit) =
+        playerEventDispatcher.next(eventClass, action)
 
-    override fun <E : BitmovinEvent> off(eventClass: KClass<E>, action: (E) -> Unit) {
-        if (eventClass == PlayerEvent.TimeChanged::class) {
-            adjustedTimeChangedDispatcher.off(eventClass, action)
-        } else {
-            player.off(eventClass, action)
-        }
-    }
+    override fun <E : BitmovinEvent> off(eventClass: KClass<E>, action: (E) -> Unit) =
+        playerEventDispatcher.off(eventClass, action)
 
-    override fun <E : BitmovinEvent> off(action: (E) -> Unit) {
-        adjustedTimeChangedDispatcher.off(action)
-        player.off(action)
-    }
+    override fun <E : BitmovinEvent> off(action: (E) -> Unit) =
+        playerEventDispatcher.off(action)
 
-    override fun <E : BitmovinEvent> on(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
-        if (eventClass == PlayerEvent.TimeChanged::class.java) {
-            adjustedTimeChangedDispatcher.on(eventClass, eventListener)
-        } else {
-            player.on(eventClass, eventListener)
-        }
-    }
+    override fun <E : BitmovinEvent> on(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) =
+        playerEventDispatcher.on(eventClass, eventListener)
 
-    override fun <E : BitmovinEvent> next(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
-        if (eventClass == PlayerEvent.TimeChanged::class.java) {
-            adjustedTimeChangedDispatcher.next(eventClass, eventListener)
-        } else {
-            player.next(eventClass, eventListener)
-        }
-    }
+    override fun <E : BitmovinEvent> next(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) =
+        playerEventDispatcher.next(eventClass, eventListener)
 
-    override fun <E : BitmovinEvent> off(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) {
-        if (eventClass == PlayerEvent.TimeChanged::class.java) {
-            adjustedTimeChangedDispatcher.off(eventClass, eventListener)
-        } else {
-            player.off(eventClass, eventListener)
-        }
-    }
+    override fun <E : BitmovinEvent> off(eventClass: Class<E>, eventListener: BitmovinEventListener<in E>) =
+        playerEventDispatcher.off(eventClass, eventListener)
 
-    override fun <E : BitmovinEvent> off(eventListener: BitmovinEventListener<in E>) {
-        adjustedTimeChangedDispatcher.off(eventListener)
-        player.off(eventListener)
-    }
+    override fun <E : BitmovinEvent> off(eventListener: BitmovinEventListener<in E>) =
+        playerEventDispatcher.off(eventListener)
 
     @PublishedApi
     internal fun <E : YospacePlayerEvent> onYospacePlayerEvent(eventClass: KClass<E>, action: (E) -> Unit) =

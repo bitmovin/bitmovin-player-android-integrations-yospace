@@ -66,3 +66,6 @@ fastlane/test_output
 fastlane/readme.md
 
 bitmovin.properties
+
+# Serena tool cache
+.serena/

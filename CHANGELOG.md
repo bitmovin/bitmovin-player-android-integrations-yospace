@@ -8,11 +8,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - `YospaceConfig.yospaceDebugMode` to enable Yospace SDK validation or full debug logging
+- Sample-app validation mode, capture script, and manual GitHub Action for generating Yospace validation-tool log submissions
+- `YospacePlayerEvent` ad lifecycle events (`AdBreakStarted`, `AdBreakFinished`, `AdStarted`, `AdClicked`, `AdFinished`, `AdSkipped`, `AdQuartile`) carrying integration-owned `Ad`/`AdBreak` payloads
+- `BitmovinYospacePlayer` `on`/`next`/`off` support for `YospacePlayerEvent`, reified Kotlin extensions for `on`/`next`, and `Class`-based Java overloads using `YospacePlayerEventListener`, e.g. `player.on<YospacePlayerEvent.AdBreakStarted> { ... }`
+- `YospacePlayerEvent.TruexAdFree` for TrueX ad-free sessions
+- Yospace ad click-through reporting when `Ad.clickThroughUrlOpened()` is called
 - Yospace warning codes for no-analytics, initialization, and analytics-session issues
 
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
 - `YospaceAssetType.LINEAR_START_OVER` now uses the recommended DVRLive session mode
+- Split `YospaceErrorCode` and `YospaceWarningCode` into separate files and 
+- Moved advertising types (`Ad`, `AdBreak`, `AdBreakPosition`, `AdData`, `CompanionAd`, `AdTimeline`, `BitmovinTruexAdRenderer`) to the `com.bitmovin.player.integration.yospace.advertising` package, playback policy types (`BitmovinYospacePlayerPolicy`, `DefaultBitmovinYospacePlayerPolicy`, `YospacePlayerPolicy`) to the `com.bitmovin.player.integration.yospace.policy` package, `YospaceAssetType`/`YospaceLiveInitializationType` to the `com.bitmovin.player.integration.yospace.config` package, and `YospaceErrorCode`/`YospaceWarningCode` to the `com.bitmovin.player.integration.yospace.deficiency` package; update imports accordingly
 
 ### Fixed
 - Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used
@@ -26,6 +33,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - `com.yospace:admanagement-util` dependency as the Yospace SDK now provides the required utilities directly
 - `YospaceConfig.readTimeout` and `YospaceConfig.connectTimeout` as the Yospace SDK no longer exposes these settings
+- Routing of Yospace ad events through `Player.on<PlayerEvent...>`; subscribe via `player.on<YospacePlayerEvent...>` instead, as `Player.on<PlayerEvent...>` now receives Bitmovin Player events only
+- Legacy `OnAdBreakStartedListener`/`OnAdFinishedListener`/etc. event-listener interfaces, superseded by `YospacePlayerEvent`
 
 ## [2.1.0] - 2026-06-03
 

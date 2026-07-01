@@ -114,26 +114,55 @@ player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 
 When uploading live validation logs to Yospace, select the same initialization type in the validation tool as configured in `YospaceConfig.liveInitializationType`.
 
-#### Ad Tracking Events
-The `BitmovinYospacePlayer` fires events through the standard Bitmovin Player event API.
-Subscribe with the `on<EventType> { }` extension. These are the ad related events you will
-typically observe:
+#### Yospace validation logs
+
+The sample app can generate upload-ready validation logs for the Yospace validation tool:
+
+```shell
+scripts/capture-yospace-validation-logs.sh --submission vod
+scripts/capture-yospace-validation-logs.sh --submission dvr-live-direct
+```
+
+Each submission creates two logs, one for playback through an ad break and one for playback across two sessions. The generated manifest names the matching Yospace validation-tool selection.
+
+Maintainers can also run the **Yospace Validation Logs** GitHub Action manually. It captures the selected submission on an Android emulator and uploads the generated logs and manifests as a workflow artifact.
+
+#### Yospace Events
+Yospace events carry integration-owned payloads. Subscribe with the
+`on<EventType> { }` extension.
+These are the events you will typically observe:
 
 ```kotlin
-player.on<PlayerEvent.AdBreakStarted> { ... }
-player.on<PlayerEvent.AdBreakFinished> { ... }
-player.on<PlayerEvent.AdStarted> { ... }
-player.on<PlayerEvent.AdFinished> { ... }
-player.on<PlayerEvent.AdClicked> { ... }
-player.on<PlayerEvent.AdError> { ... }
-player.on<PlayerEvent.AdSkipped> { ... }
+player.on<YospacePlayerEvent.Error> { event -> event.message }
+player.on<YospacePlayerEvent.Warning> { event -> event.message }
+player.on<YospacePlayerEvent.AdBreakStarted> { event -> event.adBreak }
+player.on<YospacePlayerEvent.AdBreakFinished> { event -> event.adBreak }
+player.on<YospacePlayerEvent.AdStarted> { event -> event.ad }
+player.on<YospacePlayerEvent.AdClicked> { event -> event.clickThroughUrl }
+player.on<YospacePlayerEvent.AdFinished> { event -> event.ad }
+player.on<YospacePlayerEvent.AdSkipped> { event -> event.ad }
+player.on<YospacePlayerEvent.AdQuartile> { event -> event.quartile }
+player.on<YospacePlayerEvent.TruexAdFree> { /* session is ad-free */ }
 ```
+
+Standard `player.on<PlayerEvent...>` callbacks still receive Bitmovin Player events. For VOD SSAI,
+`PlayerEvent.TimeChanged` reports content-relative time outside ads and ad-relative time during
+Yospace ad playback.
 
 #### Click Through Urls
 The click-through URL is delivered with each ad-started event:
 
 ```kotlin
-player.on<PlayerEvent.AdStarted> { event ->
+player.on<YospacePlayerEvent.AdStarted> { event ->
     val clickThroughUrl = event.clickThroughUrl
+}
+```
+
+After opening the click-through URL, notify the ad object so the Yospace SDK can fire its click
+tracking and the integration can emit `YospacePlayerEvent.AdClicked`:
+
+```kotlin
+player.on<YospacePlayerEvent.AdStarted> { event ->
+    event.ad?.clickThroughUrlOpened()
 }
 ```

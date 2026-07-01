@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 import com.bitmovin.player.api.advertising.AdBreak
 

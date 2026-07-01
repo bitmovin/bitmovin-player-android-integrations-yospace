@@ -1,5 +1,6 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.policy
 
+import com.bitmovin.player.integration.yospace.BitLog
 import com.yospace.admanagement.PlaybackPolicyHandler
 import com.yospace.admanagement.Session
 

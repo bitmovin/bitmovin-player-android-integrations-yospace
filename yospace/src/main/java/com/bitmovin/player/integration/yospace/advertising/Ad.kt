@@ -1,7 +1,8 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 import com.bitmovin.player.api.advertising.Ad
 import com.bitmovin.player.api.advertising.vast.AdSystem
+import com.bitmovin.player.integration.yospace.events.AdClickThroughHandler
 import com.yospace.admanagement.AdvertWrapper
 import com.yospace.admanagement.XmlNode
 
@@ -27,8 +28,11 @@ data class Ad(
     override var height: Int = -1,
     override var mediaFileUrl: String? = null
 ) : Ad {
-    // No-op: only meaningful for AdSourceType.Bitmovin ads, not Yospace SSAI. Matches the iOS integration.
-    override fun clickThroughUrlOpened() = Unit
+    internal var clickThroughHandler: AdClickThroughHandler? = null
+
+    override fun clickThroughUrlOpened() {
+        clickThroughHandler?.clickThroughUrlOpened(this)
+    }
 
     override fun toString() =
         "id=$id, " +

@@ -14,7 +14,8 @@ import com.bitmovin.player.integration.yospace.deficiency.YospaceWarningCode
 /**
  * Yospace integration-owned ad lifecycle events.
  *
- * These are emitted by [BitmovinYospacePlayer] and can be observed via the integration `on`/`next`/`off`
+ * These are emitted by [com.bitmovin.player.integration.yospace.BitmovinYospacePlayer] and can be
+ * observed via the integration `on`/`next`/`off`
  * extensions. They intentionally do not extend the Bitmovin Player
  * [com.bitmovin.player.api.event.Event] hierarchy, so the non-serializable payloads never reach the
  * Player UI.

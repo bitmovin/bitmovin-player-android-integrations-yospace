@@ -13,18 +13,6 @@ internal data class YospaceAdStartedSnapshot(
     val position: String,
     val skipOffset: Double = 0.0
 ) {
-    fun toYospaceAdStartedEvent() = YospaceAdStartedEvent(
-        clientType = clientType,
-        clickThroughUrl = clickThroughUrl,
-        indexInQueue = indexInQueue,
-        duration = duration,
-        timeOffset = timeOffset,
-        position = position,
-        skipOffset = skipOffset,
-        ad = ad,
-        companionAds = companionAds
-    )
-
     fun toYospacePlayerEvent() = YospacePlayerEvent.AdStarted(
         ad = ad,
         companionAds = companionAds,

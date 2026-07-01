@@ -564,7 +564,6 @@ open class BitmovinYospacePlayer(
 
         override fun onSessionAdFree() {
             BitLog.d("Session ad free")
-            yospaceEventEmitter.emit(TruexAdFreeEvent())
         }
     }
 
@@ -749,7 +748,6 @@ open class BitmovinYospacePlayer(
 
             // Notify listeners of AS event
             handler.post {
-                yospaceEventEmitter.emit(adStartedSnapshot.toYospaceAdStartedEvent())
                 yospaceEventEmitter.emit(adStartedSnapshot.toYospacePlayerEvent())
             }
         }

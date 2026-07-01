@@ -1,5 +1,14 @@
 package com.bitmovin.player.integration.yospace
 
+import com.bitmovin.player.integration.yospace.advertising.Ad
+import com.bitmovin.player.integration.yospace.advertising.AdBreak
+import com.bitmovin.player.integration.yospace.deficiency.YospaceErrorCode
+import com.bitmovin.player.integration.yospace.deficiency.YospaceWarningCode
+import com.bitmovin.player.integration.yospace.events.AdClickThroughHandler
+import com.bitmovin.player.integration.yospace.events.YospaceEventEmitter
+import com.bitmovin.player.integration.yospace.events.YospacePlayerEvent
+import com.bitmovin.player.integration.yospace.events.YospacePlayerEventDispatcher
+import com.bitmovin.player.integration.yospace.events.YospacePlayerEventListener
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test

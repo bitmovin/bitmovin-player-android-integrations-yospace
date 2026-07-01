@@ -1,5 +1,6 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
+import com.bitmovin.player.integration.yospace.BitLog
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 

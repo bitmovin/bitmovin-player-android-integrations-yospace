@@ -1,5 +1,6 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
+import com.bitmovin.player.integration.yospace.advertising.Ad
 import com.yospace.admanagement.Advert
 
 internal fun interface AdClickThroughHandler {

@@ -1,5 +1,6 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
+import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 import kotlin.reflect.KClass
 
 /**

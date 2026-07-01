@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 enum class AdBreakPosition(val value: String) {
     PREROLL("preroll"),

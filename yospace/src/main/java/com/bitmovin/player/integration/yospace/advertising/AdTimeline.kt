@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 import kotlin.collections.minByOrNull as minBy
 import kotlin.collections.maxByOrNull as maxBy

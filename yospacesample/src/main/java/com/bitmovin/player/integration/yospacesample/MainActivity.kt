@@ -19,13 +19,13 @@ import com.bitmovin.player.api.source.SourceConfig
 import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.integration.yospace.BitLog
 import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
-import com.bitmovin.player.integration.yospace.YospaceAssetType
-import com.bitmovin.player.integration.yospace.YospaceLiveInitializationType
-import com.bitmovin.player.integration.yospace.YospacePlayerEvent
-import com.bitmovin.player.integration.yospace.on
+import com.bitmovin.player.integration.yospace.config.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
 import com.bitmovin.player.integration.yospace.config.YospaceDebugMode
+import com.bitmovin.player.integration.yospace.config.YospaceLiveInitializationType
 import com.bitmovin.player.integration.yospace.config.YospaceSourceConfig
+import com.bitmovin.player.integration.yospace.events.YospacePlayerEvent
+import com.bitmovin.player.integration.yospace.events.on
 import com.bitmovin.player.integration.yospacesample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

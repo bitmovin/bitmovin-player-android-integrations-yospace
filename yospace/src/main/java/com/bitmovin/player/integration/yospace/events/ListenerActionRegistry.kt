@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
 internal class ListenerActionRegistry<K, A> {
     private val actionsByKey = mutableMapOf<K, MutableList<A>>()

@@ -1,4 +1,4 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.event.Event

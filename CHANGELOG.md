@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Upgraded Yospace Ad Management SDK from `3.3.3` to `3.11.2`
 - `YospaceAssetType.LINEAR_START_OVER` now uses the recommended DVRLive session mode
+- Moved advertising types (`Ad`, `AdBreak`, `AdBreakPosition`, `AdData`, `CompanionAd`, `AdTimeline`, `BitmovinTruexAdRenderer`) to the `com.bitmovin.player.integration.yospace.advertising` package, playback policy types (`BitmovinYospacePlayerPolicy`, `DefaultBitmovinYospacePlayerPolicy`, `YospacePlayerPolicy`) to the `com.bitmovin.player.integration.yospace.policy` package, `YospaceAssetType`/`YospaceLiveInitializationType` to the `com.bitmovin.player.integration.yospace.config` package, and `YospaceErrorCode`/`YospaceWarningCode` to the `com.bitmovin.player.integration.yospace.deficiency` package; update imports accordingly
 
 ### Fixed
 - Ad breaks were not correctly reported if `YospaceAssetType.LINEAR_START_OVER` was used

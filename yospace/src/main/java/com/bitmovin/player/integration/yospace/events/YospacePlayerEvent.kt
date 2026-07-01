@@ -1,10 +1,15 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
 import com.bitmovin.player.api.advertising.AdQuartile as PlayerAdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.deficiency.DeficiencyData
 import com.bitmovin.player.api.deficiency.ErrorEvent
 import com.bitmovin.player.api.deficiency.WarningEvent
+import com.bitmovin.player.integration.yospace.advertising.Ad
+import com.bitmovin.player.integration.yospace.advertising.AdBreak
+import com.bitmovin.player.integration.yospace.advertising.CompanionAd
+import com.bitmovin.player.integration.yospace.deficiency.YospaceErrorCode
+import com.bitmovin.player.integration.yospace.deficiency.YospaceWarningCode
 
 /**
  * Yospace integration-owned ad lifecycle events.

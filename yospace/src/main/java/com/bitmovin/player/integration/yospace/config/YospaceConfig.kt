@@ -1,7 +1,5 @@
 package com.bitmovin.player.integration.yospace.config
 
-import com.bitmovin.player.integration.yospace.YospaceLiveInitializationType
-
 data class YospaceConfig(
     val userAgent: String? = null,
     val requestTimeout: Int = 25_000,

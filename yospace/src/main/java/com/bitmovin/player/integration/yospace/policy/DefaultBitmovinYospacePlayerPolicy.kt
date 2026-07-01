@@ -1,4 +1,6 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.policy
+
+import com.bitmovin.player.integration.yospace.BitmovinYospacePlayer
 
 class DefaultBitmovinYospacePlayerPolicy(private val player: BitmovinYospacePlayer) : BitmovinYospacePlayerPolicy {
 

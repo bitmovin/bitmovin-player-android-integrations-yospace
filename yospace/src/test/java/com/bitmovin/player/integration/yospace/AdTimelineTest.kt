@@ -1,5 +1,8 @@
 package com.bitmovin.player.integration.yospace
 
+import com.bitmovin.player.integration.yospace.advertising.Ad
+import com.bitmovin.player.integration.yospace.advertising.AdBreak
+import com.bitmovin.player.integration.yospace.advertising.AdTimeline
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

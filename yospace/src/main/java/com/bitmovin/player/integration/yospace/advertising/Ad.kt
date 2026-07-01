@@ -1,7 +1,8 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 import com.bitmovin.player.api.advertising.Ad
 import com.bitmovin.player.api.advertising.vast.AdSystem
+import com.bitmovin.player.integration.yospace.events.AdClickThroughHandler
 import com.yospace.admanagement.AdvertWrapper
 import com.yospace.admanagement.XmlNode
 

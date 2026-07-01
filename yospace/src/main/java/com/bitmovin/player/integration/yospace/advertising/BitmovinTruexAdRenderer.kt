@@ -1,7 +1,8 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.advertising
 
 import android.content.Context
-import com.bitmovin.player.integration.yospace.AdBreakPosition.PREROLL
+import com.bitmovin.player.integration.yospace.BitLog
+import com.bitmovin.player.integration.yospace.advertising.AdBreakPosition.PREROLL
 import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.truex.adrenderer.TruexAdRenderer
 import com.truex.adrenderer.TruexAdRendererConstants

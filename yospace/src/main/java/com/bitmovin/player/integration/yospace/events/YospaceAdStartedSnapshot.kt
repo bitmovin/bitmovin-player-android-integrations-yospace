@@ -1,6 +1,8 @@
-package com.bitmovin.player.integration.yospace
+package com.bitmovin.player.integration.yospace.events
 
 import com.bitmovin.player.api.advertising.AdSourceType
+import com.bitmovin.player.integration.yospace.advertising.Ad
+import com.bitmovin.player.integration.yospace.advertising.CompanionAd
 
 internal data class YospaceAdStartedSnapshot(
     val ad: Ad?,

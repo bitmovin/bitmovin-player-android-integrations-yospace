@@ -610,7 +610,7 @@ open class BitmovinYospacePlayer(
             handler.post {
                 yospaceEventEmitter.emit(
                     YospacePlayerEvent.Error(
-                        YospaceErrorCode.fromValue(errorCode) ?: YospaceErrorCode.SessionNotInitialised,
+                        YospaceErrorCode.fromValue(errorCode) ?: YospaceErrorCode.SessionNotInitialized,
                         message
                     )
                 )

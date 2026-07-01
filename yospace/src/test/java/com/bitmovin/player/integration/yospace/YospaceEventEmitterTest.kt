@@ -100,6 +100,36 @@ class YospaceEventEmitterTest {
     }
 
     @Test
+    fun `dispatcher removes Java Yospace player event listener`() {
+        val dispatcher = YospacePlayerEventDispatcher(emitter)
+        var adBreakStartCount = 0
+        val listener = YospacePlayerEventListener<YospacePlayerEvent.AdBreakStarted> {
+            adBreakStartCount += 1
+        }
+
+        dispatcher.on(YospacePlayerEvent.AdBreakStarted::class.java, listener)
+        dispatcher.off(YospacePlayerEvent.AdBreakStarted::class.java, listener)
+        emitter.emit(YospacePlayerEvent.AdBreakStarted(adBreak()))
+
+        assertEquals(0, adBreakStartCount)
+    }
+
+    @Test
+    fun `dispatcher emits Java Yospace player event listener once`() {
+        val dispatcher = YospacePlayerEventDispatcher(emitter)
+        var adBreakStartCount = 0
+        val listener = YospacePlayerEventListener<YospacePlayerEvent.AdBreakStarted> {
+            adBreakStartCount += 1
+        }
+
+        dispatcher.next(YospacePlayerEvent.AdBreakStarted::class.java, listener)
+        emitter.emit(YospacePlayerEvent.AdBreakStarted(adBreak()))
+        emitter.emit(YospacePlayerEvent.AdBreakStarted(adBreak()))
+
+        assertEquals(1, adBreakStartCount)
+    }
+
+    @Test
     fun `emit delivers ad started payload`() {
         val ad = Ad(
             id = "ad",
@@ -181,7 +211,7 @@ class YospaceEventEmitterTest {
     }
 
     @Test
-    fun `ad clickThroughUrlOpened invokes callback`() {
+    fun `ad clickThroughUrlOpened delegates to active handler`() {
         var clickCount = 0
         val ad = Ad(
             id = "ad",
@@ -200,7 +230,10 @@ class YospaceEventEmitterTest {
             extensions = emptyList(),
             isLinear = true
         )
-        ad.onClickThroughUrlOpened = { clickCount += 1 }
+        ad.clickThroughHandler = AdClickThroughHandler { clickedAd ->
+            assertSame(ad, clickedAd)
+            clickCount += 1
+        }
 
         ad.clickThroughUrlOpened()
 

@@ -27,10 +27,10 @@ data class Ad(
     override var height: Int = -1,
     override var mediaFileUrl: String? = null
 ) : Ad {
-    internal var onClickThroughUrlOpened: (() -> Unit)? = null
+    internal var clickThroughHandler: AdClickThroughHandler? = null
 
     override fun clickThroughUrlOpened() {
-        onClickThroughUrlOpened?.invoke()
+        clickThroughHandler?.clickThroughUrlOpened(this)
     }
 
     override fun toString() =

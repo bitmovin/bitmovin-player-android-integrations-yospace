@@ -50,6 +50,10 @@ jobs:
       - name: Promote CHANGELOG unreleased section
         run: ./gradlew patchChangelog
 
+      - name: Update version in README
+        run: |
+          sed -i -E "s|(implementation 'com\.bitmovin\.player\.integration:yospace:)[^']+'|\1${{ steps.version.outputs.next }}'|" README.md
+
       - name: Extract release notes
         run: ./gradlew getChangelog -q --console=plain --no-header --no-summary --no-empty-sections --project-version=${{ steps.version.outputs.next }} --output-file=build/release-notes.md
 
@@ -57,7 +61,7 @@ jobs:
         run: |
           git config user.name 'Automated Release'
           git config user.email 'release-automation@bitmovin.com'
-          git add gradle.properties CHANGELOG.md
+          git add gradle.properties CHANGELOG.md README.md
           git commit -m "Release ${{ steps.version.outputs.next }}"
           git tag -a "${{ steps.version.outputs.next }}" -m "${{ steps.version.outputs.next }}"
           git push origin main

@@ -99,8 +99,8 @@ val player = BitmovinYospacePlayer(
 // Attach it to your PlayerView (e.g. from your layout)
 playerView.player = player
 
-// Create a SourceConfig pointing at your HLS asset
-val sourceConfig = SourceConfig("asset-url", SourceType.Hls)
+// Create a SourceConfig pointing at your HLS or DASH asset
+val sourceConfig = SourceConfig("asset-url", SourceType.Hls) // or SourceType.Dash
 
 // Create a YospaceSourceConfig with the YospaceAssetType
 val yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)

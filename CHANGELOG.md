@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- DASH stream support for Yospace assets.
+
 ### Changed
 
 ### Deprecated

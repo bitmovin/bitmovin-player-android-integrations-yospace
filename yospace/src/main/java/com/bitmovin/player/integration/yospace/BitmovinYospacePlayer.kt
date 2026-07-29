@@ -489,7 +489,9 @@ open class BitmovinYospacePlayer(
         player.on<PlayerEvent.TimeChanged> {
             val currentTime = getCurrentTimeMinusAd()
 
-            yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+            if (yospaceSessionStatus == SessionStatus.INITIALIZED) {
+                yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+            }
 
             if (yospaceSession as? SessionLive != null || yospaceSession as? SessionDVRLive != null) {
                 // Live session

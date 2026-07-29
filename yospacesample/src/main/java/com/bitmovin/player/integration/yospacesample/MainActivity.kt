@@ -69,6 +69,12 @@ class MainActivity : AppCompatActivity() {
                 "Yospace HLS VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+            ),
+            Stream(
+                "Yospace DASH VOD",
+                "https://csm-e-sdk-validation-eb.bln1.yospace.com/csm/access/671396777/ZGFzaC9tYW5pZmVzdC5tcGQ=?yo.av=4",
+                sourceType = SourceType.Dash,
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )
     }

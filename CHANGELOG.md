@@ -8,8 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- DASH stream support for Yospace assets.
-
 ### Changed
 
 ### Deprecated
@@ -19,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 ### Security
+
+## [2.3.0] - 2026-07-29
+
+### Added
+
+- DASH stream support for Yospace assets.
 
 ## [2.2.0] - 2026-07-01
 
@@ -310,7 +314,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `BitmovinYospacePlayerPolicy` not being respected
 
-[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.2.0...HEAD
+[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/1.20.0...2.0.0

@@ -55,13 +55,25 @@ class MainActivity : AppCompatActivity() {
     private val streams by lazy {
         listOf(
             Stream(
-                "Yospace Live (${selectedLiveInitializationType.name})",
+                "Yospace HLS Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
             ),
             Stream(
-                "Yospace VOD",
+                "Yospace DASH Live (${selectedLiveInitializationType.name})",
+                "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
+                sourceType = SourceType.Dash,
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
+            ),
+            Stream(
+                "Yospace HLS VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
+                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+            ),
+            Stream(
+                "Yospace DASH VOD",
+                "https://csm-e-sdk-validation-eb.bln1.yospace.com/csm/access/671396777/ZGFzaC9tYW5pZmVzdC5tcGQ=?yo.av=4",
+                sourceType = SourceType.Dash,
                 yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
             )
         )
@@ -177,7 +189,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadStream(stream: Stream) {
-        val sourceConfig = SourceConfig(stream.contentUrl, SourceType.Hls)
+        val sourceConfig = SourceConfig(stream.contentUrl, stream.sourceType)
         sourceConfig.drmConfig = WidevineConfig(stream.drmUrl)
 
         player.load(sourceConfig, stream.yospaceSourceConfig, stream.truexConfig)

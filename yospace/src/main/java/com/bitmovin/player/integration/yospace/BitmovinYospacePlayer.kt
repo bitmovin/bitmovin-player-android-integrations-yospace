@@ -68,6 +68,8 @@ private const val UNSUPPORTED_API = 6004
 private enum class LoadState { LOADING, UNLOADING, UNKNOWN }
 private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
+private fun MediaSourceType.isSupportedYospaceSource() = this == MediaSourceType.Hls || this == MediaSourceType.Dash
+
 open class BitmovinYospacePlayer(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
@@ -176,11 +178,12 @@ open class BitmovinYospacePlayer(
         resetYospaceSession()
 
         val originalUrl = sourceConfig.url
-        if (originalUrl.isEmpty() || sourceConfig.type != MediaSourceType.Hls) {
+        val mediaSourceType = sourceConfig.type
+        if (originalUrl.isEmpty() || !mediaSourceType.isSupportedYospaceSource()) {
             yospaceEventEmitter.emit(
                 YospacePlayerEvent.Error(
                     YospaceErrorCode.InvalidYospaceSource,
-                    "Invalid YoSpace source. You must provide an HLS source"
+                    "Invalid YoSpace source. You must provide an HLS or DASH source"
                 )
             )
             unload()
@@ -196,13 +199,13 @@ open class BitmovinYospacePlayer(
         yospaceSessionProperties = sessionProperties
 
         when (yospaceSourceConfig.assetType) {
-            YospaceAssetType.LINEAR -> loadLive(originalUrl, yospaceSessionProperties!!)
-            YospaceAssetType.VOD -> loadVod(originalUrl, yospaceSessionProperties!!)
-            YospaceAssetType.LINEAR_START_OVER -> loadStartOver(originalUrl, yospaceSessionProperties!!)
+            YospaceAssetType.LINEAR -> loadLive(originalUrl, mediaSourceType, yospaceSessionProperties!!)
+            YospaceAssetType.VOD -> loadVod(originalUrl, mediaSourceType, yospaceSessionProperties!!)
+            YospaceAssetType.LINEAR_START_OVER -> loadStartOver(originalUrl, mediaSourceType, yospaceSessionProperties!!)
         }
     }
 
-    private fun loadLive(originalUrl: String, properties: SessionProperties) =
+    private fun loadLive(originalUrl: String, mediaSourceType: MediaSourceType, properties: SessionProperties) =
         when (yospaceConfig.liveInitializationType) {
             YospaceLiveInitializationType.PROXY -> {
                 val playbackUrl = SessionFactory.create(
@@ -211,7 +214,7 @@ open class BitmovinYospacePlayer(
                     properties,
                     sessionListener
                 )
-                startPlayback(MediaSourceType.Hls, playbackUrl)
+                startPlayback(mediaSourceType, playbackUrl)
             }
             YospaceLiveInitializationType.DIRECT -> SessionLive.create(
                 originalUrl,
@@ -220,7 +223,7 @@ open class BitmovinYospacePlayer(
             )
         }
 
-    private fun loadVod(originalUrl: String, properties: SessionProperties) {
+    private fun loadVod(originalUrl: String, mediaSourceType: MediaSourceType, properties: SessionProperties) {
         SessionVOD.create(
             originalUrl, properties
         ) { event: Event<Session> ->
@@ -228,11 +231,11 @@ open class BitmovinYospacePlayer(
                 event.payload,
                 "Yospace analytics session VOD initialized"
             )
-            startPlayback(MediaSourceType.Hls, event.payload.playbackUrl)
+            startPlayback(mediaSourceType, event.payload.playbackUrl)
         }
     }
 
-    private fun loadStartOver(originalUrl: String, properties: SessionProperties) {
+    private fun loadStartOver(originalUrl: String, mediaSourceType: MediaSourceType, properties: SessionProperties) {
         when (yospaceConfig.liveInitializationType) {
             YospaceLiveInitializationType.PROXY -> {
                 val playbackUrl = SessionFactory.create(
@@ -241,7 +244,7 @@ open class BitmovinYospacePlayer(
                     properties,
                     sessionListener
                 )
-                startPlayback(MediaSourceType.Hls, playbackUrl)
+                startPlayback(mediaSourceType, playbackUrl)
             }
             YospaceLiveInitializationType.DIRECT -> {
                 SessionDVRLive.create(
@@ -486,7 +489,9 @@ open class BitmovinYospacePlayer(
         player.on<PlayerEvent.TimeChanged> {
             val currentTime = getCurrentTimeMinusAd()
 
-            yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+            if (yospaceSessionStatus == SessionStatus.INITIALIZED) {
+                yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+            }
 
             if (yospaceSession as? SessionLive != null || yospaceSession as? SessionDVRLive != null) {
                 // Live session
@@ -577,7 +582,9 @@ open class BitmovinYospacePlayer(
                 }
 
                 yospaceSession?.let {
-                    startPlayback(MediaSourceType.Hls, it.playbackUrl)
+                    sourceConfig?.type?.let { sourceType ->
+                        startPlayback(sourceType, it.playbackUrl)
+                    }
                 }
             }
             Session.SessionState.FAILED, Session.SessionState.NO_ANALYTICS -> handleYospaceSessionFailure(

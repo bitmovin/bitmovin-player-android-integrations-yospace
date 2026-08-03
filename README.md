@@ -161,6 +161,14 @@ val yospaceSourceConfig = YospaceSourceConfig(
 
 Yospace assets play through a proxied URL, so the metadata is applied to the source the integration loads internally. `SourceMetadata.isLive` is derived from `assetType` when you do not set it, and `title` falls back to the title of the `SourceConfig` you pass to `load`.
 
+##### SSAI ad tracking
+
+Yospace inserts ads server-side, so the player emits no client-side ad events. The integration reports Yospace ad breaks and ads to Bitmovin Analytics through its [SSAI tracking API](https://developer.bitmovin.com/playback/docs/how-to-set-up-ssai-tracking) automatically — no additional code is required. Ad breaks, individual ads, and slates (Yospace fillers) are tracked.
+
+Ad quartiles are only reported when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is `true`. They are suppressed for an ad that was already in progress when playback joined it, since those beacons do not reflect what the viewer saw.
+
+Ad duration is reported on Android 8.0 (API 26) and above only, as the analytics API expresses it as a `java.time.Duration`.
+
 #### Yospace validation logs
 
 The sample app can generate upload-ready validation logs for the Yospace validation tool:

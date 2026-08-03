@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `BitmovinYospacePlayer.analytics` to access the `AnalyticsApi` of the underlying player
 - `YospaceWarningCode.AnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
 - `YospaceSourceConfig.sourceMetadata` to set Bitmovin Analytics metadata for a Yospace source
+- Bitmovin Analytics SSAI ad tracking for Yospace ad breaks, ads, and slates, including ad quartiles when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is enabled
 
 ### Changed
 

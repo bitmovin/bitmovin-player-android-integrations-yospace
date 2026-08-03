@@ -34,6 +34,10 @@ import com.bitmovin.player.integration.yospace.advertising.BitmovinTruexAdRender
 import com.bitmovin.player.integration.yospace.advertising.CompanionAd
 import com.bitmovin.player.integration.yospace.advertising.CompanionAdResource
 import com.bitmovin.player.integration.yospace.advertising.CompanionAdType
+import com.bitmovin.player.integration.yospace.analytics.AnalyticsSsaiAdTracker
+import com.bitmovin.player.integration.yospace.analytics.SsaiAdInfo
+import com.bitmovin.player.integration.yospace.analytics.SsaiQuartile
+import com.bitmovin.player.integration.yospace.analytics.YospaceSsaiTracker
 import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.bitmovin.player.integration.yospace.config.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
@@ -62,6 +66,9 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.properties.Delegates
 import kotlin.reflect.KClass
+
+// Tolerance for treating an advert as already in progress when playback joined it
+private const val MID_ADVERT_JOIN_TOLERANCE_SECONDS = 1.0
 
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
@@ -132,6 +139,7 @@ open class BitmovinYospacePlayer(
     private val playerEventDispatcher = PlayerEventDispatcher(player, ::getCurrentTimeMinusAd)
     private val yospacePlayerEventDispatcher = YospacePlayerEventDispatcher(yospaceEventEmitter)
     private val adClickThroughReporter = AdClickThroughReporter(yospaceEventEmitter)
+    private val ssaiTracker = YospaceSsaiTracker(AnalyticsSsaiAdTracker { player.analytics })
 
     var adTimeline: AdTimeline? = null
         private set
@@ -721,6 +729,8 @@ open class BitmovinYospacePlayer(
         yospaceSession?.removeAnalyticObserver(analyticEventListener)
         yospaceSession?.shutdown()
         yospaceSession = null
+        // After detaching the observer, so a late callback cannot reopen the ad break
+        ssaiTracker.reset()
         isLiveAdPaused = false
         isPlayingEventSent = false
         adClickThroughReporter.clear()
@@ -754,6 +764,8 @@ open class BitmovinYospacePlayer(
             }
 
             activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
+
+            reportAdBreakStartToAnalytics(activeAdBreak)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = YospacePlayerEvent.AdBreakStarted(activeAdBreak)
@@ -835,6 +847,8 @@ open class BitmovinYospacePlayer(
             )
             adClickThroughReporter.activate(activeAd, advert)
 
+            reportAdStartToAnalytics(advert)
+
             // Notify listeners of AS event
             handler.post {
                 yospaceEventEmitter.emit(adStartedSnapshot.toYospacePlayerEvent())
@@ -844,6 +858,7 @@ open class BitmovinYospacePlayer(
         override fun onAdvertEnd(session: Session) {
             BitLog.d("YoSpace onAdvertEnd")
 
+            // No analytics call here: the SSAI API has no ad-stop, the next ad start ends this ad.
             val adFinishedEvent = YospacePlayerEvent.AdFinished(activeAd)
             handler.post { yospaceEventEmitter.emit(adFinishedEvent) }
 
@@ -854,6 +869,8 @@ open class BitmovinYospacePlayer(
         override fun onAdvertBreakEnd(session: Session) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
+            ssaiTracker.onAdBreakEnd()
+
             val adBreakFinishedEvent = YospacePlayerEvent.AdBreakFinished(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakFinishedEvent) }
             activeAdBreak = null
@@ -861,6 +878,8 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingEvent(type: String, session: Session) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
+
+            type.toSsaiQuartile()?.let { ssaiTracker.onQuartileFinished(it) }
 
             when (type) {
                 "firstQuartile" -> {
@@ -904,6 +923,65 @@ open class BitmovinYospacePlayer(
         override fun onTrackingError(error: TrackingErrors.Error, session: Session) {
             BitLog.e("YoSpace onTrackingError: ${error.toJsonString()}")
         }
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // Analytics SSAI Tracking
+    ///////////////////////////////////////////////////////////////
+
+    /**
+     * Reported as soon as Yospace signals the break. Yospace notifies once the break has already
+     * started, so the lead time the analytics API recommends is not available here.
+     */
+    private fun reportAdBreakStartToAnalytics(adBreak: AdBreak?) {
+        // Yospace does not always know the adverts of a live break upfront. Reporting zero would
+        // claim no ads are expected, so the counts stay unknown until they are available.
+        val ads = adBreak?.ads?.takeIf { it.isNotEmpty() }
+
+        ssaiTracker.onAdBreakStart(
+            position = adBreak?.position ?: AdBreakPosition.UNKNOWN,
+            paidAds = ads?.count { !it.isFiller },
+            slates = ads?.count { it.isFiller }
+        )
+    }
+
+    private fun reportAdStartToAnalytics(advert: Advert) {
+        ssaiTracker.onAdStart(
+            ad = SsaiAdInfo(
+                adId = advert.identifier,
+                adSystem = advert.adSystemName(),
+                isSlate = advert.isFiller,
+                durationMs = advert.duration
+            ),
+            joinedMidAd = hasJoinedMidAdvert(advert)
+        )
+    }
+
+    /**
+     * Whether playback joined [advert] after it had already started, in which case its quartiles do
+     * not reflect what the viewer saw. Only detectable for VOD, where advert positions are absolute.
+     */
+    private fun hasJoinedMidAdvert(advert: Advert): Boolean {
+        if (player.isLive) return false
+        val advertStart = advert.start / 1000.0
+        return currentTimeWithAds() - advertStart > MID_ADVERT_JOIN_TOLERANCE_SECONDS
+    }
+
+    /**
+     * AdSystem is a VAST property rather than a field on [Advert], and its casing varies between ad
+     * servers.
+     */
+    private fun Advert.adSystemName(): String? = properties
+        ?.firstOrNull { it.name.equals("AdSystem", ignoreCase = true) }
+        ?.value
+        ?.takeIf { it.isNotBlank() }
+
+    private fun String.toSsaiQuartile(): SsaiQuartile? = when (this) {
+        "firstQuartile" -> SsaiQuartile.FIRST
+        "midpoint" -> SsaiQuartile.MIDPOINT
+        "thirdQuartile" -> SsaiQuartile.THIRD
+        "complete" -> SsaiQuartile.COMPLETED
+        else -> null
     }
 
     ///////////////////////////////////////////////////////////////////////////

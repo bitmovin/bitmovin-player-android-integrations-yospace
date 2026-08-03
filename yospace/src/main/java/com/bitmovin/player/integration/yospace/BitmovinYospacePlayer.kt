@@ -82,7 +82,7 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 private fun MediaSourceType.isSupportedYospaceSource() = this == MediaSourceType.Hls || this == MediaSourceType.Dash
 
-open class BitmovinYospacePlayer(
+open class BitmovinYospacePlayer @JvmOverloads constructor(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
     private val player: Player,
@@ -906,6 +906,10 @@ open class BitmovinYospacePlayer(
 
         override fun onEarlyReturn(adBreak: com.yospace.admanagement.AdBreak, session: Session) {
             BitLog.d("YoSpace onEarlyReturn: ${adBreak.identifier}")
+
+            // Yospace does not always follow an early return with a break end, which would leave
+            // analytics attributing content playback to an ad.
+            ssaiTracker.onAdBreakEnd()
         }
 
         override fun onSessionError(error: AnalyticEventObserver.SessionError, session: Session) {
@@ -972,7 +976,7 @@ open class BitmovinYospacePlayer(
      * servers.
      */
     private fun Advert.adSystemName(): String? = properties
-        ?.firstOrNull { it.name.equals("AdSystem", ignoreCase = true) }
+        ?.firstOrNull { it.name?.equals("AdSystem", ignoreCase = true) == true }
         ?.value
         ?.takeIf { it.isNotBlank() }
 

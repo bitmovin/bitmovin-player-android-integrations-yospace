@@ -34,6 +34,19 @@ private class FakeSsaiAdTracker : SsaiAdTracker {
     }
 }
 
+/** Records calls under its own lock, so the recording itself cannot race. */
+private class SynchronizedFakeSsaiAdTracker : SsaiAdTracker {
+    private val recorded = mutableListOf<Call>()
+    val calls: List<Call> get() = synchronized(recorded) { recorded.toList() }
+
+    private fun record(call: Call) = synchronized(recorded) { recorded += call }
+
+    override fun adBreakStart(adBreak: SsaiAdBreakInfo) = record(Call.AdBreakStart(adBreak))
+    override fun adStart(ad: SsaiAdInfo) = record(Call.AdStart(ad))
+    override fun adQuartileFinished(quartile: SsaiQuartile) = record(Call.Quartile(quartile))
+    override fun adBreakEnd() = record(Call.AdBreakEnd)
+}
+
 private fun adInfo(adId: String = "ad-1", isSlate: Boolean = false) =
     SsaiAdInfo(adId = adId, adSystem = "Yospace", isSlate = isSlate, durationMs = 15_000)
 
@@ -139,6 +152,42 @@ class YospaceSsaiTrackerTest {
     }
 
     @Test
+    fun `does not report quartiles of an ad that started without an ad break`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = YospaceSsaiTracker(fake)
+
+        // Yospace omits the break start when playback joins a break that is already running
+        tracker.onAdStart(adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SsaiQuartile.THIRD)
+
+        assertTrue(fake.calls.none { it is Call.Quartile })
+    }
+
+    @Test
+    fun `ends an ad break that was started without one`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = YospaceSsaiTracker(fake)
+
+        tracker.onAdStart(adInfo(), joinedMidAd = false)
+        tracker.onAdBreakEnd()
+
+        assertEquals(Call.AdBreakEnd, fake.calls.last())
+    }
+
+    @Test
+    fun `does not report quartiles after an ad break ended`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = YospaceSsaiTracker(fake)
+
+        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(adInfo(), joinedMidAd = false)
+        tracker.onAdBreakEnd()
+        tracker.onQuartileFinished(SsaiQuartile.COMPLETED)
+
+        assertTrue(fake.calls.none { it is Call.Quartile })
+    }
+
+    @Test
     fun `does not report quartiles outside an ad`() {
         val fake = FakeSsaiAdTracker()
         val tracker = YospaceSsaiTracker(fake)
@@ -182,6 +231,34 @@ class YospaceSsaiTrackerTest {
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
 
         assertEquals(2, fake.calls.count { it is Call.AdBreakStart })
+    }
+
+    @Test
+    fun `guards its state against concurrent callbacks`() {
+        // Yospace callbacks arrive off the main thread while the session is reset on it
+        val fake = SynchronizedFakeSsaiAdTracker()
+        val tracker = YospaceSsaiTracker(fake)
+
+        val threads = listOf(
+            Thread {
+                repeat(500) {
+                    tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+                    tracker.onAdStart(adInfo(), joinedMidAd = false)
+                    tracker.onQuartileFinished(SsaiQuartile.FIRST)
+                }
+            },
+            Thread { repeat(500) { tracker.reset() } }
+        )
+
+        threads.forEach { it.start() }
+        threads.forEach { it.join() }
+
+        tracker.reset()
+        assertEquals(
+            fake.calls.count { it is Call.AdBreakStart },
+            fake.calls.count { it is Call.AdBreakEnd },
+            "every ad break should be ended exactly once"
+        )
     }
 
     @Test

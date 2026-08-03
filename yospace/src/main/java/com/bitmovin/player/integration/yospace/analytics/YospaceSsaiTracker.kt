@@ -40,13 +40,16 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
         synchronized(lock) {
             // Yospace reports adverts without a preceding break start when joining mid-break, and
             // the analytics API drops ads that are not inside a break.
+            var joinedMidBreak = false
             if (!isAdBreakActive) {
                 isAdBreakActive = true
+                joinedMidBreak = true
                 tracker.adBreakStart(SsaiAdBreakInfo(AdBreakPosition.UNKNOWN, null, null))
             }
 
             isAdActive = true
-            areQuartilesSuppressed = joinedMidAd
+            // A missing break start means playback joined this advert while it was already running.
+            areQuartilesSuppressed = joinedMidAd || joinedMidBreak
             reportedQuartiles.clear()
 
             // There is no ad-stop call; starting the next ad ends the previous one.

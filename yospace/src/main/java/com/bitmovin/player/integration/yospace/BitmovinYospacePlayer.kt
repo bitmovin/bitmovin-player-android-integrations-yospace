@@ -11,6 +11,9 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
+import com.bitmovin.player.api.analytics.AnalyticsApi
+import com.bitmovin.player.api.analytics.AnalyticsApi.Companion.analytics
+import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.Event as BitmovinEvent
@@ -73,9 +76,41 @@ private fun MediaSourceType.isSupportedYospaceSource() = this == MediaSourceType
 open class BitmovinYospacePlayer(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
-    private val player: Player = Player(context, playerConfig),
-    private val yospaceConfig: YospaceConfig
+    private val player: Player,
+    private val yospaceConfig: YospaceConfig,
+    analyticsConfig: AnalyticsPlayerConfig? = null
 ) : Player by player {
+
+    /**
+     * Creates a [BitmovinYospacePlayer] with an internally created [Player].
+     *
+     * Pass [analyticsConfig] to configure Bitmovin Analytics, e.g.
+     * `AnalyticsPlayerConfig.Enabled(AnalyticsConfig(licenseKey = "..."))`, or
+     * [AnalyticsPlayerConfig.Disabled] to turn analytics off. When omitted, the analytics license
+     * is resolved from the player license.
+     */
+    @JvmOverloads
+    constructor(
+        context: Context,
+        playerConfig: PlayerConfig = PlayerConfig(),
+        yospaceConfig: YospaceConfig,
+        analyticsConfig: AnalyticsPlayerConfig? = null
+    ) : this(
+        context,
+        playerConfig,
+        Player(context, playerConfig, analyticsConfig ?: AnalyticsPlayerConfig.Enabled()),
+        yospaceConfig,
+        // Already applied to the Player created above.
+        analyticsConfig = null
+    )
+
+    /**
+     * The [AnalyticsApi] of the underlying player, or `null` if analytics is disabled.
+     *
+     * Exposed explicitly because `Player.analytics` is an extension property and is therefore not
+     * forwarded by interface delegation.
+     */
+    val analytics: AnalyticsApi? get() = player.analytics
 
     private var yospaceSession: Session? = null
     private val yospaceMetadataSource = EventSource<TimedMetadata>()
@@ -155,6 +190,22 @@ open class BitmovinYospacePlayer(
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
         BitLog.d("Version ${BuildConfig.BUILD_TYPE}")
+
+        if (analyticsConfig != null) {
+            // Analytics is baked into the Player at construction, so it cannot be applied to one
+            // that was passed in. Posted so listeners attached after construction still receive it.
+            BitLog.e("analyticsConfig is ignored when a Player instance is provided")
+            handler.post {
+                yospaceEventEmitter.emit(
+                    YospacePlayerEvent.Warning(
+                        YospaceWarningCode.AnalyticsConfigIgnored,
+                        "analyticsConfig is ignored when a Player instance is provided. " +
+                            "Configure analytics on the Player you pass in instead."
+                    )
+                )
+            }
+        }
+
         onYospaceEvents()
     }
 

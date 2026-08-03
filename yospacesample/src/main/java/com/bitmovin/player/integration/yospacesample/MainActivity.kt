@@ -7,8 +7,10 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.bitmovin.analytics.api.AnalyticsConfig
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.PlaybackConfig
+import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.TweaksConfig
 import com.bitmovin.player.api.drm.WidevineConfig
@@ -43,6 +45,9 @@ class MainActivity : AppCompatActivity() {
 
         private const val ENABLE_INTEGRATION_LOGS = true
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
+
+        // Replace with your own Bitmovin Analytics license key.
+        private const val ANALYTICS_LICENSE_KEY = "YOUR-ANALYTICS-LICENSE-KEY"
         private val LIVE_INITIALIZATION_TYPE = YospaceLiveInitializationType.DIRECT
     }
 
@@ -122,6 +127,13 @@ class MainActivity : AppCompatActivity() {
         player = BitmovinYospacePlayer(
             this,
             playerConfig,
+            analyticsConfig = AnalyticsPlayerConfig.Enabled(
+                AnalyticsConfig(
+                    licenseKey = ANALYTICS_LICENSE_KEY,
+                    // Required for SSAI ad quartile tracking.
+                    ssaiEngagementTrackingEnabled = true
+                )
+            ),
             yospaceConfig = YospaceConfig(
                 liveInitializationType = selectedLiveInitializationType,
                 isDebug = ENABLE_INTEGRATION_LOGS && validationConfig == null,

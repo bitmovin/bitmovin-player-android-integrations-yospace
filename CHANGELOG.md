@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- `BitmovinYospacePlayer` support for configuring Bitmovin Analytics via `AnalyticsPlayerConfig`, including disabling it with `AnalyticsPlayerConfig.Disabled`
+- `BitmovinYospacePlayer.analytics` to access the `AnalyticsApi` of the underlying player
+- `YospaceWarningCode.AnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
+
 ### Changed
 
 ### Deprecated

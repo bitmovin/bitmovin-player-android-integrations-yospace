@@ -114,6 +114,36 @@ player.load(sourceConfig, yospaceSourceConfig, truexConfig)
 
 When uploading live validation logs to Yospace, select the same initialization type in the validation tool as configured in `YospaceConfig.liveInitializationType`.
 
+#### Bitmovin Analytics
+
+Pass an `AnalyticsPlayerConfig` to configure [Bitmovin Analytics](https://developer.bitmovin.com/playback/docs/setup-analytics-android), just as you would when using the Bitmovin Player directly:
+
+```kotlin
+val player = BitmovinYospacePlayer(
+    context = this,
+    playerConfig = PlayerConfig(),
+    yospaceConfig = yospaceConfig,
+    analyticsConfig = AnalyticsPlayerConfig.Enabled(
+        AnalyticsConfig(
+            licenseKey = "your-analytics-license-key",
+            // Required for SSAI ad quartile tracking
+            ssaiEngagementTrackingEnabled = true
+        ),
+        DefaultMetadata(cdnProvider = "akamai", customUserId = "user-id")
+    )
+)
+```
+
+When `analyticsConfig` is omitted, the analytics license is resolved from your player license. Pass `AnalyticsPlayerConfig.Disabled` to turn analytics off.
+
+The `AnalyticsApi` of the underlying player is available through `player.analytics`:
+
+```kotlin
+val impressionId = player.analytics?.impressionId
+```
+
+If you pass your own `Player` instance, configure analytics on that instance instead — `analyticsConfig` is ignored in that case and a `YospacePlayerEvent.Warning` with `YospaceWarningCode.AnalyticsConfigIgnored` is emitted.
+
 #### Yospace validation logs
 
 The sample app can generate upload-ready validation logs for the Yospace validation tool:

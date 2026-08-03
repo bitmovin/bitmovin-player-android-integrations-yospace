@@ -11,9 +11,11 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
+import com.bitmovin.analytics.api.SourceMetadata
 import com.bitmovin.player.api.analytics.AnalyticsApi
 import com.bitmovin.player.api.analytics.AnalyticsApi.Companion.analytics
 import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
+import com.bitmovin.player.api.analytics.AnalyticsSourceConfig
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.Event as BitmovinEvent
@@ -333,9 +335,28 @@ open class BitmovinYospacePlayer(
     private fun startPlayback(mediaSourceType: MediaSourceType, playbackUrl: String) {
         if (loadState != LoadState.UNLOADING) {
             handler.post {
-                player.load(buildPlaybackSourceConfig(playbackUrl, mediaSourceType))
+                player.load(buildPlaybackSourceConfig(playbackUrl, mediaSourceType).toSource())
             }
         }
+    }
+
+    private fun SourceConfig.toSource(): Source =
+        Source(this, AnalyticsSourceConfig.Enabled(resolveSourceMetadata()))
+
+    /**
+     * Yospace assets are loaded through a proxied URL, so the analytics metadata of the source the
+     * user configured has to be applied to the source that is actually loaded.
+     */
+    private fun resolveSourceMetadata(): SourceMetadata {
+        val provided = yospaceSourceConfig?.sourceMetadata ?: SourceMetadata()
+        return SourceMetadata(
+            title = provided.title ?: sourceConfig?.title,
+            videoId = provided.videoId,
+            cdnProvider = provided.cdnProvider,
+            path = provided.path,
+            isLive = provided.isLive ?: (yospaceSourceConfig?.assetType != YospaceAssetType.VOD),
+            customData = provided.customData
+        )
     }
 
     /**
@@ -680,7 +701,7 @@ open class BitmovinYospacePlayer(
                 )
 
                 if (loadState != LoadState.UNLOADING) {
-                    sourceConfig?.let { player.load(it) }
+                    sourceConfig?.let { player.load(it.toSource()) }
                 }
             }
         } else {

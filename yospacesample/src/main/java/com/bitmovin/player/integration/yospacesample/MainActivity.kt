@@ -8,6 +8,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bitmovin.analytics.api.AnalyticsConfig
+import com.bitmovin.analytics.api.CustomData
+import com.bitmovin.analytics.api.SourceMetadata
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.PlaybackConfig
 import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
@@ -73,7 +75,14 @@ class MainActivity : AppCompatActivity() {
             Stream(
                 "Yospace HLS VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.VOD,
+                    sourceMetadata = SourceMetadata(
+                        title = "Yospace HLS VOD",
+                        videoId = "yospace-hls-vod",
+                        customData = CustomData(customData1 = "yospace-sample")
+                    )
+                )
             ),
             Stream(
                 "Yospace DASH VOD",

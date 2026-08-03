@@ -144,6 +144,23 @@ val impressionId = player.analytics?.impressionId
 
 If you pass your own `Player` instance, configure analytics on that instance instead — `analyticsConfig` is ignored in that case and a `YospacePlayerEvent.Warning` with `YospaceWarningCode.AnalyticsConfigIgnored` is emitted.
 
+##### Source metadata
+
+Set per-source analytics metadata through `YospaceSourceConfig`:
+
+```kotlin
+val yospaceSourceConfig = YospaceSourceConfig(
+    assetType = YospaceAssetType.VOD,
+    sourceMetadata = SourceMetadata(
+        title = "My Stream",
+        videoId = "video-123",
+        customData = CustomData(customData1 = "campaign-x")
+    )
+)
+```
+
+Yospace assets play through a proxied URL, so the metadata is applied to the source the integration loads internally. `SourceMetadata.isLive` is derived from `assetType` when you do not set it, and `title` falls back to the title of the `SourceConfig` you pass to `load`.
+
 #### Yospace validation logs
 
 The sample app can generate upload-ready validation logs for the Yospace validation tool:

@@ -282,15 +282,35 @@ open class BitmovinYospacePlayer(
     private fun startPlayback(mediaSourceType: MediaSourceType, playbackUrl: String) {
         if (loadState != LoadState.UNLOADING) {
             handler.post {
-                val sourceItem = SourceConfig(playbackUrl, mediaSourceType)
-                sourceConfig?.thumbnailTrack?.let {
-                    sourceItem.thumbnailTrack = it
-                }
-                sourceConfig?.drmConfig?.let {
-                    sourceItem.drmConfig = it
-                }
-                player.load(sourceItem)
+                player.load(buildPlaybackSourceConfig(playbackUrl, mediaSourceType))
             }
+        }
+    }
+
+    /**
+     * Yospace returns a proxied playback URL, so playback runs on a new [SourceConfig].
+     * Carry over the settings of the source the user passed to [load].
+     */
+    private fun buildPlaybackSourceConfig(playbackUrl: String, mediaSourceType: MediaSourceType): SourceConfig {
+        val original = sourceConfig ?: return SourceConfig(playbackUrl, mediaSourceType)
+
+        return SourceConfig(playbackUrl, mediaSourceType).apply {
+            title = original.title
+            description = original.description
+            posterSource = original.posterSource
+            isPosterPersistent = original.isPosterPersistent
+            subtitleTracks = original.subtitleTracks
+            thumbnailTrack = original.thumbnailTrack
+            drmConfig = original.drmConfig
+            labelingConfig = original.labelingConfig
+            vrConfig = original.vrConfig
+            videoCodecPriority = original.videoCodecPriority
+            audioCodecPriority = original.audioCodecPriority
+            options = original.options
+            metadata = original.metadata
+            networkConfig = original.networkConfig
+            adaptationConfig = original.adaptationConfig
+            cmcdConfig = original.cmcdConfig
         }
     }
 

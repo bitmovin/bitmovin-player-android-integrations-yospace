@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Source settings such as title, subtitles, poster image, and codec priorities were ignored when playing a Yospace asset
+
 ### Security
 
 ## [2.3.0] - 2026-07-29

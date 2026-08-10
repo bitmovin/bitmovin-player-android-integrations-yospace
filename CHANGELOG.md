@@ -10,9 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `BitmovinYospacePlayer` support for configuring Bitmovin Analytics via `AnalyticsPlayerConfig`, including disabling it with `AnalyticsPlayerConfig.Disabled`
 - `BitmovinYospacePlayer.analytics` to access the `AnalyticsApi` of the underlying player
-- `YospaceWarningCode.AnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
+- `YospaceWarningCode.BitmovinAnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
 - `YospaceSourceConfig.sourceMetadata` to set Bitmovin Analytics metadata for a Yospace source
 - Bitmovin Analytics SSAI ad tracking for Yospace ad breaks, ads, and slates, including ad quartiles when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is enabled
+- `YospaceConfig.midAdvertJoinToleranceMs` to configure how far into a VOD advert playback may start before Bitmovin Analytics reports it as joined mid-ad
 
 ### Changed
 

@@ -67,9 +67,6 @@ import kotlin.math.roundToLong
 import kotlin.properties.Delegates
 import kotlin.reflect.KClass
 
-// Tolerance for treating an advert as already in progress when playback joined it
-private const val MID_ADVERT_JOIN_TOLERANCE_SECONDS = 1.0
-
 // Yospace Error/Warning Codes
 private const val INVALID_YOSPACE_SOURCE = 6001
 private const val SESSION_NO_ANALYTICS = 6002
@@ -967,8 +964,8 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
      */
     private fun hasJoinedMidAdvert(advert: Advert): Boolean {
         if (player.isLive) return false
-        val advertStart = advert.start / 1000.0
-        return currentTimeWithAds() - advertStart > MID_ADVERT_JOIN_TOLERANCE_SECONDS
+        val elapsedMs = currentTimeWithAds() * 1000 - advert.start
+        return elapsedMs > yospaceConfig.midAdvertJoinToleranceMs
     }
 
     /**

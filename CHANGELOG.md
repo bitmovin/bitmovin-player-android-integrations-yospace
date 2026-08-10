@@ -14,10 +14,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceSourceConfig.sourceMetadata` to set Bitmovin Analytics metadata for a Yospace source
 - Bitmovin Analytics SSAI ad tracking for Yospace ad breaks, ads, and slates, including ad quartiles when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is enabled
 - `YospaceConfig.midAdvertJoinTolerance` to configure how far into a VOD advert, in seconds, playback may start before Bitmovin Analytics reports it as joined mid-ad
+- `YospaceConfig.requestTimeoutSeconds` to set the Yospace request timeout in seconds
 
 ### Changed
 
 ### Deprecated
+
+- `YospaceConfig.requestTimeout`: Use `YospaceConfig.requestTimeoutSeconds` instead, which is expressed in seconds like all other time-based configuration.
 
 ### Removed
 

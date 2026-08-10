@@ -249,7 +249,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
         }
 
         val sessionProperties = SessionProperties()
-        sessionProperties.requestTimeout = yospaceConfig.requestTimeout
+        sessionProperties.requestTimeout = yospaceConfig.effectiveRequestTimeoutMilliseconds
         sessionProperties.userAgent = yospaceConfig.userAgent
 
         SessionProperties.setDebugFlags(yospaceConfig.yospaceDebugMode.toYospaceDebugFlags())

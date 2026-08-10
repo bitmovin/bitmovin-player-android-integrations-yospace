@@ -15,7 +15,7 @@ enum class YospaceWarningCode(override val value: Int) : WarningCode {
     NoAnalytics(6005),
     SessionInitializationIssue(6006),
     SessionAnalyticsIssue(6007),
-    AnalyticsConfigIgnored(6008);
+    BitmovinAnalyticsConfigIgnored(6008);
 
     companion object {
         private val map by lazy { YospaceWarningCode.values().associateBy(YospaceWarningCode::value) }

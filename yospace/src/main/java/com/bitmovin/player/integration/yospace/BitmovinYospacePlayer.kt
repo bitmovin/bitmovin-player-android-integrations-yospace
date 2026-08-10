@@ -208,7 +208,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             handler.post {
                 yospaceEventEmitter.emit(
                     YospacePlayerEvent.Warning(
-                        YospaceWarningCode.AnalyticsConfigIgnored,
+                        YospaceWarningCode.BitmovinAnalyticsConfigIgnored,
                         "analyticsConfig is ignored when a Player instance is provided. " +
                             "Configure analytics on the Player you pass in instead."
                     )

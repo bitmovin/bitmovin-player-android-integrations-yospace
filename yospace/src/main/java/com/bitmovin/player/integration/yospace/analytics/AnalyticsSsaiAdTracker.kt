@@ -1,6 +1,7 @@
 package com.bitmovin.player.integration.yospace.analytics
 
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.bitmovin.analytics.api.ssai.SsaiAdBreakMetadata
 import com.bitmovin.analytics.api.ssai.SsaiAdMetadata
 import com.bitmovin.analytics.api.ssai.SsaiAdPosition
@@ -69,6 +70,7 @@ private fun SsaiAdInfo.toSsaiAdMetadata(): SsaiAdMetadata {
 /**
  * Isolates the `java.time.Duration` reference so the class is only loaded on API 26 and above.
  */
+@RequiresApi(Build.VERSION_CODES.O)
 private object SsaiAdDuration {
     fun applyTo(builder: SsaiAdMetadata.Builder, durationMs: Long) {
         builder.setDuration(java.time.Duration.ofMillis(durationMs))

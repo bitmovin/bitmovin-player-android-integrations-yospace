@@ -8,10 +8,10 @@ data class YospaceConfig(
     val filterMetadataType: MetadataType? = MetadataType.EMSG,
     val yospaceDebugMode: YospaceDebugMode = YospaceDebugMode.NONE,
     /**
-     * How far into a VOD advert playback may start before Bitmovin Analytics reports the ad as
-     * joined mid-ad, meaning its quartiles do not reflect what the viewer saw. Milliseconds.
+     * How far into a VOD advert, in seconds, playback may start before Bitmovin Analytics reports
+     * the ad as joined mid-ad, meaning its quartiles do not reflect what the viewer saw.
      */
-    val midAdvertJoinToleranceMs: Long = 1_000
+    val midAdvertJoinTolerance: Double = 1.0
 )
 
 public enum class MetadataType{

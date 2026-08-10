@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceWarningCode.BitmovinAnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
 - `YospaceSourceConfig.sourceMetadata` to set Bitmovin Analytics metadata for a Yospace source
 - Bitmovin Analytics SSAI ad tracking for Yospace ad breaks, ads, and slates, including ad quartiles when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is enabled
-- `YospaceConfig.midAdvertJoinToleranceMs` to configure how far into a VOD advert playback may start before Bitmovin Analytics reports it as joined mid-ad
+- `YospaceConfig.midAdvertJoinTolerance` to configure how far into a VOD advert, in seconds, playback may start before Bitmovin Analytics reports it as joined mid-ad
 
 ### Changed
 

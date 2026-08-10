@@ -964,8 +964,8 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
      */
     private fun hasJoinedMidAdvert(advert: Advert): Boolean {
         if (player.isLive) return false
-        val elapsedMs = currentTimeWithAds() * 1000 - advert.start
-        return elapsedMs > yospaceConfig.midAdvertJoinToleranceMs
+        val advertStart = advert.start / 1000.0
+        return currentTimeWithAds() - advertStart > yospaceConfig.midAdvertJoinTolerance
     }
 
     /**

@@ -64,23 +64,34 @@ class MainActivity : AppCompatActivity() {
             Stream(
                 "Yospace HLS Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.LINEAR_START_OVER,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace HLS Live",
+                        videoId = "yospace-hls-live"
+                    )
+                )
             ),
             Stream(
                 "Yospace DASH Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 sourceType = SourceType.Dash,
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.LINEAR_START_OVER,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace DASH Live",
+                        videoId = "yospace-dash-live"
+                    )
+                )
             ),
             Stream(
                 "Yospace HLS VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
                 yospaceSourceConfig = YospaceSourceConfig(
                     assetType = YospaceAssetType.VOD,
-                    sourceMetadata = SourceMetadata(
+                    sourceMetadata = sampleSourceMetadata(
                         title = "Yospace HLS VOD",
-                        videoId = "yospace-hls-vod",
-                        customData = CustomData(customData1 = "yospace-sample")
+                        videoId = "yospace-hls-vod"
                     )
                 )
             ),
@@ -88,10 +99,28 @@ class MainActivity : AppCompatActivity() {
                 "Yospace DASH VOD",
                 "https://csm-e-sdk-validation-eb.bln1.yospace.com/csm/access/671396777/ZGFzaC9tYW5pZmVzdC5tcGQ=?yo.av=4",
                 sourceType = SourceType.Dash,
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.VOD,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace DASH VOD",
+                        videoId = "yospace-dash-vod"
+                    )
+                )
             )
         )
     }
+
+    /**
+     * Analytics metadata for a sample stream. [SourceMetadata.isLive] is left unset so it is
+     * derived from the [YospaceAssetType].
+     */
+    private fun sampleSourceMetadata(title: String, videoId: String) = SourceMetadata(
+        title = title,
+        videoId = videoId,
+        cdnProvider = "yospace",
+        path = "/yospace-sample/$videoId",
+        customData = CustomData(customData1 = "yospace-sample")
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

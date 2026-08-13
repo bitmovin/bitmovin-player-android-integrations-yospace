@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Security
 
+- Sample app: cleartext traffic and trust in user-added certificate authorities are now limited to debug builds
+
 ## [2.3.0] - 2026-07-29
 
 ### Added

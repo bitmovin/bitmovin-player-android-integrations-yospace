@@ -83,7 +83,7 @@ The following example creates a `BitmovinYospacePlayer` and loads a `YospaceSour
 // Create a YospaceConfig
 val yospaceConfig = YospaceConfig(
     userAgent = "userAgent",
-    requestTimeout = 25_000,
+    requestTimeoutSeconds = 25.0,
     liveInitializationType = YospaceLiveInitializationType.DIRECT,
     isDebug = true,
     yospaceDebugMode = YospaceDebugMode.VALIDATION
@@ -142,7 +142,7 @@ The `AnalyticsApi` of the underlying player is available through `player.analyti
 val impressionId = player.analytics?.impressionId
 ```
 
-If you pass your own `Player` instance, configure analytics on that instance instead — `analyticsConfig` is ignored in that case and a `YospacePlayerEvent.Warning` with `YospaceWarningCode.AnalyticsConfigIgnored` is emitted.
+If you pass your own `Player` instance, configure analytics on that instance instead — `analyticsConfig` is ignored in that case and a `YospacePlayerEvent.Warning` with `YospaceWarningCode.BitmovinAnalyticsConfigIgnored` is emitted.
 
 ##### Source metadata
 
@@ -166,6 +166,12 @@ Yospace assets play through a proxied URL, so the metadata is applied to the sou
 Yospace inserts ads server-side, so the player emits no client-side ad events. The integration reports Yospace ad breaks and ads to Bitmovin Analytics through its [SSAI tracking API](https://developer.bitmovin.com/playback/docs/how-to-set-up-ssai-tracking) automatically — no additional code is required. Ad breaks, individual ads, and slates (Yospace fillers) are tracked.
 
 Ad quartiles are only reported when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is `true`. They are suppressed for an ad that was already in progress when playback joined it, since those beacons do not reflect what the viewer saw.
+
+A VOD advert counts as joined mid-ad when playback starts more than `YospaceConfig.midAdvertJoinTolerance` seconds into it. Raise the tolerance if seek-accuracy in your streams makes ads at the start of a break be treated as joined mid-ad:
+
+```kotlin
+val yospaceConfig = YospaceConfig(midAdvertJoinTolerance = 2.0)
+```
 
 Ad duration is reported on Android 8.0 (API 26) and above only, as the analytics API expresses it as a `java.time.Duration`.
 

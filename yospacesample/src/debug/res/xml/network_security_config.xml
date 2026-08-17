@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Debug builds permit cleartext and trust user-added CAs so traffic can be inspected with an
+        intercepting proxy. cleartextTrafficPermitted is set on base-config rather than
+        debug-overrides because only trust anchors are merged out of debug-overrides.
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

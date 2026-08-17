@@ -33,8 +33,6 @@ jobs:
       - name: Verify CHANGELOG format
         run: ./gradlew getChangelog -q --console=plain --unreleased
 
-      - name: Android Lint
-        run: ./gradlew lint
-
+      # `build` already depends on `lint`, so a separate lint step just re-runs it.
       - name: Build
         run: ./gradlew build

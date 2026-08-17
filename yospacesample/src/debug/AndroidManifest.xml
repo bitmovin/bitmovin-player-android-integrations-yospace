@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        The network security config is only honored from API 24 on, so debug builds need this to
+        allow cleartext on API 23. Release builds leave it unset and stay HTTPS-only.
+    -->
+    <application android:usesCleartextTraffic="true" />
+
+</manifest>

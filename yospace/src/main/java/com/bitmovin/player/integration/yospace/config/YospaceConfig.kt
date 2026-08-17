@@ -6,8 +6,7 @@ data class YospaceConfig(
     val userAgent: String? = null,
     @Deprecated(
         message = "Use requestTimeoutSeconds instead, which is expressed in seconds like all other " +
-            "time-based configuration.",
-        replaceWith = ReplaceWith("requestTimeoutSeconds")
+            "time-based configuration. Divide the milliseconds passed here by 1000."
     )
     val requestTimeout: Int = DEFAULT_REQUEST_TIMEOUT_MILLISECONDS,
     val liveInitializationType: YospaceLiveInitializationType = YospaceLiveInitializationType.DIRECT,

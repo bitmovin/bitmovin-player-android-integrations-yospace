@@ -319,7 +319,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             Session.SessionState.INITIALISED -> {
                 yospaceSession = session
                 // Before attaching the observer, so no callback of this session is dropped
-                ssaiTracker.onSessionStart()
+                ssaiTracker.onSessionStart(session)
                 session.addAnalyticObserver(analyticEventListener)
                 session.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i("Session is initialized and analytic listener is registered %s".format(message))
@@ -673,6 +673,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             Session.SessionState.INITIALISED -> {
                 BitLog.d("YoSpace session Initialized: url=${yospaceSession?.playbackUrl}")
 
+                yospaceSession?.let { ssaiTracker.onSessionStart(it) }
                 yospaceSession?.addAnalyticObserver(analyticEventListener)
                 yospaceSession?.setPlaybackPolicyHandler(yospacePlayerPolicy)
 
@@ -764,7 +765,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
             activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
 
-            reportAdBreakStartToAnalytics(activeAdBreak)
+            reportAdBreakStartToAnalytics(session, activeAdBreak)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = YospacePlayerEvent.AdBreakStarted(activeAdBreak)
@@ -846,7 +847,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             )
             adClickThroughReporter.activate(activeAd, advert)
 
-            reportAdStartToAnalytics(advert)
+            reportAdStartToAnalytics(session, advert)
 
             // Notify listeners of AS event
             handler.post {
@@ -868,7 +869,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
         override fun onAdvertBreakEnd(session: Session) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
-            ssaiTracker.onAdBreakEnd()
+            ssaiTracker.onAdBreakEnd(session)
 
             val adBreakFinishedEvent = YospacePlayerEvent.AdBreakFinished(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakFinishedEvent) }
@@ -878,7 +879,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
         override fun onTrackingEvent(type: String, session: Session) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
 
-            type.toSsaiQuartile()?.let { ssaiTracker.onQuartileFinished(it) }
+            type.toSsaiQuartile()?.let { ssaiTracker.onQuartileFinished(session, it) }
 
             when (type) {
                 "firstQuartile" -> {
@@ -908,7 +909,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
             // Yospace does not always follow an early return with a break end, which would leave
             // analytics attributing content playback to an ad.
-            ssaiTracker.onAdBreakEnd()
+            ssaiTracker.onAdBreakEnd(session)
         }
 
         override fun onSessionError(error: AnalyticEventObserver.SessionError, session: Session) {
@@ -936,20 +937,22 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
      * Reported as soon as Yospace signals the break. Yospace notifies once the break has already
      * started, so the lead time the analytics API recommends is not available here.
      */
-    private fun reportAdBreakStartToAnalytics(adBreak: AdBreak?) {
+    private fun reportAdBreakStartToAnalytics(session: Session, adBreak: AdBreak?) {
         // Yospace does not always know the adverts of a live break upfront. Reporting zero would
         // claim no ads are expected, so the counts stay unknown until they are available.
         val ads = adBreak?.ads?.takeIf { it.isNotEmpty() }
 
         ssaiTracker.onAdBreakStart(
+            session = session,
             position = adBreak?.position ?: AdBreakPosition.UNKNOWN,
             paidAds = ads?.count { !it.isFiller },
             slates = ads?.count { it.isFiller }
         )
     }
 
-    private fun reportAdStartToAnalytics(advert: Advert) {
+    private fun reportAdStartToAnalytics(session: Session, advert: Advert) {
         ssaiTracker.onAdStart(
+            session = session,
             ad = SsaiAdInfo(
                 adId = advert.identifier,
                 adSystem = advert.adSystemName(),

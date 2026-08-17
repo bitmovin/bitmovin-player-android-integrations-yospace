@@ -17,11 +17,14 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
     private var isAdActive = false
 
     /**
-     * Set by [reset] and cleared by [onSessionStart]. Callbacks already in flight when a session is
-     * torn down find the tracker closed and are dropped, so they cannot reopen an ad break that is
-     * never ended.
+     * The session callbacks are currently accepted for, or `null` while no session is active.
+     *
+     * Removing the analytic observer does not cancel a callback already in flight, and a delayed
+     * one can arrive after the next session has started. Callbacks therefore carry the session they
+     * belong to and are dropped unless it is still this one, so they can neither reopen an ad break
+     * that is never ended nor mutate a later session's state.
      */
-    private var isClosed = true
+    private var activeSession: Any? = null
 
     /**
      * Quartiles of an ad that was already playing when playback joined do not reflect what the
@@ -31,20 +34,20 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
     private val reportedQuartiles = mutableSetOf<SsaiQuartile>()
 
     /**
-     * Opens the tracker for a new Yospace session. Callbacks are ignored until this is called, so
-     * that callbacks left over from a previous session cannot report against the new one.
+     * Opens the tracker for [session]. Callbacks are ignored until this is called, and callbacks of
+     * any earlier session are ignored from here on.
      */
-    fun onSessionStart() {
+    fun onSessionStart(session: Any) {
         synchronized(lock) {
             clearState()
-            isClosed = false
+            activeSession = session
         }
     }
 
-    fun onAdBreakStart(position: AdBreakPosition, paidAds: Int?, slates: Int?) {
+    fun onAdBreakStart(session: Any, position: AdBreakPosition, paidAds: Int?, slates: Int?) {
         val tracker = tracker ?: return
         synchronized(lock) {
-            if (isClosed) return
+            if (session !== activeSession) return
             if (isAdBreakActive) return
             isAdBreakActive = true
             tracker.adBreakStart(SsaiAdBreakInfo(position, paidAds, slates))
@@ -54,10 +57,10 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
     /**
      * @param joinedMidAd whether playback joined this ad after it had already started.
      */
-    fun onAdStart(ad: SsaiAdInfo, joinedMidAd: Boolean) {
+    fun onAdStart(session: Any, ad: SsaiAdInfo, joinedMidAd: Boolean) {
         val tracker = tracker ?: return
         synchronized(lock) {
-            if (isClosed) return
+            if (session !== activeSession) return
             // Yospace reports adverts without a preceding break start when joining mid-break, and
             // the analytics API drops ads that are not inside a break.
             var joinedMidBreak = false
@@ -77,20 +80,20 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
         }
     }
 
-    fun onQuartileFinished(quartile: SsaiQuartile) {
+    fun onQuartileFinished(session: Any, quartile: SsaiQuartile) {
         val tracker = tracker ?: return
         synchronized(lock) {
-            if (isClosed) return
+            if (session !== activeSession) return
             if (!isAdActive || areQuartilesSuppressed) return
             if (!reportedQuartiles.add(quartile)) return
             tracker.adQuartileFinished(quartile)
         }
     }
 
-    fun onAdBreakEnd() {
+    fun onAdBreakEnd(session: Any) {
         val tracker = tracker ?: return
         synchronized(lock) {
-            if (isClosed) return
+            if (session !== activeSession) return
             if (!isAdBreakActive) return
             clearState()
             tracker.adBreakEnd()
@@ -98,14 +101,14 @@ internal class YospaceSsaiTracker(private val tracker: SsaiAdTracker?) {
     }
 
     /**
-     * Ends an ad break that is still open and closes the tracker until the next session starts.
-     * Without this, analytics keeps attributing content playback to an ad.
+     * Ends an ad break that is still open and detaches from the current session, so its callbacks
+     * are ignored from here on. Without this, analytics keeps attributing content playback to an ad.
      */
     fun reset() {
         synchronized(lock) {
             val wasAdBreakActive = isAdBreakActive
             clearState()
-            isClosed = true
+            activeSession = null
             if (wasAdBreakActive) tracker?.adBreakEnd()
         }
     }

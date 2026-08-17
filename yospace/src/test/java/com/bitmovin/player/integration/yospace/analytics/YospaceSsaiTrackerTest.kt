@@ -50,9 +50,12 @@ private class SynchronizedFakeSsaiAdTracker : SsaiAdTracker {
 private fun adInfo(adId: String = "ad-1", isSlate: Boolean = false) =
     SsaiAdInfo(adId = adId, adSystem = "Yospace", isSlate = isSlate, durationMs = 15_000)
 
+/** Stands in for the Yospace `Session` the callbacks belong to. */
+private val SESSION = Any()
+
 /** A tracker with a session started, as it is used once a Yospace session is initialized. */
 private fun startedTracker(tracker: SsaiAdTracker?) =
-    YospaceSsaiTracker(tracker).apply { onSessionStart() }
+    YospaceSsaiTracker(tracker).apply { onSessionStart(SESSION) }
 
 class YospaceSsaiTrackerTest {
 
@@ -61,9 +64,9 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 2, slates = 1)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onAdBreakEnd()
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 2, slates = 1)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onAdBreakEnd(SESSION)
 
         assertEquals(
             listOf(
@@ -80,8 +83,8 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 5, slates = 0)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 5, slates = 0)
 
         assertEquals(1, fake.calls.count { it is Call.AdBreakStart })
     }
@@ -91,7 +94,7 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdStart(adInfo(), joinedMidAd = true)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = true)
 
         assertEquals(
             listOf(
@@ -109,9 +112,9 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onQuartileFinished(quartile)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, quartile)
 
         assertTrue(fake.calls.contains(Call.Quartile(quartile)))
     }
@@ -121,9 +124,9 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = true)
-        tracker.onQuartileFinished(SsaiQuartile.THIRD)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = true)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.THIRD)
 
         assertTrue(fake.calls.none { it is Call.Quartile })
     }
@@ -133,11 +136,11 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 2, slates = 0)
-        tracker.onAdStart(adInfo("ad-1"), joinedMidAd = true)
-        tracker.onQuartileFinished(SsaiQuartile.THIRD)
-        tracker.onAdStart(adInfo("ad-2"), joinedMidAd = false)
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 2, slates = 0)
+        tracker.onAdStart(SESSION, adInfo("ad-1"), joinedMidAd = true)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.THIRD)
+        tracker.onAdStart(SESSION, adInfo("ad-2"), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
 
         assertEquals(listOf(Call.Quartile(SsaiQuartile.FIRST)), fake.calls.filterIsInstance<Call.Quartile>())
     }
@@ -147,10 +150,10 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
 
         assertEquals(1, fake.calls.count { it is Call.Quartile })
     }
@@ -161,8 +164,8 @@ class YospaceSsaiTrackerTest {
         val tracker = startedTracker(fake)
 
         // Yospace omits the break start when playback joins a break that is already running
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onQuartileFinished(SsaiQuartile.THIRD)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.THIRD)
 
         assertTrue(fake.calls.none { it is Call.Quartile })
     }
@@ -172,8 +175,8 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onAdBreakEnd()
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onAdBreakEnd(SESSION)
 
         assertEquals(Call.AdBreakEnd, fake.calls.last())
     }
@@ -183,10 +186,10 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onAdBreakEnd()
-        tracker.onQuartileFinished(SsaiQuartile.COMPLETED)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onAdBreakEnd(SESSION)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.COMPLETED)
 
         assertTrue(fake.calls.none { it is Call.Quartile })
     }
@@ -196,7 +199,7 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
 
         assertTrue(fake.calls.isEmpty())
     }
@@ -206,8 +209,8 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
         tracker.reset()
 
         assertEquals(Call.AdBreakEnd, fake.calls.last())
@@ -218,8 +221,8 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdBreakEnd()
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdBreakEnd(SESSION)
         tracker.reset()
 
         assertEquals(1, fake.calls.count { it is Call.AdBreakEnd })
@@ -230,9 +233,9 @@ class YospaceSsaiTrackerTest {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
 
-        tracker.onAdBreakStart(AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
-        tracker.onAdBreakEnd()
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
+        tracker.onAdBreakEnd(SESSION)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
 
         assertEquals(2, fake.calls.count { it is Call.AdBreakStart })
     }
@@ -246,12 +249,17 @@ class YospaceSsaiTrackerTest {
         val threads = listOf(
             Thread {
                 repeat(500) {
-                    tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-                    tracker.onAdStart(adInfo(), joinedMidAd = false)
-                    tracker.onQuartileFinished(SsaiQuartile.FIRST)
+                    tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+                    tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+                    tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
                 }
             },
-            Thread { repeat(500) { tracker.reset() } }
+            Thread {
+                repeat(500) {
+                    tracker.reset()
+                    tracker.onSessionStart(SESSION)
+                }
+            }
         )
 
         threads.forEach { it.start() }
@@ -273,9 +281,9 @@ class YospaceSsaiTrackerTest {
         tracker.reset()
 
         // In flight on the Yospace thread while the session was torn down on the main thread
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
 
         assertTrue(fake.calls.isEmpty(), "a reset tracker must not reopen an ad break")
     }
@@ -284,12 +292,34 @@ class YospaceSsaiTrackerTest {
     fun `tracks again once the next session starts`() {
         val fake = FakeSsaiAdTracker()
         val tracker = startedTracker(fake)
+        val nextSession = Any()
 
         tracker.reset()
-        tracker.onSessionStart()
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onSessionStart(nextSession)
+        tracker.onAdBreakStart(nextSession, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
 
         assertEquals(1, fake.calls.count { it is Call.AdBreakStart })
+    }
+
+    @Test
+    fun `ignores callbacks of a previous session once the next one started`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = startedTracker(fake)
+        val nextSession = Any()
+
+        tracker.reset()
+        tracker.onSessionStart(nextSession)
+        tracker.onAdBreakStart(nextSession, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+
+        // Delayed callbacks of the session that was torn down must not touch the new one
+        tracker.onAdStart(SESSION, adInfo("stale"), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
+        tracker.onAdBreakEnd(SESSION)
+
+        assertEquals(
+            listOf(Call.AdBreakStart(SsaiAdBreakInfo(AdBreakPosition.MIDROLL, 1, 0))),
+            fake.calls
+        )
     }
 
     @Test
@@ -297,10 +327,10 @@ class YospaceSsaiTrackerTest {
         val tracker = startedTracker(null)
 
         // Would throw if the absent tracker were dereferenced
-        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
-        tracker.onAdStart(adInfo(), joinedMidAd = false)
-        tracker.onQuartileFinished(SsaiQuartile.FIRST)
-        tracker.onAdBreakEnd()
+        tracker.onAdBreakStart(SESSION, AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(SESSION, adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SESSION, SsaiQuartile.FIRST)
+        tracker.onAdBreakEnd(SESSION)
         tracker.reset()
     }
 }

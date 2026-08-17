@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Source settings such as title, subtitles, poster image, and codec priorities were ignored when playing a Yospace asset
-- Content played after an ad break could be reported to Bitmovin Analytics as part of an ad when a source was unloaded during the break
 
 ### Security
 

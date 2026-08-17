@@ -11,6 +11,11 @@ import com.bitmovin.player.api.advertising.AdQuartile
 import com.bitmovin.player.api.advertising.AdSourceType
 import com.bitmovin.player.api.advertising.AdvertisingApi
 import com.bitmovin.player.api.advertising.vast.AdSystem
+import com.bitmovin.analytics.api.SourceMetadata
+import com.bitmovin.player.api.analytics.AnalyticsApi
+import com.bitmovin.player.api.analytics.AnalyticsApi.Companion.analytics
+import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
+import com.bitmovin.player.api.analytics.AnalyticsSourceConfig
 import com.bitmovin.player.api.event.PlayerEvent
 import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.Event as BitmovinEvent
@@ -29,6 +34,10 @@ import com.bitmovin.player.integration.yospace.advertising.BitmovinTruexAdRender
 import com.bitmovin.player.integration.yospace.advertising.CompanionAd
 import com.bitmovin.player.integration.yospace.advertising.CompanionAdResource
 import com.bitmovin.player.integration.yospace.advertising.CompanionAdType
+import com.bitmovin.player.integration.yospace.analytics.AnalyticsSsaiAdTracker
+import com.bitmovin.player.integration.yospace.analytics.SsaiAdInfo
+import com.bitmovin.player.integration.yospace.analytics.SsaiQuartile
+import com.bitmovin.player.integration.yospace.analytics.YospaceSsaiTracker
 import com.bitmovin.player.integration.yospace.config.TruexConfig
 import com.bitmovin.player.integration.yospace.config.YospaceAssetType
 import com.bitmovin.player.integration.yospace.config.YospaceConfig
@@ -70,12 +79,44 @@ private enum class SessionStatus { NOT_INITIALIZED, INITIALIZED }
 
 private fun MediaSourceType.isSupportedYospaceSource() = this == MediaSourceType.Hls || this == MediaSourceType.Dash
 
-open class BitmovinYospacePlayer(
+open class BitmovinYospacePlayer @JvmOverloads constructor(
     private val context: Context,
     private val playerConfig: PlayerConfig = PlayerConfig(),
-    private val player: Player = Player(context, playerConfig),
-    private val yospaceConfig: YospaceConfig
+    private val player: Player,
+    private val yospaceConfig: YospaceConfig,
+    analyticsConfig: AnalyticsPlayerConfig? = null
 ) : Player by player {
+
+    /**
+     * Creates a [BitmovinYospacePlayer] with an internally created [Player].
+     *
+     * Pass [analyticsConfig] to configure Bitmovin Analytics, e.g.
+     * `AnalyticsPlayerConfig.Enabled(AnalyticsConfig(licenseKey = "..."))`, or
+     * [AnalyticsPlayerConfig.Disabled] to turn analytics off. When omitted, the analytics license
+     * is resolved from the player license.
+     */
+    @JvmOverloads
+    constructor(
+        context: Context,
+        playerConfig: PlayerConfig = PlayerConfig(),
+        yospaceConfig: YospaceConfig,
+        analyticsConfig: AnalyticsPlayerConfig? = null
+    ) : this(
+        context,
+        playerConfig,
+        Player(context, playerConfig, analyticsConfig ?: AnalyticsPlayerConfig.Enabled()),
+        yospaceConfig,
+        // Already applied to the Player created above.
+        analyticsConfig = null
+    )
+
+    /**
+     * The [AnalyticsApi] of the underlying player, or `null` if analytics is disabled.
+     *
+     * Exposed explicitly because `Player.analytics` is an extension property and is therefore not
+     * forwarded by interface delegation.
+     */
+    val analytics: AnalyticsApi? get() = player.analytics
 
     private var yospaceSession: Session? = null
     private val yospaceMetadataSource = EventSource<TimedMetadata>()
@@ -95,6 +136,7 @@ open class BitmovinYospacePlayer(
     private val playerEventDispatcher = PlayerEventDispatcher(player, ::getCurrentTimeMinusAd)
     private val yospacePlayerEventDispatcher = YospacePlayerEventDispatcher(yospaceEventEmitter)
     private val adClickThroughReporter = AdClickThroughReporter(yospaceEventEmitter)
+    private val ssaiTracker = YospaceSsaiTracker(AnalyticsSsaiAdTracker { player.analytics })
 
     var adTimeline: AdTimeline? = null
         private set
@@ -155,6 +197,22 @@ open class BitmovinYospacePlayer(
     init {
         BitLog.isEnabled = yospaceConfig.isDebug
         BitLog.d("Version ${BuildConfig.BUILD_TYPE}")
+
+        if (analyticsConfig != null) {
+            // Analytics is baked into the Player at construction, so it cannot be applied to one
+            // that was passed in. Posted so listeners attached after construction still receive it.
+            BitLog.e("analyticsConfig is ignored when a Player instance is provided")
+            handler.post {
+                yospaceEventEmitter.emit(
+                    YospacePlayerEvent.Warning(
+                        YospaceWarningCode.BitmovinAnalyticsConfigIgnored,
+                        "analyticsConfig is ignored when a Player instance is provided. " +
+                            "Configure analytics on the Player you pass in instead."
+                    )
+                )
+            }
+        }
+
         onYospaceEvents()
     }
 
@@ -191,7 +249,7 @@ open class BitmovinYospacePlayer(
         }
 
         val sessionProperties = SessionProperties()
-        sessionProperties.requestTimeout = yospaceConfig.requestTimeout
+        sessionProperties.requestTimeout = yospaceConfig.effectiveRequestTimeoutMilliseconds
         sessionProperties.userAgent = yospaceConfig.userAgent
 
         SessionProperties.setDebugFlags(yospaceConfig.yospaceDebugMode.toYospaceDebugFlags())
@@ -260,6 +318,8 @@ open class BitmovinYospacePlayer(
         when (session.sessionState) {
             Session.SessionState.INITIALISED -> {
                 yospaceSession = session
+                // Before attaching the observer, so no callback of this session is dropped
+                ssaiTracker.onSessionStart(session)
                 session.addAnalyticObserver(analyticEventListener)
                 session.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i("Session is initialized and analytic listener is registered %s".format(message))
@@ -282,15 +342,54 @@ open class BitmovinYospacePlayer(
     private fun startPlayback(mediaSourceType: MediaSourceType, playbackUrl: String) {
         if (loadState != LoadState.UNLOADING) {
             handler.post {
-                val sourceItem = SourceConfig(playbackUrl, mediaSourceType)
-                sourceConfig?.thumbnailTrack?.let {
-                    sourceItem.thumbnailTrack = it
-                }
-                sourceConfig?.drmConfig?.let {
-                    sourceItem.drmConfig = it
-                }
-                player.load(sourceItem)
+                player.load(buildPlaybackSourceConfig(playbackUrl, mediaSourceType).toSource())
             }
+        }
+    }
+
+    private fun SourceConfig.toSource(): Source =
+        Source(this, AnalyticsSourceConfig.Enabled(resolveSourceMetadata()))
+
+    /**
+     * Yospace assets are loaded through a proxied URL, so the analytics metadata of the source the
+     * user configured has to be applied to the source that is actually loaded.
+     */
+    private fun resolveSourceMetadata(): SourceMetadata {
+        val provided = yospaceSourceConfig?.sourceMetadata ?: SourceMetadata()
+        return SourceMetadata(
+            title = provided.title ?: sourceConfig?.title,
+            videoId = provided.videoId,
+            cdnProvider = provided.cdnProvider,
+            path = provided.path,
+            isLive = provided.isLive ?: (yospaceSourceConfig?.assetType != YospaceAssetType.VOD),
+            customData = provided.customData
+        )
+    }
+
+    /**
+     * Yospace returns a proxied playback URL, so playback runs on a new [SourceConfig].
+     * Carry over the settings of the source the user passed to [load].
+     */
+    private fun buildPlaybackSourceConfig(playbackUrl: String, mediaSourceType: MediaSourceType): SourceConfig {
+        val original = sourceConfig ?: return SourceConfig(playbackUrl, mediaSourceType)
+
+        return SourceConfig(playbackUrl, mediaSourceType).apply {
+            title = original.title
+            description = original.description
+            posterSource = original.posterSource
+            isPosterPersistent = original.isPosterPersistent
+            subtitleTracks = original.subtitleTracks
+            thumbnailTrack = original.thumbnailTrack
+            drmConfig = original.drmConfig
+            labelingConfig = original.labelingConfig
+            vrConfig = original.vrConfig
+            videoCodecPriority = original.videoCodecPriority
+            audioCodecPriority = original.audioCodecPriority
+            options = original.options
+            metadata = original.metadata
+            networkConfig = original.networkConfig
+            adaptationConfig = original.adaptationConfig
+            cmcdConfig = original.cmcdConfig
         }
     }
 
@@ -574,6 +673,7 @@ open class BitmovinYospacePlayer(
             Session.SessionState.INITIALISED -> {
                 BitLog.d("YoSpace session Initialized: url=${yospaceSession?.playbackUrl}")
 
+                yospaceSession?.let { ssaiTracker.onSessionStart(it) }
                 yospaceSession?.addAnalyticObserver(analyticEventListener)
                 yospaceSession?.setPlaybackPolicyHandler(yospacePlayerPolicy)
 
@@ -609,7 +709,7 @@ open class BitmovinYospacePlayer(
                 )
 
                 if (loadState != LoadState.UNLOADING) {
-                    sourceConfig?.let { player.load(it) }
+                    sourceConfig?.let { player.load(it.toSource()) }
                 }
             }
         } else {
@@ -629,6 +729,8 @@ open class BitmovinYospacePlayer(
         yospaceSession?.removeAnalyticObserver(analyticEventListener)
         yospaceSession?.shutdown()
         yospaceSession = null
+        // After detaching the observer, so a late callback cannot reopen the ad break
+        ssaiTracker.reset()
         isLiveAdPaused = false
         isPlayingEventSent = false
         adClickThroughReporter.clear()
@@ -662,6 +764,8 @@ open class BitmovinYospacePlayer(
             }
 
             activeAdBreak = adBreak?.toAdBreak(adBreakAbsoluteStart, adBreakRelativeStart)
+
+            reportAdBreakStartToAnalytics(session, activeAdBreak)
 
             // Notify listeners of ABS event
             val adBreakStartedEvent = YospacePlayerEvent.AdBreakStarted(activeAdBreak)
@@ -743,6 +847,8 @@ open class BitmovinYospacePlayer(
             )
             adClickThroughReporter.activate(activeAd, advert)
 
+            reportAdStartToAnalytics(session, advert)
+
             // Notify listeners of AS event
             handler.post {
                 yospaceEventEmitter.emit(adStartedSnapshot.toYospacePlayerEvent())
@@ -752,6 +858,7 @@ open class BitmovinYospacePlayer(
         override fun onAdvertEnd(session: Session) {
             BitLog.d("YoSpace onAdvertEnd")
 
+            // No analytics call here: the SSAI API has no ad-stop, the next ad start ends this ad.
             val adFinishedEvent = YospacePlayerEvent.AdFinished(activeAd)
             handler.post { yospaceEventEmitter.emit(adFinishedEvent) }
 
@@ -762,6 +869,8 @@ open class BitmovinYospacePlayer(
         override fun onAdvertBreakEnd(session: Session) {
             BitLog.d("YoSpace onAdvertBreakEnd")
 
+            ssaiTracker.onAdBreakEnd(session)
+
             val adBreakFinishedEvent = YospacePlayerEvent.AdBreakFinished(activeAdBreak)
             handler.post { yospaceEventEmitter.emit(adBreakFinishedEvent) }
             activeAdBreak = null
@@ -769,6 +878,8 @@ open class BitmovinYospacePlayer(
 
         override fun onTrackingEvent(type: String, session: Session) {
             BitLog.d("YoSpace onTrackingUrlCalled: $type")
+
+            type.toSsaiQuartile()?.let { ssaiTracker.onQuartileFinished(session, it) }
 
             when (type) {
                 "firstQuartile" -> {
@@ -795,6 +906,10 @@ open class BitmovinYospacePlayer(
 
         override fun onEarlyReturn(adBreak: com.yospace.admanagement.AdBreak, session: Session) {
             BitLog.d("YoSpace onEarlyReturn: ${adBreak.identifier}")
+
+            // Yospace does not always follow an early return with a break end, which would leave
+            // analytics attributing content playback to an ad.
+            ssaiTracker.onAdBreakEnd(session)
         }
 
         override fun onSessionError(error: AnalyticEventObserver.SessionError, session: Session) {
@@ -812,6 +927,67 @@ open class BitmovinYospacePlayer(
         override fun onTrackingError(error: TrackingErrors.Error, session: Session) {
             BitLog.e("YoSpace onTrackingError: ${error.toJsonString()}")
         }
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // Analytics SSAI Tracking
+    ///////////////////////////////////////////////////////////////
+
+    /**
+     * Reported as soon as Yospace signals the break. Yospace notifies once the break has already
+     * started, so the lead time the analytics API recommends is not available here.
+     */
+    private fun reportAdBreakStartToAnalytics(session: Session, adBreak: AdBreak?) {
+        // Yospace does not always know the adverts of a live break upfront. Reporting zero would
+        // claim no ads are expected, so the counts stay unknown until they are available.
+        val ads = adBreak?.ads?.takeIf { it.isNotEmpty() }
+
+        ssaiTracker.onAdBreakStart(
+            session = session,
+            position = adBreak?.position ?: AdBreakPosition.UNKNOWN,
+            paidAds = ads?.count { !it.isFiller },
+            slates = ads?.count { it.isFiller }
+        )
+    }
+
+    private fun reportAdStartToAnalytics(session: Session, advert: Advert) {
+        ssaiTracker.onAdStart(
+            session = session,
+            ad = SsaiAdInfo(
+                adId = advert.identifier,
+                adSystem = advert.adSystemName(),
+                isSlate = advert.isFiller,
+                durationMs = advert.duration
+            ),
+            joinedMidAd = hasJoinedMidAdvert(advert)
+        )
+    }
+
+    /**
+     * Whether playback joined [advert] after it had already started, in which case its quartiles do
+     * not reflect what the viewer saw. Only detectable for VOD, where advert positions are absolute.
+     */
+    private fun hasJoinedMidAdvert(advert: Advert): Boolean {
+        if (player.isLive) return false
+        val advertStart = advert.start / 1000.0
+        return currentTimeWithAds() - advertStart > yospaceConfig.midAdvertJoinTolerance
+    }
+
+    /**
+     * AdSystem is a VAST property rather than a field on [Advert], and its casing varies between ad
+     * servers.
+     */
+    private fun Advert.adSystemName(): String? = properties
+        ?.firstOrNull { it.name?.equals("AdSystem", ignoreCase = true) == true }
+        ?.value
+        ?.takeIf { it.isNotBlank() }
+
+    private fun String.toSsaiQuartile(): SsaiQuartile? = when (this) {
+        "firstQuartile" -> SsaiQuartile.FIRST
+        "midpoint" -> SsaiQuartile.MIDPOINT
+        "thirdQuartile" -> SsaiQuartile.THIRD
+        "complete" -> SsaiQuartile.COMPLETED
+        else -> null
     }
 
     ///////////////////////////////////////////////////////////////////////////

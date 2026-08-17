@@ -7,8 +7,12 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.bitmovin.analytics.api.AnalyticsConfig
+import com.bitmovin.analytics.api.CustomData
+import com.bitmovin.analytics.api.SourceMetadata
 import com.bitmovin.player.api.PlayerConfig
 import com.bitmovin.player.api.PlaybackConfig
+import com.bitmovin.player.api.analytics.AnalyticsPlayerConfig
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.TweaksConfig
 import com.bitmovin.player.api.drm.WidevineConfig
@@ -43,6 +47,9 @@ class MainActivity : AppCompatActivity() {
 
         private const val ENABLE_INTEGRATION_LOGS = true
         private const val ENABLE_YOSPACE_VALIDATION_LOGS = true
+
+        // Replace with your own Bitmovin Analytics license key.
+        private const val ANALYTICS_LICENSE_KEY = "YOUR-ANALYTICS-LICENSE-KEY"
         private val LIVE_INITIALIZATION_TYPE = YospaceLiveInitializationType.DIRECT
     }
 
@@ -57,27 +64,63 @@ class MainActivity : AppCompatActivity() {
             Stream(
                 "Yospace HLS Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.LINEAR_START_OVER,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace HLS Live",
+                        videoId = "yospace-hls-live"
+                    )
+                )
             ),
             Stream(
                 "Yospace DASH Live (${selectedLiveInitializationType.name})",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur",
                 sourceType = SourceType.Dash,
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.LINEAR_START_OVER)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.LINEAR_START_OVER,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace DASH Live",
+                        videoId = "yospace-dash-live"
+                    )
+                )
             ),
             Stream(
                 "Yospace HLS VOD",
                 "https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3",
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.VOD,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace HLS VOD",
+                        videoId = "yospace-hls-vod"
+                    )
+                )
             ),
             Stream(
                 "Yospace DASH VOD",
                 "https://csm-e-sdk-validation-eb.bln1.yospace.com/csm/access/671396777/ZGFzaC9tYW5pZmVzdC5tcGQ=?yo.av=4",
                 sourceType = SourceType.Dash,
-                yospaceSourceConfig = YospaceSourceConfig(YospaceAssetType.VOD)
+                yospaceSourceConfig = YospaceSourceConfig(
+                    assetType = YospaceAssetType.VOD,
+                    sourceMetadata = sampleSourceMetadata(
+                        title = "Yospace DASH VOD",
+                        videoId = "yospace-dash-vod"
+                    )
+                )
             )
         )
     }
+
+    /**
+     * Analytics metadata for a sample stream. [SourceMetadata.isLive] is left unset so it is
+     * derived from the [YospaceAssetType].
+     */
+    private fun sampleSourceMetadata(title: String, videoId: String) = SourceMetadata(
+        title = title,
+        videoId = videoId,
+        cdnProvider = "yospace",
+        path = "/yospace-sample/$videoId",
+        customData = CustomData(customData1 = "yospace-sample")
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +165,13 @@ class MainActivity : AppCompatActivity() {
         player = BitmovinYospacePlayer(
             this,
             playerConfig,
+            analyticsConfig = AnalyticsPlayerConfig.Enabled(
+                AnalyticsConfig(
+                    licenseKey = ANALYTICS_LICENSE_KEY,
+                    // Required for SSAI ad quartile tracking.
+                    ssaiEngagementTrackingEnabled = true
+                )
+            ),
             yospaceConfig = YospaceConfig(
                 liveInitializationType = selectedLiveInitializationType,
                 isDebug = ENABLE_INTEGRATION_LOGS && validationConfig == null,

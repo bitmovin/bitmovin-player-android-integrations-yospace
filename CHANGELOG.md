@@ -8,15 +8,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- `BitmovinYospacePlayer` support for configuring Bitmovin Analytics via `AnalyticsPlayerConfig`, including disabling it with `AnalyticsPlayerConfig.Disabled`
+- `BitmovinYospacePlayer.analytics` to access the `AnalyticsApi` of the underlying player
+- `YospaceWarningCode.BitmovinAnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
+- `YospaceSourceConfig.sourceMetadata` to set Bitmovin Analytics metadata for a Yospace source
+- Bitmovin Analytics SSAI ad tracking for Yospace ad breaks, ads, and slates, including ad quartiles when `AnalyticsConfig.ssaiEngagementTrackingEnabled` is enabled
+- `YospaceConfig.midAdvertJoinTolerance` to configure how far into a VOD advert, in seconds, playback may start before Bitmovin Analytics reports it as joined mid-ad
+- `YospaceConfig.requestTimeoutSeconds` to set the Yospace request timeout in seconds
+
 ### Changed
 
 ### Deprecated
+
+- `YospaceConfig.requestTimeout`: Use `YospaceConfig.requestTimeoutSeconds` instead, which is expressed in seconds like all other time-based configuration.
 
 ### Removed
 
 ### Fixed
 
+- Source settings such as title, subtitles, poster image, and codec priorities were ignored when playing a Yospace asset
+
 ### Security
+
+- Sample app: cleartext traffic and trust in user-added certificate authorities are now limited to debug builds
 
 ## [2.3.0] - 2026-07-29
 

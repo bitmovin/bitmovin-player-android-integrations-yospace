@@ -50,12 +50,16 @@ private class SynchronizedFakeSsaiAdTracker : SsaiAdTracker {
 private fun adInfo(adId: String = "ad-1", isSlate: Boolean = false) =
     SsaiAdInfo(adId = adId, adSystem = "Yospace", isSlate = isSlate, durationMs = 15_000)
 
+/** A tracker with a session started, as it is used once a Yospace session is initialized. */
+private fun startedTracker(tracker: SsaiAdTracker?) =
+    YospaceSsaiTracker(tracker).apply { onSessionStart() }
+
 class YospaceSsaiTrackerTest {
 
     @Test
     fun `reports ad break and ad in order`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 2, slates = 1)
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -74,7 +78,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `ignores a second ad break start while a break is active`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 5, slates = 0)
@@ -85,7 +89,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `starts an ad break when an ad starts outside one`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdStart(adInfo(), joinedMidAd = true)
 
@@ -103,7 +107,7 @@ class YospaceSsaiTrackerTest {
     fun `reports quartiles of an ad that was watched from the start`(quartileName: String) {
         val quartile = SsaiQuartile.valueOf(quartileName)
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -115,7 +119,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `does not report quartiles of an ad that was joined mid-roll`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdStart(adInfo(), joinedMidAd = true)
@@ -127,7 +131,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `reports quartiles again for the next ad after a mid-roll join`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 2, slates = 0)
         tracker.onAdStart(adInfo("ad-1"), joinedMidAd = true)
@@ -141,7 +145,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `reports each quartile of an ad once`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -154,7 +158,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `does not report quartiles of an ad that started without an ad break`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         // Yospace omits the break start when playback joins a break that is already running
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -166,7 +170,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `ends an ad break that was started without one`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdStart(adInfo(), joinedMidAd = false)
         tracker.onAdBreakEnd()
@@ -177,7 +181,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `does not report quartiles after an ad break ended`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -190,7 +194,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `does not report quartiles outside an ad`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onQuartileFinished(SsaiQuartile.FIRST)
 
@@ -200,7 +204,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `ends an ad break that is still open on reset`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdStart(adInfo(), joinedMidAd = false)
@@ -212,7 +216,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `does not end an ad break when none is open`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
         tracker.onAdBreakEnd()
@@ -224,7 +228,7 @@ class YospaceSsaiTrackerTest {
     @Test
     fun `reports an ad break again after the previous one ended`() {
         val fake = FakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         tracker.onAdBreakStart(AdBreakPosition.PREROLL, paidAds = 1, slates = 0)
         tracker.onAdBreakEnd()
@@ -237,7 +241,7 @@ class YospaceSsaiTrackerTest {
     fun `guards its state against concurrent callbacks`() {
         // Yospace callbacks arrive off the main thread while the session is reset on it
         val fake = SynchronizedFakeSsaiAdTracker()
-        val tracker = YospaceSsaiTracker(fake)
+        val tracker = startedTracker(fake)
 
         val threads = listOf(
             Thread {
@@ -262,8 +266,35 @@ class YospaceSsaiTrackerTest {
     }
 
     @Test
+    fun `ignores callbacks that arrive after the session was reset`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = startedTracker(fake)
+
+        tracker.reset()
+
+        // In flight on the Yospace thread while the session was torn down on the main thread
+        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+        tracker.onAdStart(adInfo(), joinedMidAd = false)
+        tracker.onQuartileFinished(SsaiQuartile.FIRST)
+
+        assertTrue(fake.calls.isEmpty(), "a reset tracker must not reopen an ad break")
+    }
+
+    @Test
+    fun `tracks again once the next session starts`() {
+        val fake = FakeSsaiAdTracker()
+        val tracker = startedTracker(fake)
+
+        tracker.reset()
+        tracker.onSessionStart()
+        tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)
+
+        assertEquals(1, fake.calls.count { it is Call.AdBreakStart })
+    }
+
+    @Test
     fun `does nothing when analytics is not configured`() {
-        val tracker = YospaceSsaiTracker(null)
+        val tracker = startedTracker(null)
 
         // Would throw if the absent tracker were dereferenced
         tracker.onAdBreakStart(AdBreakPosition.MIDROLL, paidAds = 1, slates = 0)

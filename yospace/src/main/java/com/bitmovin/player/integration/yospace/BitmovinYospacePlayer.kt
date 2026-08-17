@@ -318,6 +318,8 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
         when (session.sessionState) {
             Session.SessionState.INITIALISED -> {
                 yospaceSession = session
+                // Before attaching the observer, so no callback of this session is dropped
+                ssaiTracker.onSessionStart()
                 session.addAnalyticObserver(analyticEventListener)
                 session.setPlaybackPolicyHandler(yospacePlayerPolicy)
                 BitLog.i("Session is initialized and analytic listener is registered %s".format(message))

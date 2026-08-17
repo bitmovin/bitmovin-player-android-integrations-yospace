@@ -69,7 +69,7 @@ And this line to your main project `build.gradle`
 
 ```groovy
 dependencies {
-    implementation 'com.bitmovin.player.integration:yospace:2.3.0'
+    implementation 'com.bitmovin.player.integration:yospace:2.4.0'
 }
 ```
 

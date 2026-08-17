@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2.4.0] - 2026-08-17
+
+### Added
+
 - `BitmovinYospacePlayer` support for configuring Bitmovin Analytics via `AnalyticsPlayerConfig`, including disabling it with `AnalyticsPlayerConfig.Disabled`
 - `BitmovinYospacePlayer.analytics` to access the `AnalyticsApi` of the underlying player
 - `YospaceWarningCode.BitmovinAnalyticsConfigIgnored`, emitted when an analytics configuration is passed together with a `Player` instance
@@ -16,13 +30,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `YospaceConfig.midAdvertJoinTolerance` to configure how far into a VOD advert, in seconds, playback may start before Bitmovin Analytics reports it as joined mid-ad
 - `YospaceConfig.requestTimeoutSeconds` to set the Yospace request timeout in seconds
 
-### Changed
-
 ### Deprecated
 
 - `YospaceConfig.requestTimeout`: Use `YospaceConfig.requestTimeoutSeconds` instead, which is expressed in seconds like all other time-based configuration.
-
-### Removed
 
 ### Fixed
 
@@ -328,7 +338,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `BitmovinYospacePlayerPolicy` not being respected
 
-[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.3.0...HEAD
+[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.4.0...HEAD
+[2.4.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.0.0...2.1.0

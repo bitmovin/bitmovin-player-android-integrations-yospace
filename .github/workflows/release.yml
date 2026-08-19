@@ -71,7 +71,7 @@ jobs:
         run: ./gradlew artifactoryPublish
 
       # Promote the release from the internal staging repo to the public, anonymously
-      # readable repo. Mirrors the copy step used by player-android and the analytics SDK.
+      # readable repo.
       - name: Promote artifact to public-releases
         run: |
           VERSION="${{ steps.version.outputs.next }}"

@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Matches player-android-samples-private: head.ref is the branch on pull_request
-  # events, ref_name on push, so both share one group per branch. The head repo keeps
-  # same-named branches from different forks out of one another's group.
+  # head.ref is the branch on pull_request events, ref_name on push, so both share
+  # one group per branch. The head repo keeps same-named branches from different
+  # forks out of one another's group.
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 

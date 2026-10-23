@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Ad quartile tracking for live streams with wall-clock time, such as DASH or HLS with `EXT-X-PROGRAM-DATE-TIME`, was sent all at once at the end of each ad instead of during playback
+
 ### Security
 
 ## [2.4.0] - 2026-08-17

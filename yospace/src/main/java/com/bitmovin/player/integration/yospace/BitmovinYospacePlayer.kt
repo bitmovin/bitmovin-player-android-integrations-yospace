@@ -63,7 +63,6 @@ import com.yospace.admanagement.PlaybackEventHandler.PlayerEvent as YoPlayerEven
 import com.yospace.admanagement.Session.SessionProperties
 import com.yospace.admanagement.util.YoLog
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import kotlin.properties.Delegates
 import kotlin.reflect.KClass
 
@@ -423,15 +422,6 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
     fun currentTimeWithAds(): Double = player.currentTime
 
-    /**
-     * Yospace expects milliseconds from the fixed timeline origin where the first media segment
-     * was available to this session. This anchors ad-break matching and analytics for DVR live.
-     */
-    private fun yospacePlayheadMs(playbackTime: Double = currentTimeWithAds()): Long =
-        ((playbackTime + player.playbackTimeOffsetToRelativeTime) * 1000)
-            .roundToLong()
-            .coerceAtLeast(0)
-
     override fun seek(time: Double) {
         adTimeline?.let {
             val seekTime = yospaceSession!!.willSeekTo(time.toLong())
@@ -516,9 +506,9 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
             // Live sessions need the playhead overload to start the analytic poller.
             when (yospaceSourceConfig?.assetType) {
-                YospaceAssetType.LINEAR -> (yospaceSession as? SessionLive)?.onPlaybackStart(yospacePlayheadMs())
+                YospaceAssetType.LINEAR -> (yospaceSession as? SessionLive)?.onPlaybackStart(player.yospacePlayheadMs())
                 YospaceAssetType.LINEAR_START_OVER ->
-                    (yospaceSession as? SessionDVRLive)?.onPlaybackStart(yospacePlayheadMs())
+                    (yospaceSession as? SessionDVRLive)?.onPlaybackStart(player.yospacePlayheadMs())
                 else -> yospaceSession?.onPlaybackStart()
             }
         }
@@ -527,7 +517,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             BitLog.d("Sending PAUSED event: $yospaceTime")
             isLiveAdPaused = player.isLive && isYospaceAd()
 
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.PAUSE, yospacePlayheadMs())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.PAUSE, player.yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.Playing> {
@@ -537,7 +527,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
         player.on<PlayerEvent.PlaybackFinished> {
             BitLog.d("Sending STOPPED event: $yospaceTime")
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.STOP, yospacePlayheadMs())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.STOP, player.yospacePlayheadMs())
         }
 
         player.on<SourceEvent.Loaded> {
@@ -559,12 +549,12 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
 
         player.on<PlayerEvent.StallEnded> {
             BitLog.d("Sending CONTINUE event: $yospaceTime")
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.CONTINUE, yospacePlayheadMs())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.CONTINUE, player.yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.StallStarted> {
             BitLog.d("Sending STALL event: $yospaceTime")
-            yospaceSession?.onPlayerEvent(YoPlayerEvent.STALL, yospacePlayheadMs())
+            yospaceSession?.onPlayerEvent(YoPlayerEvent.STALL, player.yospacePlayheadMs())
         }
 
         player.on<PlayerEvent.Metadata> { metadataEvent ->
@@ -589,7 +579,7 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
             val currentTime = getCurrentTimeMinusAd()
 
             if (yospaceSessionStatus == SessionStatus.INITIALIZED) {
-                yospaceSession?.onPlayheadUpdate(yospacePlayheadMs())
+                yospaceSession?.onPlayheadUpdate(player.yospacePlayheadMs())
             }
 
             if (yospaceSession as? SessionLive != null || yospaceSession as? SessionDVRLive != null) {
@@ -1131,10 +1121,6 @@ open class BitmovinYospacePlayer @JvmOverloads constructor(
         return generateTimedMetadata(ymid, yseq, ytyp, ydur, yprg)
     }
 
-    private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?) = when {
-        ymid != null && yseq != null && ytyp != null && ydur != null -> TimedMetadata.createFromMetadata(ymid, yseq, ytyp, ydur,
-            yospaceTime.toLong()
-        )
-        else -> null
-    }
+    private fun generateTimedMetadata(ymid: String?, yseq: String?, ytyp: String?, ydur: String?, yprg: String?) =
+        player.createYospaceTimedMetadata(ymid, yseq, ytyp, ydur)
 }

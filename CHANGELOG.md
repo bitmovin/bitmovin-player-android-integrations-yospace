@@ -16,9 +16,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Ad quartile tracking for live streams with wall-clock time, such as DASH or HLS with `EXT-X-PROGRAM-DATE-TIME`, was sent all at once at the end of each ad instead of during playback
-
 ### Security
+
+## [2.5.0] - 2026-10-23
+
+### Fixed
+
+- Ad quartile tracking for live streams with wall-clock time, such as DASH or HLS with `EXT-X-PROGRAM-DATE-TIME`, was sent all at once at the end of each ad instead of during playback
 
 ## [2.4.0] - 2026-08-17
 
@@ -340,7 +344,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `BitmovinYospacePlayerPolicy` not being respected
 
-[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.4.0...HEAD
+[Unreleased]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.5.0...HEAD
+[2.5.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.4.0...2.5.0
 [2.4.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/bitmovin/bitmovin-player-android-integrations-yospace/compare/2.1.0...2.2.0
